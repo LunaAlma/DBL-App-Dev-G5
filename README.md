@@ -1,2 +1,2 @@
 # DBL-App-Dev-G5
-work in progress
+Repository for DBL App Development Group 5
