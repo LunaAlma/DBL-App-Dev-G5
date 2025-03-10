@@ -1,6 +1,7 @@
 package com.bikerental.app
 
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,23 +21,31 @@ import kotlinx.coroutines.launch
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bikerental.app.data.datasource.AuthRemoteDataSource
 import com.bikerental.app.data.model.ErrorMessage
 import dagger.hilt.android.AndroidEntryPoint
 import com.bikerental.app.ui.signup.SignUpScreen
-import com.bikerental.app.ui.signup.SignUpRoute
 import com.bikerental.app.ui.home.HomeScreen
-import com.bikerental.app.ui.home.HomeRoute
 import com.bikerental.app.ui.signin.SignInScreen
-import com.bikerental.app.ui.signin.SignInRoute
+import com.google.firebase.auth.FirebaseAuth
 
-
+const val SIGN_UP_ROUTE = "signup"
+const val SIGN_IN_ROUTE = "signin"
+const val HOME_ROUTE = "home"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setSoftInputMode()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        var startDestination = SIGN_UP_ROUTE
+
+        if (currentUser != null) {
+            startDestination = HOME_ROUTE
+        }
 
         setContent {
             val scope = rememberCoroutineScope()
@@ -54,41 +63,18 @@ class MainActivity : ComponentActivity() {
                     ) { innerPadding ->
                         NavHost(
                             navController = navController,
-                            startDestination = SignUpRoute,
+                            startDestination = startDestination,
                             modifier = Modifier.padding(innerPadding)
                         ) {
-                            composable<HomeRoute> {
-                                HomeScreen(
-                                    openSettingsScreen = {
-                                        navController.navigate("") {
-                                            launchSingleTop = true
-                                        }
-                                    }
-                                )
-                            }
-//                            composable<SettingsRoute> {
-//                                SettingsScreen(
-//                                    openHomeScreen = {
-//                                        navController.navigate(TodoListRoute) {
-//                                            launchSingleTop = true
-//                                        }
-//                                    },
-//                                    openSignInScreen = {
-//                                        navController.navigate(SignInRoute) {
-//                                            launchSingleTop = true
-//                                        }
-//                                    }
-//                                )
-//                            }
-                            composable<SignInRoute> {
+                            composable(SIGN_IN_ROUTE) {
                                 SignInScreen(
                                     openHomeScreen = {
-                                        navController.navigate("") {
+                                        navController.navigate(HOME_ROUTE) {
                                             launchSingleTop = true
                                         }
                                     },
                                     openSignUpScreen = {
-                                        navController.navigate(SignUpRoute) {
+                                        navController.navigate(SIGN_UP_ROUTE) {
                                             launchSingleTop = true
                                         }
                                     },
@@ -98,10 +84,10 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-                            composable<SignUpRoute> {
+                            composable(SIGN_UP_ROUTE) {
                                 SignUpScreen(
                                     openHomeScreen = {
-                                        navController.navigate(HomeRoute) {
+                                        navController.navigate(HOME_ROUTE) {
                                             launchSingleTop = true
                                         }
                                     },
@@ -110,6 +96,9 @@ class MainActivity : ComponentActivity() {
                                         scope.launch { snackbarHostState.showSnackbar(message) }
                                     }
                                 )
+                            }
+                            composable(HOME_ROUTE) {
+                                HomeScreen()
                             }
                         }
                     }

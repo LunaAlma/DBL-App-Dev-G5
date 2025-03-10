@@ -37,10 +37,6 @@ import com.bikerental.app.R
 import com.bikerental.app.data.model.ErrorMessage
 import com.bikerental.app.ui.shared.StandardButton
 import com.bikerental.app.ui.theme.BikeRentalTheme
-import kotlinx.serialization.Serializable
-
-@Serializable
-object SignInRoute
 
 @Composable
 fun SignInScreen(
