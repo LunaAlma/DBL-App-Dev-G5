@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "873004430527",
+    "project_id": "dbl-app-development-g5",
+    "storage_bucket": "dbl-app-development-g5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:873004430527:android:0cb5106acf1404f7a6420a",
+        "android_client_info": {
+          "package_name": "com.bikerental.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn3rtZNK5Dj5XHmqnOS4Y4dD8X2iSau8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
