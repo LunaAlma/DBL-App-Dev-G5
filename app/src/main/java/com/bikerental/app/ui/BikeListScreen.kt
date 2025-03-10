@@ -1,4 +1,4 @@
-package com.bikerental.app
+package com.bikerental.app.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
