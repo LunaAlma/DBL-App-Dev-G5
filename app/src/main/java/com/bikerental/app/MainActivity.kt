@@ -22,8 +22,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.bikerental.app.data.model.ErrorMessage
 import dagger.hilt.android.AndroidEntryPoint
-import com.bikerental.app.ui.home.HomeScreen
 import com.bikerental.app.ui.signup.SignUpScreen
+import com.bikerental.app.ui.signup.SignUpRoute
+import com.bikerental.app.ui.home.HomeScreen
+import com.bikerental.app.ui.home.HomeRoute
+import com.bikerental.app.ui.signin.SignInScreen
+import com.bikerental.app.ui.signin.SignInRoute
+
 
 
 @AndroidEntryPoint
@@ -49,18 +54,18 @@ class MainActivity : ComponentActivity() {
                     ) { innerPadding ->
                         NavHost(
                             navController = navController,
-                            startDestination = "",
+                            startDestination = SignUpRoute,
                             modifier = Modifier.padding(innerPadding)
                         ) {
-//                            composable<HomeRoute> {
-//                                HomeScreen(
-//                                    openSettingsScreen = {
-//                                        navController.navigate("") {
-//                                            launchSingleTop = true
-//                                        }
-//                                    }
-//                                )
-//                            }
+                            composable<HomeRoute> {
+                                HomeScreen(
+                                    openSettingsScreen = {
+                                        navController.navigate("") {
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                )
+                            }
 //                            composable<SettingsRoute> {
 //                                SettingsScreen(
 //                                    openHomeScreen = {
@@ -75,37 +80,37 @@ class MainActivity : ComponentActivity() {
 //                                    }
 //                                )
 //                            }
-//                            composable<SignInRoute> {
-//                                SignInScreen(
-//                                    openHomeScreen = {
-//                                        navController.navigate(TodoListRoute) {
-//                                            launchSingleTop = true
-//                                        }
-//                                    },
-//                                    openSignUpScreen = {
-//                                        navController.navigate(SignUpRoute) {
-//                                            launchSingleTop = true
-//                                        }
-//                                    },
-//                                    showErrorSnackbar = { errorMessage ->
-//                                        val message = getErrorMessage(errorMessage)
-//                                        scope.launch { snackbarHostState.showSnackbar(message) }
-//                                    }
-//                                )
-//                            }
-//                            composable<SignUpRoute> {
-//                                SignUpScreen(
-//                                    openHomeScreen = {
-//                                        navController.navigate(TodoListRoute) {
-//                                            launchSingleTop = true
-//                                        }
-//                                    },
-//                                    showErrorSnackbar = { errorMessage ->
-//                                        val message = getErrorMessage(errorMessage)
-//                                        scope.launch { snackbarHostState.showSnackbar(message) }
-//                                    }
-//                                )
-//                            }
+                            composable<SignInRoute> {
+                                SignInScreen(
+                                    openHomeScreen = {
+                                        navController.navigate("") {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                    openSignUpScreen = {
+                                        navController.navigate(SignUpRoute) {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                    showErrorSnackbar = { errorMessage ->
+                                        val message = getErrorMessage(errorMessage)
+                                        scope.launch { snackbarHostState.showSnackbar(message) }
+                                    }
+                                )
+                            }
+                            composable<SignUpRoute> {
+                                SignUpScreen(
+                                    openHomeScreen = {
+                                        navController.navigate(HomeRoute) {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                    showErrorSnackbar = { errorMessage ->
+                                        val message = getErrorMessage(errorMessage)
+                                        scope.launch { snackbarHostState.showSnackbar(message) }
+                                    }
+                                )
+                            }
                         }
                     }
                 }

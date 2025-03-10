@@ -1,4 +1,4 @@
-package com.bikerental.app.data.repository
+package com.bikerental.app.data.repositories
 
 import com.google.firebase.auth.FirebaseUser
 import com.bikerental.app.data.datasource.AuthRemoteDataSource
