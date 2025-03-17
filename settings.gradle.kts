@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Bike Rental"
 include(":app")
- 
+

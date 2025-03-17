@@ -1,7 +1,6 @@
 package com.bikerental.app
 
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,13 +20,13 @@ import kotlinx.coroutines.launch
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bikerental.app.data.datasource.AuthRemoteDataSource
 import com.bikerental.app.data.model.ErrorMessage
 import dagger.hilt.android.AndroidEntryPoint
 import com.bikerental.app.ui.signup.SignUpScreen
 import com.bikerental.app.ui.home.HomeScreen
 import com.bikerental.app.ui.signin.SignInScreen
 import com.google.firebase.auth.FirebaseAuth
+
 
 const val SIGN_UP_ROUTE = "signup"
 const val SIGN_IN_ROUTE = "signin"
@@ -53,6 +52,13 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             BikeRentalTheme {
+                WelcomeScreen(
+                    onGetStartedClick = {
+                        navController.navigate(SIGN_IN_ROUTE) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -73,6 +79,7 @@ class MainActivity : ComponentActivity() {
                                             launchSingleTop = true
                                         }
                                     },
+
                                     openSignUpScreen = {
                                         navController.navigate(SIGN_UP_ROUTE) {
                                             launchSingleTop = true
