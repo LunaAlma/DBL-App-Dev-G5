@@ -30,7 +30,7 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Replace R.drawable.getstarted with your actual image resource
+
             Image(
                 painter = painterResource(id = R.drawable.getstarted),
                 contentDescription = "Welcome Illustration",
