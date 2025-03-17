@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.hilt.android)
+    implementation(libs.coil.compose)
+    implementation(libs.material.icons.extended)
     ksp(libs.hilt.android.compiler)
 
     //Firebase
