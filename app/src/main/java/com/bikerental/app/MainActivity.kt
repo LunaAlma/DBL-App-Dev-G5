@@ -26,8 +26,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.bikerental.app.ui.home.HomeScreen
 import com.bikerental.app.ui.signin.SignInScreen
 import com.bikerental.app.ui.signup.SignUpScreen
+import com.bikerental.app.ui.welcome.WelcomeScreen
 
-
+const val WELCOME_ROUTE = "welcome"
 const val SIGN_UP_ROUTE = "signup"
 const val SIGN_IN_ROUTE = "signin"
 const val HOME_ROUTE = "home"
@@ -40,7 +41,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setSoftInputMode()
         val currentUser = FirebaseAuth.getInstance().currentUser
-        var startDestination = SIGN_UP_ROUTE
+        var startDestination = WELCOME_ROUTE
 
         if (currentUser != null) {
             startDestination = HOME_ROUTE
@@ -52,13 +53,6 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             BikeRentalTheme {
-                WelcomeScreen(
-                    onGetStartedClick = {
-                        navController.navigate(SIGN_IN_ROUTE) {
-                            launchSingleTop = true
-                        }
-                    }
-                )
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -72,6 +66,16 @@ class MainActivity : ComponentActivity() {
                             startDestination = startDestination,
                             modifier = Modifier.padding(innerPadding)
                         ) {
+                            composable(WELCOME_ROUTE) {
+                                WelcomeScreen(
+                                    openSignUpScreen = {
+                                        navController.navigate(SIGN_UP_ROUTE) {
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                )
+                            }
+
                             composable(SIGN_IN_ROUTE) {
                                 SignInScreen(
                                     openHomeScreen = {

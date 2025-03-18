@@ -1,13 +1,20 @@
 package com.bikerental.app.ui.signup
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +35,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bikerental.app.data.model.ErrorMessage
 import com.bikerental.app.ui.theme.BikeRentalTheme
+import android.net.Uri
+import android.os.Environment
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun SignUpScreen(
@@ -57,6 +81,24 @@ fun SignUpScreenContent(
     var password by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val context = LocalContext.current
+    val cameraUri = remember { mutableStateOf<Uri?>(null) }
+
+    val takePictureLauncher: ActivityResultLauncher<Uri> =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                profileImageUri = cameraUri.value
+            }
+        }
+
+    fun createImageFile(): Uri {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir: File = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+        val imageFile = File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
+    }
 
     Column(
         modifier = Modifier
@@ -66,6 +108,35 @@ fun SignUpScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Sign Up", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+
+
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(100.dp)
+                .padding(bottom = 16.dp)
+        ) {
+            profileImageUri?.let {
+                val painter: AsyncImagePainter = rememberAsyncImagePainter(it)
+                Image(
+                    painter = painter,
+                    contentDescription = "Profile Image",
+                    modifier = Modifier.fillMaxSize().clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } ?: run {
+                IconButton(onClick = {
+                    cameraUri.value = createImageFile()
+
+                    cameraUri.value?.let { uri ->
+                        takePictureLauncher.launch(uri)
+                    }
+                }) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Take Picture")
+                }
+            }
+        }
 
         OutlinedTextField(
             value = email,
@@ -112,7 +183,10 @@ fun SignUpScreenContent(
                         )
                 }
             },
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFB2E59C)
+            )
         ) {
             Text("Sign Up")
         }

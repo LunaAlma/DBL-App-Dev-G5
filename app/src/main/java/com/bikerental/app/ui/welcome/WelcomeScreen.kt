@@ -1,4 +1,4 @@
-package com.bikerental.app
+package com.bikerental.app.ui.welcome
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -17,10 +17,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bikerental.app.R
 
 @Composable
 fun WelcomeScreen(
-    onGetStartedClick: () -> Unit = {}
+    openSignUpScreen: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -31,13 +32,13 @@ fun WelcomeScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            Image(
-                painter = painterResource(id = R.drawable.getstarted),
-                contentDescription = "Welcome Illustration",
-                modifier = Modifier
-                    .size(200.dp)
-                    .clip(CircleShape)
-            )
+//            Image(
+//                painter = painterResource(id = R.drawable.getstarted),
+//                contentDescription = "Welcome Illustration",
+//                modifier = Modifier
+//                    .size(200.dp)
+//                    .clip(CircleShape)
+//            )
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
@@ -58,7 +59,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             Button(
-                onClick = onGetStartedClick,
+                onClick = openSignUpScreen,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -75,5 +76,7 @@ fun WelcomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun WelcomeScreenPreview() {
-    WelcomeScreen()
+    WelcomeScreen(
+        openSignUpScreen = TODO()
+    )
 }
