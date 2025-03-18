@@ -18,11 +18,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.bikerental.app.R
+import com.bikerental.app.data.model.ErrorMessage
+import com.bikerental.app.ui.signup.SignUpViewModel
 
 @Composable
 fun SuccessScreen(
-    onGetStartedClick: () -> Unit = {}
+    openHomeScreen: () -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit,
+    viewModel: SignUpViewModel = hiltViewModel()
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -61,7 +66,7 @@ fun SuccessScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             Button(
-                onClick = onGetStartedClick,
+                onClick = openHomeScreen,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -78,5 +83,9 @@ fun SuccessScreen(
 @Preview(showBackground = true)
 @Composable
 fun WelcomeScreenPreview() {
-    SuccessScreen()
+    SuccessScreen(
+        openHomeScreen = TODO(),
+        showErrorSnackbar = TODO(),
+        viewModel = TODO()
+    )
 }

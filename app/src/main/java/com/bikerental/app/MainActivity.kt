@@ -27,6 +27,7 @@ import com.bikerental.app.ui.home.HomeScreen
 import com.bikerental.app.ui.maps.MapsScreen
 import com.bikerental.app.ui.signin.SignInScreen
 import com.bikerental.app.ui.signup.SignUpScreen
+import com.bikerental.app.ui.success.SuccessScreen
 import com.bikerental.app.ui.welcome.WelcomeScreen
 
 const val WELCOME_ROUTE = "welcome"
@@ -100,8 +101,8 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(SIGN_UP_ROUTE) {
                                 SignUpScreen(
-                                    openHomeScreen = {
-                                        navController.navigate(HOME_ROUTE) {
+                                    openSuccessScreen = {
+                                        navController.navigate(SUCCESS_ROUTE) {
                                             launchSingleTop = true
                                         }
                                     },
@@ -111,6 +112,22 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
+
+                            composable(SUCCESS_ROUTE) {
+                                SuccessScreen(
+                                    openHomeScreen = {
+                                        navController.navigate(MAPS_ROUTE) {
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                    showErrorSnackbar = { errorMessage ->
+                                        val message = getErrorMessage(errorMessage)
+                                        scope.launch { snackbarHostState.showSnackbar(message) }
+                                    }
+                                )
+
+                            }
+
                             composable(HOME_ROUTE) {
                                 HomeScreen()
                             }

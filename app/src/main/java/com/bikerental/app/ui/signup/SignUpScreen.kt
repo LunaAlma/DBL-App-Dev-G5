@@ -55,14 +55,14 @@ import java.util.Locale
 
 @Composable
 fun SignUpScreen(
-    openHomeScreen: () -> Unit,
+    openSuccessScreen: () -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
 
     if (shouldRestartApp) {
-        openHomeScreen()
+        openSuccessScreen()
     } else {
         SignUpScreenContent(
             signUp = viewModel::signUp,
