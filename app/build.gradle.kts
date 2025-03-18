@@ -1,3 +1,7 @@
+import org.gradle.kotlin.dsl.android
+import org.gradle.kotlin.dsl.hilt
+import org.gradle.kotlin.dsl.test
+
 plugins {
     // Add the Google services Gradle plugin
 //    id("com.google.gms.google-services")
