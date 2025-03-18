@@ -66,11 +66,9 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.material.icons.extended)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.material)
+    implementation(libs.play.services.maps)
     ksp(libs.hilt.android.compiler)
-    dependencies {
-        implementation(libs.androidx.material)
-    }
-
 
 
     // Google Maps

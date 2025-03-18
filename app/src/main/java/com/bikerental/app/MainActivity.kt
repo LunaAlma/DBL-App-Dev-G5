@@ -34,6 +34,7 @@ const val SIGN_UP_ROUTE = "signup"
 const val SIGN_IN_ROUTE = "signin"
 const val HOME_ROUTE = "home"
 const val MAPS_ROUTE = "maps"
+const val SUCCESS_ROUTE = "success"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -46,7 +47,7 @@ class MainActivity : ComponentActivity() {
         var startDestination = WELCOME_ROUTE
 
         if (currentUser != null) {
-            startDestination = MAPS_ROUTE //HOME_ROUTE
+            startDestination = MAPS_ROUTE //HOME_ROUTE //SUCCESS_ROUTE
         }
 
         setContent {
