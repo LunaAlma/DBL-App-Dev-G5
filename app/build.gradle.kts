@@ -1,4 +1,6 @@
 import org.gradle.kotlin.dsl.android
+import org.gradle.kotlin.dsl.hilt
+import org.gradle.kotlin.dsl.test
 
 plugins {
     alias(libs.plugins.android.application)
@@ -62,9 +64,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.hilt.android)
-    // Added for live location permissions
     implementation(libs.play.services.location)
-//    implementation(libs.play.services.maps)
     ksp(libs.hilt.android.compiler)
     dependencies {
         implementation(libs.androidx.material)

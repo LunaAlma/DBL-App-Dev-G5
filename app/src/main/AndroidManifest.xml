@@ -26,7 +26,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
+                android:resource="@xml/provider_paths"/>
         </provider>
         <activity
             android:name=".MainActivity"
@@ -42,6 +42,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCs4bo6FpXXzDUN11_Oltu8zggkSyen2tY"/>
     </application>
 
 </manifest>
