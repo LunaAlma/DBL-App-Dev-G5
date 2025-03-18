@@ -68,25 +68,12 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.material)
     implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
+    implementation(libs.maps.compose.widgets)
+    implementation(libs.accompanist.permissions)
     ksp(libs.hilt.android.compiler)
 
-
-    // Google Maps
-//    implementation("com.google.maps.android:maps-compose:6.5.1")
-    // Older version but works with this implementation
-    implementation("com.google.maps.android:maps-compose:2.11.4")
-
-//    // Optionally, you can include the Compose utils library for Clustering,
-//    // Street View metadata checks, etc.
-//    implementation ("com.google.maps.android:maps-compose-utils:6.5.1")
-//
-//    // Optionally, you can include the widgets library for ScaleBar, etc.
-//    implementation ("com.google.maps.android:maps-compose-widgets:6.5.1")
-//
-    implementation ("com.google.android.gms:play-services-maps:18.1.0")
-
-    // Accomponist library helping with location permissions
-    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
     //Firebase
     implementation(platform(libs.firebase.bom))
