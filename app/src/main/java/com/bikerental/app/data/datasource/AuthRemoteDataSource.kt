@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class AuthRemoteDataSource @Inject constructor(private val auth: FirebaseAuth) {
+class AuthRemoteDataSource @Inject constructor(
+    private val auth: FirebaseAuth
+) {
     val currentUser: FirebaseUser? get() = auth.currentUser
 
     val currentUserIdFlow: Flow<String?>

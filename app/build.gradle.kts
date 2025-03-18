@@ -1,7 +1,8 @@
-plugins {
-    // Add the Google services Gradle plugin
-//    id("com.google.gms.google-services")
+import org.gradle.kotlin.dsl.android
+import org.gradle.kotlin.dsl.hilt
+import org.gradle.kotlin.dsl.test
 
+plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -48,6 +49,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -62,9 +64,31 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.hilt.android)
-    implementation(libs.coil.compose)
     implementation(libs.material.icons.extended)
+    implementation(libs.play.services.location)
     ksp(libs.hilt.android.compiler)
+    dependencies {
+        implementation(libs.androidx.material)
+    }
+
+
+
+    // Google Maps
+//    implementation("com.google.maps.android:maps-compose:6.5.1")
+    // Older version but works with this implementation
+    implementation("com.google.maps.android:maps-compose:2.11.4")
+
+//    // Optionally, you can include the Compose utils library for Clustering,
+//    // Street View metadata checks, etc.
+//    implementation ("com.google.maps.android:maps-compose-utils:6.5.1")
+//
+//    // Optionally, you can include the widgets library for ScaleBar, etc.
+//    implementation ("com.google.maps.android:maps-compose-widgets:6.5.1")
+//
+    implementation ("com.google.android.gms:play-services-maps:18.1.0")
+
+    // Accomponist library helping with location permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
     //Firebase
     implementation(platform(libs.firebase.bom))
