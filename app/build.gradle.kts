@@ -1,7 +1,8 @@
-plugins {
-    // Add the Google services Gradle plugin
-//    id("com.google.gms.google-services")
+import org.gradle.kotlin.dsl.android
+import org.gradle.kotlin.dsl.hilt
+import org.gradle.kotlin.dsl.test
 
+plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -48,6 +49,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -62,11 +64,12 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.hilt.android)
-    // Added for live location permissions
+    implementation(libs.material.icons.extended)
     implementation(libs.play.services.location)
     implementation(libs.androidx.material)
-//    implementation(libs.play.services.maps)
+    implementation(libs.play.services.maps)
     ksp(libs.hilt.android.compiler)
+
 
     // Google Maps
 //    implementation("com.google.maps.android:maps-compose:6.5.1")

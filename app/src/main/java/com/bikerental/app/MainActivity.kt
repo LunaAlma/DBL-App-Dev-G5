@@ -1,7 +1,6 @@
 package com.bikerental.app
 
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,15 +20,16 @@ import kotlinx.coroutines.launch
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bikerental.app.data.datasource.AuthRemoteDataSource
 import com.bikerental.app.data.model.ErrorMessage
 import dagger.hilt.android.AndroidEntryPoint
-import com.bikerental.app.ui.signup.SignUpScreen
+import com.google.firebase.auth.FirebaseAuth
 import com.bikerental.app.ui.home.HomeScreen
 import com.bikerental.app.ui.maps.MapsScreen
 import com.bikerental.app.ui.signin.SignInScreen
-import com.google.firebase.auth.FirebaseAuth
+import com.bikerental.app.ui.signup.SignUpScreen
+import com.bikerental.app.ui.welcome.WelcomeScreen
 
+const val WELCOME_ROUTE = "welcome"
 const val SIGN_UP_ROUTE = "signup"
 const val SIGN_IN_ROUTE = "signin"
 const val HOME_ROUTE = "home"
@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setSoftInputMode()
         val currentUser = FirebaseAuth.getInstance().currentUser
-        var startDestination = SIGN_UP_ROUTE
+        var startDestination = WELCOME_ROUTE
 
         if (currentUser != null) {
             startDestination = MAPS_ROUTE //HOME_ROUTE //SUCCESS_ROUTE
@@ -69,6 +69,16 @@ class MainActivity : ComponentActivity() {
                             startDestination = startDestination,
                             modifier = Modifier.padding(innerPadding)
                         ) {
+                            composable(WELCOME_ROUTE) {
+                                WelcomeScreen(
+                                    openSignUpScreen = {
+                                        navController.navigate(SIGN_UP_ROUTE) {
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                )
+                            }
+
                             composable(SIGN_IN_ROUTE) {
                                 SignInScreen(
                                     openHomeScreen = {
@@ -76,6 +86,7 @@ class MainActivity : ComponentActivity() {
                                             launchSingleTop = true
                                         }
                                     },
+
                                     openSignUpScreen = {
                                         navController.navigate(SIGN_UP_ROUTE) {
                                             launchSingleTop = true
