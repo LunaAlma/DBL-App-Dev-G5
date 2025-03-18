@@ -7,5 +7,13 @@ data class Transaction(
 
     val toId: String = "",
 
-    val amount: Double = 0.00
+    val timeStamp: String = "",
+
+    val status: String = "",
+
+    val fee: Double = 0.00,
+
+    val ownerAmount: Double = 0.00,
+
+    val totalAmount: Double = 0.00
 )

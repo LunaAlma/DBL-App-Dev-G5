@@ -23,18 +23,22 @@ import com.bikerental.app.ui.theme.BikeRentalTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.bikerental.app.data.model.User
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val bikes by viewModel.bikes
     val isLoading by viewModel.isLoading
     val error by viewModel.error
+    val users by viewModel.users
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (isLoading) {
             CircularProgressIndicator(Modifier.align(Alignment.Center))
         } else {
             BikeList(bikes = bikes)
+
+            UserList(users = users)
         }
 
         error?.let {
@@ -57,18 +61,49 @@ fun BikeList(bikes: List<Bike>) {
 }
 
 @Composable
+fun UserList(users: List<User>) {
+    LazyColumn {
+        items(users) { user ->
+            UserItem(user = user)
+        }
+    }
+}
+
+@Composable
 fun BikeItem(bike: Bike) {
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = bike.bikeId, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = bike.price)
+            Text(text = bike.price.toString())
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = bike.ownerId)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = bike.price)
+            Text(text = bike.bikeId)
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = bike.picture)
+        }
+    }
+}
+@Composable
+fun UserItem(user: User) {
+    Card(modifier = Modifier.padding(8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = user.uid, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = user.firstName)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = user.lastName)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = user.username)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = user.email)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = user.avgRating.toString())
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = user.profilePicture)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = user.currentLocation.toString())
         }
     }
 }

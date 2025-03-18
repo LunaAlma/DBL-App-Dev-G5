@@ -9,6 +9,7 @@ import com.bikerental.app.data.repositories.BikeRepository
 import com.bikerental.app.data.repositories.TransactionRepository
 import com.bikerental.app.data.repositories.UserRepository
 import com.bikerental.app.data.model.Bike
+import com.bikerental.app.data.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
@@ -26,6 +27,9 @@ class HomeViewModel @Inject constructor(
     private val _bikes = mutableStateOf(emptyList<Bike>())
     val bikes: State<List<Bike>> = _bikes
 
+    private val _users = mutableStateOf(emptyList<User>())
+    val users: State<List<User>> = _users
+
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
@@ -34,6 +38,22 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadBikes()
+        loadUsers()
+    }
+
+    private fun loadUsers() {
+        viewModelScope.launch {
+            userRepository.getUsers()
+                .onStart { _isLoading.value = true }
+                .catch { e ->
+                    _error.value = e.message
+                    _isLoading.value = false
+                }
+                .collect { users ->
+                    _users.value = users
+                    _isLoading.value = false
+                }
+        }
     }
 
 
@@ -45,8 +65,8 @@ class HomeViewModel @Inject constructor(
                     _error.value = e.message
                     _isLoading.value = false
                 }
-                .collect { posts ->
-                    _bikes.value = posts
+                .collect { bikes ->
+                    _bikes.value = bikes
                     _isLoading.value = false
                 }
         }

@@ -7,7 +7,7 @@ data class Bike(
 
     val bikeName: String = "",
 
-    val price: String = "",
+    val price: Int = 0,
 
     val picture: String = "",
 )

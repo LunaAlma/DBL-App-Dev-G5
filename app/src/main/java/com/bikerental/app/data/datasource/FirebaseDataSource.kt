@@ -16,6 +16,21 @@ class FirebaseDataSource @Inject constructor(
     private val auth: FirebaseAuth
 ){
 
+    fun getUsers(): Flow<List<User>> = callbackFlow {
+        val subscription = db.collection("users")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val users = snapshot?.toObjects(User::class.java) ?: emptyList()
+                trySend(users)
+            }
+
+        awaitClose { subscription.remove() }
+    }
+
     suspend fun updateUserDetails(user: User) {
         if(auth.currentUser?.uid != null) {
             db.collection("users").document(auth.currentUser!!.uid).set(user)
