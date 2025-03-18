@@ -27,6 +27,7 @@ import com.bikerental.app.ui.home.HomeScreen
 import com.bikerental.app.ui.signin.SignInScreen
 import com.bikerental.app.ui.signup.SignUpScreen
 
+
 const val SIGN_UP_ROUTE = "signup"
 const val SIGN_IN_ROUTE = "signin"
 const val HOME_ROUTE = "home"
@@ -51,6 +52,13 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             BikeRentalTheme {
+                WelcomeScreen(
+                    onGetStartedClick = {
+                        navController.navigate(SIGN_IN_ROUTE) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -71,6 +79,7 @@ class MainActivity : ComponentActivity() {
                                             launchSingleTop = true
                                         }
                                     },
+
                                     openSignUpScreen = {
                                         navController.navigate(SIGN_UP_ROUTE) {
                                             launchSingleTop = true
