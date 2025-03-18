@@ -22,10 +22,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.bikerental.app.data.model.ErrorMessage
 import dagger.hilt.android.AndroidEntryPoint
-import com.bikerental.app.ui.signup.SignUpScreen
+import com.google.firebase.auth.FirebaseAuth
 import com.bikerental.app.ui.home.HomeScreen
 import com.bikerental.app.ui.signin.SignInScreen
-import com.google.firebase.auth.FirebaseAuth
+import com.bikerental.app.ui.signup.SignUpScreen
 
 
 const val SIGN_UP_ROUTE = "signup"
