@@ -1,7 +1,6 @@
 package com.bikerental.app
 
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,7 +20,6 @@ import kotlinx.coroutines.launch
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bikerental.app.data.datasource.AuthRemoteDataSource
 import com.bikerental.app.data.model.ErrorMessage
 import dagger.hilt.android.AndroidEntryPoint
 import com.bikerental.app.ui.signup.SignUpScreen
