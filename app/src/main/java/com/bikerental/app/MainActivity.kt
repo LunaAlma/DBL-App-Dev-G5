@@ -24,6 +24,7 @@ import com.bikerental.app.data.model.ErrorMessage
 import dagger.hilt.android.AndroidEntryPoint
 import com.google.firebase.auth.FirebaseAuth
 import com.bikerental.app.ui.home.HomeScreen
+import com.bikerental.app.ui.maps.MapsScreen
 import com.bikerental.app.ui.signin.SignInScreen
 import com.bikerental.app.ui.signup.SignUpScreen
 
@@ -31,6 +32,7 @@ import com.bikerental.app.ui.signup.SignUpScreen
 const val SIGN_UP_ROUTE = "signup"
 const val SIGN_IN_ROUTE = "signin"
 const val HOME_ROUTE = "home"
+const val MAPS_ROUTE = "maps"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -43,7 +45,7 @@ class MainActivity : ComponentActivity() {
         var startDestination = SIGN_UP_ROUTE
 
         if (currentUser != null) {
-            startDestination = HOME_ROUTE
+            startDestination = MAPS_ROUTE //HOME_ROUTE
         }
 
         setContent {
@@ -106,6 +108,9 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(HOME_ROUTE) {
                                 HomeScreen()
+                            }
+                            composable(MAPS_ROUTE) {
+                                MapsScreen()
                             }
                         }
                     }
