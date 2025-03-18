@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.hilt.android)
+    implementation(libs.material.icons.extended)
     implementation(libs.play.services.location)
     ksp(libs.hilt.android.compiler)
     dependencies {
