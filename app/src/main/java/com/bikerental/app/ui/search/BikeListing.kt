@@ -1,4 +1,4 @@
-    package com.bikerental.app.ui
+package com.bikerental.app.ui.search
 import com.bikerental.app.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*

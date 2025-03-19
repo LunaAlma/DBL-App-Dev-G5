@@ -8,7 +8,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class FirebaseDataSource @Inject constructor(
@@ -26,6 +25,25 @@ class FirebaseDataSource @Inject constructor(
 
                 val users = snapshot?.toObjects(User::class.java) ?: emptyList()
                 trySend(users)
+            }
+
+        awaitClose { subscription.remove() }
+    }
+
+    fun getUserDetails(): Flow<User> = callbackFlow {
+        val subscription = db.collection("users").document(auth.currentUser!!.uid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val user = snapshot?.toObject(User::class.java)
+                if(user != null) {
+                    trySend(user)
+                } else {
+                    close(IllegalStateException("User document not found"))
+                }
+
             }
 
         awaitClose { subscription.remove() }
@@ -68,7 +86,6 @@ class FirebaseDataSource @Inject constructor(
                 val bikes = snapshot?.toObjects(Bike::class.java) ?: emptyList()
                 trySend(bikes)
             }
-
         awaitClose { subscription.remove() }
     }
 

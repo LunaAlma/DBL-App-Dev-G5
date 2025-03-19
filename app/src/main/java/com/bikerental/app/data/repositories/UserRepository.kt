@@ -18,6 +18,8 @@ class UserRepository @Inject constructor(
 
     fun getUsers(): Flow<List<User>> = firebaseDataSource.getUsers()
 
+    fun getUserDetails(): Flow<User> = firebaseDataSource.getUserDetails()
+
     suspend fun updateUserDetails(user: User) = firebaseDataSource.updateUserDetails(user)
 
     suspend fun createBike(bike: Bike) = firebaseDataSource.addBike(bike)

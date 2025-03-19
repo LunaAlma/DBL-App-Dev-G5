@@ -1,4 +1,4 @@
-package com.bikerental.app.ui
+package com.bikerental.app.ui.search
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -101,29 +101,6 @@ fun BikeCard(bike: Bike) {
         }
     }
 }
-
-//finalise once we agree on what we want in the nav bar
-//@Composable
-//fun BottomNavigationBar() {
-//    NavigationBar(containerColor = Color.White) {
-//        NavigationBarItem(
-//            selected = false, onClick = {},
-//            icon = { Icon(painterResource(id = R.drawable.ic_), contentDescription = "Add") }
-//        )
-//        NavigationBarItem(
-//            selected = true, onClick = {},
-//            icon = { Icon(painterResource(id = R.drawable.ic_), contentDescription = "Home") }
-//        )
-//        NavigationBarItem(
-//            selected = false, onClick = {},
-//            icon = { Icon(painterResource(id = R.drawable.ic_), contentDescription = "Search") }
-//        )
-//        NavigationBarItem(
-//            selected = false, onClick = {},
-//            icon = { Icon(painterResource(id = R.drawable.ic_), contentDescription = "Menu") }
-//        )
-//    }
-//}
 
 data class Bike(val name: String, val imageRes: Int)
 

@@ -31,14 +31,6 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-
-//            Image(
-//                painter = painterResource(id = R.drawable.getstarted),
-//                contentDescription = "Welcome Illustration",
-//                modifier = Modifier
-//                    .size(200.dp)
-//                    .clip(CircleShape)
-//            )
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(

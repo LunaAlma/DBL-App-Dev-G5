@@ -30,6 +30,9 @@ class HomeViewModel @Inject constructor(
     private val _users = mutableStateOf(emptyList<User>())
     val users: State<List<User>> = _users
 
+    private val _user = mutableStateOf<User?>(null)
+    val user: State<User?> = _user
+
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
@@ -37,8 +40,25 @@ class HomeViewModel @Inject constructor(
     val error: State<String?> = _error
 
     init {
+        loadUserDetails()
         loadBikes()
         loadUsers()
+
+    }
+
+    private fun loadUserDetails() {
+        viewModelScope.launch {
+            userRepository.getUserDetails()
+                .onStart { _isLoading.value = true }
+                .catch { e ->
+                    _error.value = e.message
+                    _isLoading.value = false
+                }
+                .collect { user ->
+                    _user.value = user
+                    _isLoading.value = false
+                }
+        }
     }
 
     private fun loadUsers() {
