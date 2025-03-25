@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.tooling.preview.Preview
-import com.bikerental.app.ui.theme.BikeRentalTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 
@@ -152,7 +151,7 @@ fun SettingsItem(title: String) {
 @Preview(name = "Settings Screen", showBackground = true)
 @Composable
 fun PreviewSettingsScreen() {
-    BikeRentalTheme {
+    MaterialTheme {
         SettingsScreen()
     }
 }
