@@ -21,11 +21,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import com.bikerental.app.ui.theme.AppTheme
 
 @Preview(showBackground = true)
 @Composable
 fun BikeRentalCardPreview() {
-    MaterialTheme {
+    AppTheme {
         BikeRentalCard()
     }
 }

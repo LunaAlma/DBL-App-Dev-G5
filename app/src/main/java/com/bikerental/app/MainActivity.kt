@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.bikerental.app.ui.theme.BikeRentalTheme
 import kotlinx.coroutines.launch
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,6 +42,7 @@ import com.bikerental.app.ui.settings.SettingsScreen
 import com.bikerental.app.ui.signin.SignInScreen
 import com.bikerental.app.ui.signup.SignUpScreen
 import com.bikerental.app.ui.success.SuccessScreen
+import com.bikerental.app.ui.theme.AppTheme
 import com.bikerental.app.ui.welcome.WelcomeScreen
 
 const val WELCOME_ROUTE = "welcome"
@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
             val snackbarHostState = remember { SnackbarHostState() }
             val navController = rememberNavController()
 
-            BikeRentalTheme {
+            AppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

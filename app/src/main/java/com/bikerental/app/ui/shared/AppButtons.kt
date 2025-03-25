@@ -14,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bikerental.app.R
-import com.bikerental.app.ui.theme.BikeRentalTheme
 
 @Composable
 fun StandardButton(@StringRes label: Int, onButtonClick: () -> Unit) {

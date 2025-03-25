@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bikerental.app.data.model.ErrorMessage
-import com.bikerental.app.ui.theme.BikeRentalTheme
 import android.net.Uri
 import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -42,12 +41,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import com.bikerental.app.ui.theme.AppTheme
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -100,95 +101,97 @@ fun SignUpScreenContent(
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Sign Up", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-
-
-
-        Box(
-            contentAlignment = Alignment.Center,
+    AppTheme {
+        Column(
             modifier = Modifier
-                .size(100.dp)
-                .padding(bottom = 16.dp)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            profileImageUri?.let {
-                val painter: AsyncImagePainter = rememberAsyncImagePainter(it)
-                Image(
-                    painter = painter,
-                    contentDescription = "Profile Image",
-                    modifier = Modifier.fillMaxSize().clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } ?: run {
-                IconButton(onClick = {
-                    cameraUri.value = createImageFile()
+            Text("Sign Up", fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-                    cameraUri.value?.let { uri ->
-                        takePictureLauncher.launch(uri)
+
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(bottom = 16.dp)
+            ) {
+                profileImageUri?.let {
+                    val painter: AsyncImagePainter = rememberAsyncImagePainter(it)
+                    Image(
+                        painter = painter,
+                        contentDescription = "Profile Image",
+                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } ?: run {
+                    IconButton(onClick = {
+                        cameraUri.value = createImageFile()
+
+                        cameraUri.value?.let { uri ->
+                            takePictureLauncher.launch(uri)
+                        }
+                    }) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Take Picture")
                     }
-                }) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Take Picture")
                 }
             }
-        }
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
-        )
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
+            )
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
-        )
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation()
+            )
 
-        OutlinedTextField(
-            value = repeatPassword,
-            onValueChange = { repeatPassword = it },
-            label = { Text("Repeat Password") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
-        )
+            OutlinedTextField(
+                value = repeatPassword,
+                onValueChange = { repeatPassword = it },
+                label = { Text("Repeat Password") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation()
+            )
 
-        errorMessage?.let {
-            Text(it, color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(4.dp))
-        }
+            errorMessage?.let {
+                Text(it, color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(4.dp))
+            }
 
-        Button(
-            onClick = {
-                if (email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty()) {
-                    errorMessage = "All fields are required!"
-                } else {
-                    errorMessage = null
-                    signUp(
+            Button(
+                onClick = {
+                    if (email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty()) {
+                        errorMessage = "All fields are required!"
+                    } else {
+                        errorMessage = null
+                        signUp(
                             email,
                             password,
                             repeatPassword,
                             showErrorSnackbar
                         )
-                }
-            },
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFB2E59C)
-            )
-        ) {
-            Text("Sign Up")
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text("Sign Up")
+            }
         }
     }
 }
@@ -196,7 +199,7 @@ fun SignUpScreenContent(
 @Composable
 @Preview(showSystemUi = true)
 fun SignUpScreenPreview() {
-    BikeRentalTheme(darkTheme = true) {
+    AppTheme() {
         SignUpScreenContent(
             signUp = { _, _, _, _ -> },
             showErrorSnackbar = {}

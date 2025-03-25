@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,7 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bikerental.app.R
 import com.bikerental.app.data.model.ErrorMessage
 import com.bikerental.app.ui.shared.StandardButton
-import com.bikerental.app.ui.theme.BikeRentalTheme
+import com.bikerental.app.ui.theme.AppTheme
 
 @Composable
 fun SignInScreen(
@@ -166,7 +167,7 @@ fun SignInScreenContent(
 @Composable
 @Preview(showSystemUi = true)
 fun SignInScreenPreview() {
-    BikeRentalTheme(darkTheme = true) {
+    AppTheme() {
         SignInScreenContent(
             openSignUpScreen = {},
             signIn = { _, _, _ -> },
