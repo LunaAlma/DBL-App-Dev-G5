@@ -46,37 +46,32 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
+import androidx.navigation.NavController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.ui.theme.AppTheme
+import com.bikerental.app.ui.welcome.WelcomeViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
-fun SignUpScreen(
-    openSuccessScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
-    viewModel: SignUpViewModel = hiltViewModel()
+fun SignUp(
+    modifier: Modifier,
+    viewModel: WelcomeViewModel
 ) {
-    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
+//    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
 
-    if (shouldRestartApp) {
-        openSuccessScreen()
-    } else {
-        SignUpScreenContent(
-            signUp = viewModel::signUp,
-            showErrorSnackbar = showErrorSnackbar
-        )
-    }
+    SignUpScreenContent(modifier, viewModel)
+
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SignUpScreenContent(
-    signUp: (String, String, String, (ErrorMessage) -> Unit) -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    modifier: Modifier,
+    viewModel: WelcomeViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -172,19 +167,7 @@ fun SignUpScreenContent(
             }
 
             Button(
-                onClick = {
-                    if (email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty()) {
-                        errorMessage = "All fields are required!"
-                    } else {
-                        errorMessage = null
-                        signUp(
-                            email,
-                            password,
-                            repeatPassword,
-                            showErrorSnackbar
-                        )
-                    }
-                },
+                onClick = { },
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -196,13 +179,13 @@ fun SignUpScreenContent(
     }
 }
 
-@Composable
-@Preview(showSystemUi = true)
-fun SignUpScreenPreview() {
-    AppTheme() {
-        SignUpScreenContent(
-            signUp = { _, _, _, _ -> },
-            showErrorSnackbar = {}
-        )
-    }
-}
+//@Composable
+//@Preview(showSystemUi = true)
+//fun SignUpScreenPreview() {
+//    AppTheme() {
+//        SignUpScreenContent(
+//            signUp = { _, _, _, _ -> },
+//            showErrorSnackbar = {}
+//        )
+//    }
+//}

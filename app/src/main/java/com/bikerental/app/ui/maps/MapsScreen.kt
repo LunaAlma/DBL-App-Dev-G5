@@ -192,7 +192,7 @@ fun MapsScreen(viewModel: MapsViewModel = hiltViewModel()) {
             return
         }
 
-        // Listening for location updates
+        // Start listening for location updates
         fusedLocationClient.requestLocationUpdates(
             LocationRequest.Builder(1000L).build(),
             locationCallback,
@@ -202,6 +202,7 @@ fun MapsScreen(viewModel: MapsViewModel = hiltViewModel()) {
 
 
     Scaffold(
+
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             FloatingActionButton(

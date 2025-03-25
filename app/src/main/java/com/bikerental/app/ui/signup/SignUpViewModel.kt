@@ -1,9 +1,12 @@
 package com.bikerental.app.ui.signup
 
-import com.bikerental.app.MainViewModel
+import android.os.Messenger
+import com.bikerental.app.ui.MainViewModel
 import com.bikerental.app.data.model.ErrorMessage
 import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.R
+import com.bikerental.app.ui.base.BaseViewModel
+import com.bikerental.app.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,8 +15,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
+    navigator: Navigator,
     private val authRepository: AuthRepository
-) : MainViewModel() {
+) : BaseViewModel(navigator) {
+
     private val _shouldRestartApp = MutableStateFlow(false)
     val shouldRestartApp: StateFlow<Boolean>
         get() = _shouldRestartApp.asStateFlow()
@@ -37,11 +42,6 @@ class SignUpViewModel @Inject constructor(
         if (password != repeatPassword) {
             showErrorSnackbar(ErrorMessage.IdError(R.string.passwords_do_not_match))
             return
-        }
-
-        launchCatching(showErrorSnackbar) {
-            authRepository.signUp(email, password)
-            _shouldRestartApp.value = true
         }
     }
 }

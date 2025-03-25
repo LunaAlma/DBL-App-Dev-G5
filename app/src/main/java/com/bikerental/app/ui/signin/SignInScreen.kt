@@ -34,37 +34,26 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.bikerental.app.R
 import com.bikerental.app.data.model.ErrorMessage
 import com.bikerental.app.ui.shared.StandardButton
 import com.bikerental.app.ui.theme.AppTheme
+import com.bikerental.app.ui.welcome.WelcomeViewModel
 
 @Composable
-fun SignInScreen(
-    openHomeScreen: () -> Unit,
-    openSignUpScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
-    viewModel: SignInViewModel = hiltViewModel()
+fun SignIn(
+    modifier: Modifier,
+    viewModel: WelcomeViewModel
 ) {
-    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
-
-    if (shouldRestartApp) {
-        openHomeScreen()
-    } else {
-        SignInScreenContent(
-            openSignUpScreen = openSignUpScreen,
-            signIn = viewModel::signIn,
-            showErrorSnackbar = showErrorSnackbar
-        )
-    }
+        SignInScreenContent(modifier, viewModel)
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SignInScreenContent(
-    openSignUpScreen: () -> Unit,
-    signIn: (String, String, (ErrorMessage) -> Unit) -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    modifier: Modifier,
+    viewModel: WelcomeViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -133,7 +122,7 @@ fun SignInScreenContent(
                 StandardButton(
                     label = R.string.sign_in_with_email,
                     onButtonClick = {
-                        signIn(email, password, showErrorSnackbar)
+//                        signIn(email, password, showErrorSnackbar)
                     }
                 )
 
@@ -149,14 +138,14 @@ fun SignInScreenContent(
                     },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextButton(onClick = openSignUpScreen) {
-                    Text(
-                        text = stringResource(R.string.sign_up_text),
-                        textAlign = TextAlign.Center,
-                        fontSize = 16.sp,
-                        color = Color.Blue
-                    )
-                }
+//                TextButton(onClick = openSignUpScreen) {
+//                    Text(
+//                        text = stringResource(R.string.sign_up_text),
+//                        textAlign = TextAlign.Center,
+//                        fontSize = 16.sp,
+//                        color = Color.Blue
+//                    )
+//                }
 
                 Spacer(Modifier.size(24.dp))
             }
@@ -164,14 +153,14 @@ fun SignInScreenContent(
     }
 }
 
-@Composable
-@Preview(showSystemUi = true)
-fun SignInScreenPreview() {
-    AppTheme() {
-        SignInScreenContent(
-            openSignUpScreen = {},
-            signIn = { _, _, _ -> },
-            showErrorSnackbar = {}
-        )
-    }
-}
+//@Composable
+//@Preview(showSystemUi = true)
+//fun SignInScreenPreview() {
+//    AppTheme() {
+//        SignInScreenContent(
+//            openSignUpScreen = {},
+//            signIn = { _, _, _ -> },
+//            showErrorSnackbar = {}
+//        )
+//    }
+//}

@@ -11,14 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.bikerental.app.ui.theme.AppTheme
 
 @Composable
-fun WelcomeScreen(
-    openSignUpScreen: () -> Unit
+fun Welcome(
+    modifier: Modifier,
+    viewModel: WelcomeViewModel
 ) {
     AppTheme {
         Surface(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -49,7 +50,7 @@ fun WelcomeScreen(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 Button(
-                    onClick = openSignUpScreen,
+                    onClick = {},
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -62,15 +63,5 @@ fun WelcomeScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WelcomeScreenPreview() {
-    AppTheme() {
-        WelcomeScreen(
-            openSignUpScreen = {}
-        )
     }
 }
