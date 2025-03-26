@@ -98,11 +98,11 @@ fun UserItem(user: User) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = user.email)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = user.avgRating.toString())
+            Text(text = (user.totalRating/user.numberOfRatings).toString())
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = user.profilePicture)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = user.currentLocation.toString())
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(text = user.currentLocation.toString())
         }
     }
 }
