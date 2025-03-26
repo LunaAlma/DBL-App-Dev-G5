@@ -18,6 +18,9 @@ class SignUpViewModel @Inject constructor(
     navigator: Navigator,
     private val authRepository: AuthRepository
 ) : BaseViewModel(navigator) {
+    companion object {
+        const val TAG = "SignUpViewModel"
+    }
 
     private val _shouldRestartApp = MutableStateFlow(false)
     val shouldRestartApp: StateFlow<Boolean>

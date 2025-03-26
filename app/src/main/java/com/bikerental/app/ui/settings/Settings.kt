@@ -22,7 +22,7 @@ import com.bikerental.app.ui.welcome.WelcomeViewModel
 
 @Composable
 fun Settings(modifier: Modifier,
-             viewModel: WelcomeViewModel
+             viewModel: SettingsViewModel
 ) {
     Column(
         modifier = Modifier

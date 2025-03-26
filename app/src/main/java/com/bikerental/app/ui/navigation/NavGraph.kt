@@ -6,8 +6,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
+import com.bikerental.app.ui.maps.MapViewModel
+import com.bikerental.app.ui.signup.SignUp
+import com.bikerental.app.ui.signup.SignUpViewModel
 import com.bikerental.app.ui.welcome.Welcome
 import com.bikerental.app.ui.welcome.WelcomeViewModel
+import com.bikerental.app.ui.maps.Map
+import com.bikerental.app.ui.settings.Settings
+import com.bikerental.app.ui.settings.SettingsViewModel
 
 @Composable
 fun NavGraph(
@@ -30,7 +37,31 @@ fun NavGraph(
         // Welcome
         composable(Destination.Welcome.route) {
             val viewModel: WelcomeViewModel = hiltViewModel(key = WelcomeViewModel.TAG)
-            Welcome(modifier, viewModel)
+            Welcome(modifier, viewModel, navigator)
+        }
+
+        // Signup
+        composable(Destination.SignUp.route) {
+            val viewModel: SignUpViewModel = hiltViewModel(key = SignUpViewModel.TAG)
+            SignUp(modifier, viewModel)
+        }
+
+        // Home
+        navigation(
+            route = Destination.Home.route,
+            startDestination = Destination.Home.Profile.route
+        ) {
+            // Home.Map
+            composable(Destination.Home.Map.route) {
+                val viewModel: MapViewModel = hiltViewModel(key = MapViewModel.TAG)
+                Map(modifier, viewModel)
+            }
+
+            // Home.Profile
+            composable(Destination.Home.Profile.route) {
+                val viewModel: SettingsViewModel = hiltViewModel(key = SettingsViewModel.TAG)
+                Settings(modifier, viewModel)
+            }
         }
     }
 }

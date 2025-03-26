@@ -11,11 +11,8 @@ object Destination {
     data object Success : Screen("success")
 
     data object Home : Screen("home") {
-        data object Feed : Screen("home/map")
-        data object Mentors : Screen("home/profile")
-//        data object MyBox : Screen("home/my_box")
-//        data object Search : DynamicScreen("home/search", "searchMode")
-//        data object Profile : DynamicScreen("home/profile", "profileTab")
+        data object Map : Screen("home/map")
+        data object Profile : Screen("home/profile")
     }
 }
 

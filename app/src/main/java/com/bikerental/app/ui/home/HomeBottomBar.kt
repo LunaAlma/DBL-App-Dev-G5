@@ -40,15 +40,15 @@ enum class HomeTab(
         R.string.menu_map,
         R.drawable.ic_search_unselected,
         R.drawable.ic_search,
-        Destination.Home.Feed.route,
-        Destination.Home.Feed.route,
+        Destination.Home.Map.route,
+        Destination.Home.Map.route,
     ),
     MENTORS(
         R.string.menu_profile,
         R.drawable.ic_mentor_unselected,
         R.drawable.ic_mentor,
-        Destination.Home.Mentors.route,
-        Destination.Home.Mentors.route,
+        Destination.Home.Profile.route,
+        Destination.Home.Profile.route,
     )
 }
 
@@ -60,7 +60,7 @@ fun HomeBottomBar(navController: NavController) {
     val routes = remember { HomeTab.entries.map { it.route } }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-        ?: Destination.Home.Feed.route
+        ?: Destination.Home.Profile.route
 
     HomeBottomBarView(
         tabs = tabs,
@@ -92,9 +92,8 @@ private fun HomeBottomBarView(
         NavigationBar(
             Modifier
                 .windowInsetsBottomHeight(
-                    WindowInsets.navigationBars.add(WindowInsets(bottom = 56.dp))
-                ),
-            tonalElevation = 4.dp
+                    WindowInsets.navigationBars.add(WindowInsets(bottom = 60.dp))
+                )
         ) {
             tabs.forEach { tab ->
                 val selected = currentRoute == tab.route

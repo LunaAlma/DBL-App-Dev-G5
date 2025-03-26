@@ -14,12 +14,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.bikerental.app.ui.navigation.Destination
+import com.bikerental.app.ui.navigation.Navigator
 import com.bikerental.app.ui.theme.AppTheme
 
 @Composable
 fun Welcome(
     modifier: Modifier,
-    viewModel: WelcomeViewModel
+    viewModel: WelcomeViewModel,
+    navigator: Navigator
 ) {
     AppTheme {
         Surface(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -50,7 +53,7 @@ fun Welcome(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 Button(
-                    onClick = {},
+                    onClick = { navigator.navigateTo(Destination.Home.route, true) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),

@@ -30,6 +30,9 @@ class SettingsViewModel @Inject constructor(
 //    init {
 //        loadUserDetails()
 //    }
+companion object {
+    const val TAG = "SettingsViewModel"
+}
 
     var userName by mutableStateOf("Firstname Lastname")
     var userEmail by mutableStateOf("example@student.tue.nl")

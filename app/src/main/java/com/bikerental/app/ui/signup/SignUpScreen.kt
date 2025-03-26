@@ -28,12 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bikerental.app.data.model.ErrorMessage
 import android.net.Uri
 import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -46,7 +42,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
-import androidx.navigation.NavController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.ui.theme.AppTheme
@@ -59,19 +54,16 @@ import java.util.Locale
 @Composable
 fun SignUp(
     modifier: Modifier,
-    viewModel: WelcomeViewModel
+    viewModel: SignUpViewModel
 ) {
-//    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
-
     SignUpScreenContent(modifier, viewModel)
-
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SignUpScreenContent(
     modifier: Modifier,
-    viewModel: WelcomeViewModel
+    viewModel: SignUpViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

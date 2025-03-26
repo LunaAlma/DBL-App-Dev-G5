@@ -11,6 +11,6 @@ class WelcomeViewModel @Inject constructor(
     navigator: Navigator,
 ): BaseViewModel(navigator) {
     companion object {
-        const val TAG = "BikeApplication"
+        const val TAG = "WelcomeViewModel"
     }
 }
