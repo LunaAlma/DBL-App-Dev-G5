@@ -13,9 +13,9 @@ data class User(
 
     val email: String = "",
 
-    val avgRating: Int = 0,
+    val profilePicture: String = "",
 
-    val currentLocation: GeoPoint = GeoPoint(0.0, 0.0),
+    val totalRating: Int = 0,
 
-    val profilePicture: String = ""
+    val numberOfRatings: Int = 0,
 )

@@ -53,9 +53,13 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.maps.android.compose.Circle
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,6 +81,15 @@ import com.google.maps.android.compose.MarkerInfoWindowContent
 import com.google.maps.android.compose.MarkerState
 import kotlinx.coroutines.launch
 
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import com.google.firebase.firestore.GeoPoint
+import coil.compose.rememberAsyncImagePainter
+import com.bikerental.app.data.model.Bike
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 // Note that rememberMultiplePermissions is using an experimental API
@@ -84,7 +97,35 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MapsScreen() {
+fun MapsScreen(viewModel: MapsViewModel = hiltViewModel()) {
+    val bikes by viewModel.bikes.collectAsState()
+
+    val owner by viewModel.ownerDetails.collectAsState()
+
+    fun onBikeSelected(ownerId: String) {
+        viewModel.setOwnerId(ownerId)
+    }
+
+    val markersData = bikes.map { bike ->
+        // bike.location is a GeoPoint from Firebase
+        val lat = bike.location?.latitude ?: 0.0
+        val lng = bike.location?.longitude ?: 0.0
+
+        MarkerData(
+            location = LatLng(lat, lng),
+            ownerName = bike.bikeName,
+            rating = owner?.let {
+                if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
+            } ?: 0,
+            bikeImgId = bike.picture,  // uses Coil to load this image
+            bikePrice = bike.price,
+            city = bike.city,
+            startTime = bike.startTime,
+            endTime = bike.endTime,
+            ownerId = bike.ownerId ?: "",
+        )
+    }
+
     var currentLocation by remember { mutableStateOf<Location?>(null) }
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
@@ -92,10 +133,7 @@ fun MapsScreen() {
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(51.423, 5.46), 10f)
     }
-    val locations = listOf(
-        LatLng(51.423,5.462),
-        LatLng(51.508,5.398)
-    )
+
     val locationsPermissions = rememberMultiplePermissionsState(
         listOf(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION)
     )
@@ -107,11 +145,7 @@ fun MapsScreen() {
     var selectedMarker by remember { mutableStateOf<MarkerData?>(null) }
 
 
-
-
-
-
-    //here
+    // Location activation code
     val myLocationSource = object : LocationSource {
         var listener: LocationSource.OnLocationChangedListener? = null
 
@@ -158,16 +192,13 @@ fun MapsScreen() {
             return
         }
 
-        // Start listening for location updates
+        // Listening for location updates
         fusedLocationClient.requestLocationUpdates(
             LocationRequest.Builder(1000L).build(),
             locationCallback,
             Looper.getMainLooper()
         )
     }
-
-
-    // Here is where mapProperties used to be
 
 
     Scaffold(
@@ -214,7 +245,7 @@ fun MapsScreen() {
         // Gives error when empty
         val mapProperties = MapProperties(
             mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, mapStyleResId),
-            // Zoom limitations?
+            // Zoom limitations
             maxZoomPreference = 18f,
             minZoomPreference = 3f,
 //         Restrict map bounds to Europe?
@@ -233,128 +264,82 @@ fun MapsScreen() {
             properties = mapProperties,
             locationSource = myLocationSource
         ) {
-            // Add markers, etc.
-//            for (loc in locations) {
-//                Marker(
-//                    state = MarkerState(loc)
-//                )
-//            }
             for (data in markersData) {
-//                Marker(
-//                    state = MarkerState(position = data.location),
-//                    title = data.ownerName,
-//                    snippet = data.rating,
-//                )
-
-//                MarkerInfoWindowContent(
-//                    state = MarkerState(position = data.location),
-//                    title = data.ownerName,
-//                    snippet = data.rating,
-//                ) {
-//                    Column(
-//                        horizontalAlignment = Alignment.CenterHorizontally,
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(32.dp)
-//                    ) {
-//                        Text(
-//                            modifier = Modifier.padding(top = 6.dp),
-//                            text = data.ownerName,
-//                            fontWeight = FontWeight.Bold,
-//                            color = Color.Black
-//                        )
-//                        data.rating?.let { desc -> Text(desc) }
-//                        data.bikeImgId?.let { res ->
-//                            Image(
-//                                modifier = Modifier
-//                                    .padding(top = 6.dp)
-//                                    .size(240.dp),
-//                                painter = painterResource(id = res),
-//                                contentDescription = data.bikePrice.toString()
-//                            )
-//                        }
-//                    }
-//                }
+                val markerState = remember { MarkerState(position = data.location) }
                 Marker(
-                    state = MarkerState(position = data.location),
-                    title = data.ownerName,
-                    snippet = data.rating,
+                    state = markerState,
+//                    title = data.ownerName,
+//                    snippet = data.rating,
                     onClick = {
                         // Update the selected marker
+                        onBikeSelected(data.ownerId)
                         selectedMarker = data
-                        // Return true to consume the click
+                        // Return true to consume click
                         true
                     }
                 )
-
-
-
-
             }
         }
 
         // Show the bottom card if a marker is selected
         selectedMarker?.let { marker ->
+            // Observe the owner details for the selected marker
+            val ownerDetails by viewModel.ownerDetails.collectAsState()
+            // Use ownerDetails to compute rating calc.
+            val rating = ownerDetails?.let {
+                if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
+            } ?: 0
+
             BottomCard(
-                markerData = marker,
+                markerData = marker.copy(rating = rating), // markerData = marker,
                 onDismiss = { selectedMarker = null }
             )
         }
     }
 
-
-
-    // Here is where GoogleMap used to be
-
 }
 
 // Hardcoded data
-private val markersData = listOf(
-    MarkerData(
-        location = LatLng(51.423,5.462),
-        ownerName = "John",
-        rating = "5",
-        bikeImgId = R.drawable.target,
-        bikePrice = 5,
-    ),
-    MarkerData(
-        location = LatLng(51.508,5.398),
-        ownerName = "Tim",
-        rating = "4",
-        bikeImgId = R.drawable.target,
-        bikePrice = 6,
-    ),
-)
+//private val markersData = listOf(
+//    MarkerData(
+//        location = LatLng(51.423,5.462),
+//        ownerName = "John",
+//        rating = "5",
+//        bikeImgId = R.drawable.target,
+//        bikePrice = 5,
+//    ),
+//    MarkerData(
+//        location = LatLng(51.508,5.398),
+//        ownerName = "Tim",
+//        rating = "4",
+//        bikeImgId = R.drawable.target,
+//        bikePrice = 6,
+//    ),
+//)
 
 // Original MarkerData
 data class MarkerData(
     val location: LatLng,
     val ownerName: String,
-    val rating: String,
-    val bikeImgId: Int? = null,
+    val rating: Int,
+    val bikeImgId: String, // Null option here? String? = null
     val bikePrice: Int,
+    val city: String,
+    val startTime: Timestamp? = null,
+    val endTime: Timestamp? = null,
+    val ownerId: String,
 )
-
-// Firebase spec.
-//data class MarkerData(
-//    val location: LatLng = LatLng(0.0, 0.0),  // Provide defaults so Firestore can map them
-//    val ownerName: String = "",
-//    val bikeImgId: String? = null,           // We'll load from this URL
-//    val bikePrice: Int = 0,
-//    val rating: String = ""                   // If you want a rating, keep it or remove it
-//)
 
 
 /**
- * Simple bottom card composable that appears at the bottom of the screen.
- * You can style it however you like (rounded corners, images, etc.).
+ * Bottom card pop up when pin clicked
  */
 @Composable
 fun BottomCard(
     markerData: MarkerData,
     onDismiss: () -> Unit
 ) {
-    // Box overlay that takes the entire screen
+    // Box that takes the entire screen
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -367,93 +352,100 @@ fun BottomCard(
             ),
         contentAlignment = Alignment.BottomCenter
     ) {
-        // The card itself at the bottom
+        // The pop-up at the bottom
         Card(
             modifier = Modifier
-                //.fillMaxWidth()
                 .width(300.dp)
                 .heightIn(min = 150.dp, max = 300.dp)
-                // Make sure clicks on the card do NOT dismiss it
+                // Clicking the card doesn't do anything
                 .clickable(
-                    onClick = { /* do nothing */ },
+                    onClick = { /* nothing */ },
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 )
                 .padding(bottom = 20.dp), // prev. 16
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(
+            shape = RoundedCornerShape(
                 topStart = 16.dp,
                 topEnd = 16.dp
             )
         ) {
-//            Column(
-//                modifier = Modifier.padding(16.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ) {
-//                Text(
-//                    text = markerData.ownerName,
-//                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-//                    color = Color.Black
-//                )
-//                Text(
-//                    text = "Rating: ${markerData.rating}",
-//                    style = MaterialTheme.typography.bodyMedium
-//                )
-//                markerData.bikeImgId?.let { res ->
-//                    Image(
-//                        painter = painterResource(id = res),
-//                        contentDescription = "Bike image",
-//                        modifier = Modifier
-//                            .padding(top = 8.dp)
-//                            .size(100.dp)
-//                    )
-//                }
-//                Text(text = "Price: ${markerData.bikePrice}€")
-//            }
             // Use a Row to arrange the image on the left and text on the right
-            Row(modifier = Modifier.padding(16.dp)) {
-                // Image on the left
-                markerData.bikeImgId?.let { res ->
-                    Image(
-                        painter = painterResource(id = res),
-//                        painter = rememberAsyncImagePainter(model = res),
-                                contentDescription = "Bike image",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .align(Alignment.CenterVertically)
-                    )
-                }
-                // A spacer between image and text
-                Spacer(modifier = Modifier.width(16.dp))
-                // Column for text on the right
-                Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                    Text(
-                        text = markerData.ownerName,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black
-                    )
-//                    Text(
-//                        text = "Rating: ${markerData.rating}",
-//                        style = MaterialTheme.typography.bodyMedium
-//                    )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = "Star",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(16.dp).background(Color.Transparent)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = markerData.rating,
-                            style = MaterialTheme.typography.bodyMedium
+            Box() { // Added this outer box to add X button properties to close out
+                Row(modifier = Modifier.padding(16.dp)) {
+                    // Image on the left
+                    markerData.bikeImgId?.let { res ->
+                        Image(
+                            painter = rememberAsyncImagePainter(model = res),
+                            contentDescription = "Bike image",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .align(Alignment.CenterVertically)
                         )
                     }
+                    // Space between image and text
+                    Spacer(modifier = Modifier.width(16.dp))
+                    // Column for text on the right of image
+                    Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+                        Text(
+                            text = markerData.city, // Used to be owner name
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.Black
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = "Star",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(16.dp).background(Color.Transparent)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "${markerData.rating}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
 
-                    Text(text = "${markerData.bikePrice}€/hour")
+                        Text(text = "${markerData.bikePrice}€")
+                        val dateFormatter = SimpleDateFormat("dd-MM HH:mm", Locale.getDefault())
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.CalendarMonth,
+                                contentDescription = "Calendar",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(16.dp).background(Color.Transparent)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "${
+                                    markerData.startTime?.toDate()
+                                        ?.let { dateFormatter.format(it) } ?: "Unknown"
+                                } to ${
+                                    markerData.endTime?.toDate()
+                                        ?.let { dateFormatter.format(it) } ?: "Unknown"
+                                }"
+                            )
+                        }
+                    }
                 }
-            }
+
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp) // Adjust padding if awkward
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Close",
+                        tint = Color.Black
+                    )
+                }
+            } // Closure of box added to close out when clicking X button
 
         }
     }

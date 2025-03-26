@@ -49,6 +49,25 @@ class FirebaseDataSource @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
+    fun getUserDetailsBasedOnID(userID: String): Flow<User> = callbackFlow {
+        val subscription = db.collection("users").document(userID)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val user = snapshot?.toObject(User::class.java)
+                if(user != null) {
+                    trySend(user)
+                } else {
+                    close(IllegalStateException("User document not found"))
+                }
+
+            }
+
+        awaitClose { subscription.remove() }
+    }
+
     suspend fun updateUserDetails(user: User) {
         if(auth.currentUser?.uid != null) {
             db.collection("users").document(auth.currentUser!!.uid).set(user)

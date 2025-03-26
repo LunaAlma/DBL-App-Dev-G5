@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.maps.compose.widgets)
     implementation(libs.accompanist.permissions)
     ksp(libs.hilt.android.compiler)
+    implementation(libs.coil.kt.coil.compose.v222)
 
 
     //Firebase
