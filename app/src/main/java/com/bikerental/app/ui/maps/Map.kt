@@ -95,7 +95,9 @@ import java.util.Locale
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MapsScreen(viewModel: MapsViewModel = hiltViewModel()) {
+fun Map(
+    modifier: Modifier,
+    viewModel: MapViewModel = hiltViewModel()) {
     val bikes by viewModel.bikes.collectAsState()
 
     val owner by viewModel.ownerDetails.collectAsState()
