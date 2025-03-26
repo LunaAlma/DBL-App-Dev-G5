@@ -10,7 +10,7 @@ import com.bikerental.app.ui.navigation.Navigator
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    val navigator: Navigator
+    navigator: Navigator
 
 ) : BaseViewModel(navigator) {
     init {

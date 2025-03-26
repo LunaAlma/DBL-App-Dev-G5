@@ -6,7 +6,7 @@ import com.bikerental.app.ui.navigation.Navigator
 
 
 abstract class BaseViewModel(
-    private val navigator: Navigator
+    val navigator: Navigator
 ) : ViewModel() {
 
     companion object {

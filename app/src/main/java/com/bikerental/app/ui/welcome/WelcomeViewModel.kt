@@ -1,6 +1,5 @@
 package com.bikerental.app.ui.welcome
 
-import android.os.Messenger
 import com.bikerental.app.ui.base.BaseViewModel
 import com.bikerental.app.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel

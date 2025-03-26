@@ -5,6 +5,7 @@ import androidx.navigation.navArgument
 
 
 object Destination {
+    data object Splash : Screen("splash")
     data object Welcome : Screen("welcome")
     data object SignIn : Screen("signin")
     data object SignUp : Screen("signup")

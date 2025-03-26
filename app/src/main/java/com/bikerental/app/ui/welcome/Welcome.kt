@@ -21,8 +21,7 @@ import com.bikerental.app.ui.theme.AppTheme
 @Composable
 fun Welcome(
     modifier: Modifier,
-    viewModel: WelcomeViewModel,
-    navigator: Navigator
+    viewModel: WelcomeViewModel
 ) {
     AppTheme {
         Surface(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -53,7 +52,7 @@ fun Welcome(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 Button(
-                    onClick = { navigator.navigateTo(Destination.Home.route, true) },
+                    onClick = { viewModel.navigator.navigateTo(Destination.Home.route, true) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),

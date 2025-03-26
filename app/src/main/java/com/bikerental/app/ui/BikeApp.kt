@@ -17,9 +17,9 @@ import com.bikerental.app.ui.theme.AppTheme
 
 @Composable
 fun BikeApp(
-    navigator: Navigator
+    navigator: Navigator,
+    finish: () -> Unit
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
     AppTheme {
         val navController = rememberNavController()
         Scaffold(
@@ -31,7 +31,8 @@ fun BikeApp(
             NavGraph(
                 navController = navController,
                 modifier = Modifier.padding(innerPaddingModifier),
-                navigator = navigator
+                navigator = navigator,
+                finish = finish
             )
         }
     }

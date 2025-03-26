@@ -15,12 +15,14 @@ import com.bikerental.app.ui.welcome.WelcomeViewModel
 import com.bikerental.app.ui.maps.Map
 import com.bikerental.app.ui.settings.Settings
 import com.bikerental.app.ui.settings.SettingsViewModel
+import com.bikerental.app.ui.splash.Splash
+import com.bikerental.app.ui.splash.SplashViewModel
 
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    startDestination: String = Destination.Welcome.route,
+    startDestination: String = Destination.Splash.route,
     navigator: Navigator,
     finish: () -> Unit = {},
 ) {
@@ -34,10 +36,16 @@ fun NavGraph(
         navController = navController,
         startDestination = startDestination,
     ) {
+        // Splash
+        composable(Destination.Splash.route) {
+            val viewModel: SplashViewModel = hiltViewModel(key = SplashViewModel.TAG)
+            Splash(modifier, viewModel)
+        }
+
         // Welcome
         composable(Destination.Welcome.route) {
             val viewModel: WelcomeViewModel = hiltViewModel(key = WelcomeViewModel.TAG)
-            Welcome(modifier, viewModel, navigator)
+            Welcome(modifier, viewModel)
         }
 
         // Signup
