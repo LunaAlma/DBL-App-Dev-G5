@@ -1,8 +1,8 @@
-package com.bikerental.app.ui.signup
+package com.bikerental.app.ui.login
 
 import androidx.core.util.PatternsCompat
+import com.bikerental.app.data.datasource.AuthRemoteDataSource
 import com.bikerental.app.data.repositories.AuthRepository
-import com.bikerental.app.data.repositories.UserRepository
 import com.bikerental.app.ui.base.BaseViewModel
 import com.bikerental.app.ui.navigation.Destination
 import com.bikerental.app.ui.navigation.Navigator
@@ -12,38 +12,30 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
-class SignUpViewModel @Inject constructor(
+class LoginViewModel @Inject constructor(
     navigator: Navigator,
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository,
     private val auth: FirebaseAuth
 ) : BaseViewModel(navigator) {
+
     companion object {
-        const val TAG = "SignUpViewModel"
+        const val TAG = "LoginViewModel"
     }
 
-    private val _name = MutableStateFlow("")
     private val _email = MutableStateFlow("")
     private val _password = MutableStateFlow("")
-    private val _nameError = MutableStateFlow("")
     private val _emailError = MutableStateFlow("")
     private val _passwordError = MutableStateFlow("")
 
-    val name = _name.asStateFlow()
     val email = _email.asStateFlow()
     val password = _password.asStateFlow()
-    val nameError = _nameError.asStateFlow()
     val emailError = _emailError.asStateFlow()
     val passwordError = _passwordError.asStateFlow()
-
-    fun onNameChange(input: String) {
-        _name.tryEmit(input)
-        if (nameError.value.isNotEmpty()) _nameError.tryEmit("")
-    }
 
     fun onEmailChange(input: String) {
         _email.tryEmit(input)
@@ -56,20 +48,16 @@ class SignUpViewModel @Inject constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun basicSignUp() {
+    fun basicLogin() {
         if(validate()) {
             launchFirebase {
-                authRepository.firebaseSignUp(email.value, password.value)
+                authRepository.firebaseLogin(email.value, password.value)
                 if(auth.currentUser != null) {
-                    val uid = auth.currentUser!!.uid
-                    userRepository.createUserDocument(uid, name.value, email.value)
-
                     withContext(Dispatchers.Main) {
                         navigator.navigateTo(Destination.Home.route, true)
                     }
                 } else {
-//                    showErrorSnackbar(ErrorMessage.IdError(R.string.passwords_do_not_match))
-
+                    // TODO SHOW ERROR
                 }
             }
         }

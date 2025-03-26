@@ -5,14 +5,12 @@ import com.google.firebase.firestore.GeoPoint;
 data class User(
     val uid: String = "",
 
-    val firstName: String = "",
-
-    val lastName: String = "",
-
-    val username: String = "",
+    val name: String = "",
 
     val email: String = "",
-
+//
+//    val currentLocation: GeoPoint = GeoPoint(0.0, 0.0),
+//
     val profilePicture: String = "",
 
     val totalRating: Int = 0,

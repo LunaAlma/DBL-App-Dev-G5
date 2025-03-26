@@ -7,6 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.bikerental.app.ui.login.Login
+import com.bikerental.app.ui.login.LoginViewModel
 import com.bikerental.app.ui.maps.MapViewModel
 import com.bikerental.app.ui.signup.SignUp
 import com.bikerental.app.ui.signup.SignUpViewModel
@@ -46,6 +48,12 @@ fun NavGraph(
         composable(Destination.Welcome.route) {
             val viewModel: WelcomeViewModel = hiltViewModel(key = WelcomeViewModel.TAG)
             Welcome(modifier, viewModel)
+        }
+
+        // Login
+        composable(Destination.Login.route) {
+            val viewModel: LoginViewModel = hiltViewModel(key = LoginViewModel.TAG)
+            Login(modifier, viewModel)
         }
 
         // Signup

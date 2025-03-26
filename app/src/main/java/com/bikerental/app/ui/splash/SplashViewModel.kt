@@ -23,20 +23,12 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch {
             delay(1000)
 
-//            val exists = userRepository.userExists()
-            val exists = true
-            val userDocumentExists = true
-//                if (userRepository.isOnBoardingComplete()) {
+            val exists = authRepository.getCurrentUser != null
             if (exists) {
-                if (userDocumentExists) {
-                    navigator.navigateTo(Destination.Home.route, true)
-                } else {
-                    navigator.navigateTo(Destination.SignUp.route, true)
-                }
+                navigator.navigateTo(Destination.Home.route, true)
             } else {
-                navigator.navigateTo(Destination.SignIn.route, true)
+                navigator.navigateTo(Destination.SignUp.route, true)
             }
-
         }
     }
 }

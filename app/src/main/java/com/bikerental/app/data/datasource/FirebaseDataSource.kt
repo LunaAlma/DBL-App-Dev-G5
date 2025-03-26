@@ -8,12 +8,23 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class FirebaseDataSource @Inject constructor(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth
 ){
+
+    suspend fun createUserDocument(uid: String, name: String, email: String) {
+        db.collection("users").document(uid).set(
+            User(
+                uid = uid,
+                name = name,
+                email = email
+            )
+        ).await()
+    }
 
     fun getUsers(): Flow<List<User>> = callbackFlow {
         val subscription = db.collection("users")
