@@ -36,14 +36,14 @@ enum class HomeTab(
     val route: String,
     val destRoute: String,
 ) {
-    FEED(
+    MAP(
         R.string.menu_map,
         R.drawable.ic_search_unselected,
         R.drawable.ic_search,
         Destination.Home.Map.route,
         Destination.Home.Map.route,
     ),
-    MENTORS(
+    PROFILE(
         R.string.menu_profile,
         R.drawable.ic_mentor_unselected,
         R.drawable.ic_mentor,
@@ -122,7 +122,7 @@ private fun HomeBottomBarLightPreview() {
         HomeBottomBarView(
             tabs = HomeTab.entries.toTypedArray().asList(),
             routes = HomeTab.entries.map { it.route },
-            currentRoute = HomeTab.MENTORS.route,
+            currentRoute = HomeTab.PROFILE.route,
         ) {}
     }
 }
@@ -134,7 +134,7 @@ private fun HomeBottomBarDarkPreview() {
         HomeBottomBarView(
             tabs = HomeTab.entries.toTypedArray().asList(),
             routes = HomeTab.entries.map { it.route },
-            currentRoute = HomeTab.MENTORS.route,
+            currentRoute = HomeTab.PROFILE.route,
         ) {}
     }
 }
