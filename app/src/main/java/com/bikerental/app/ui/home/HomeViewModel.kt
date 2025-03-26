@@ -1,15 +1,17 @@
 package com.bikerental.app.ui.home
 
+import android.os.Messenger
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.bikerental.app.MainViewModel
 import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.BikeRepository
 import com.bikerental.app.data.repositories.TransactionRepository
 import com.bikerental.app.data.repositories.UserRepository
 import com.bikerental.app.data.model.Bike
 import com.bikerental.app.data.model.User
+import com.bikerental.app.ui.base.BaseViewModel
+import com.bikerental.app.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
@@ -21,8 +23,9 @@ class HomeViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val bikeRepository: BikeRepository,
     private val transactionRepository: TransactionRepository,
-    private val userRepository: UserRepository
-) : MainViewModel() {
+    private val userRepository: UserRepository,
+    navigator: Navigator
+) : BaseViewModel(navigator) {
 
     private val _bikes = mutableStateOf(emptyList<Bike>())
     val bikes: State<List<Bike>> = _bikes

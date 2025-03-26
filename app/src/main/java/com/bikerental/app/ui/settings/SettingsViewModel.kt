@@ -1,32 +1,23 @@
 package com.bikerental.app.ui.settings
 
-import androidx.compose.runtime.State
-import androidx.lifecycle.ViewModel
+import android.os.Messenger
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewModelScope
-import com.bikerental.app.MainViewModel
-import com.bikerental.app.data.model.User
-import com.bikerental.app.data.repositories.AuthRepository
-import com.bikerental.app.data.repositories.BikeRepository
-import com.bikerental.app.data.repositories.TransactionRepository
-import com.bikerental.app.data.repositories.UserRepository
+import com.bikerental.app.ui.MainViewModel
+import com.bikerental.app.ui.base.BaseViewModel
+import com.bikerental.app.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    navigator: Navigator,
 //    private val authRepository: AuthRepository,
 //    private val bikeRepository: BikeRepository,
 //    private val transactionRepository: TransactionRepository,
 //    private val userRepository: UserRepository
-) : MainViewModel(
-
-) {
+) : BaseViewModel(navigator) {
 //    private val _isLoading = mutableStateOf(false)
 //    val isLoading: State<Boolean> = _isLoading
 //
@@ -39,6 +30,9 @@ class SettingsViewModel @Inject constructor(
 //    init {
 //        loadUserDetails()
 //    }
+companion object {
+    const val TAG = "SettingsViewModel"
+}
 
     var userName by mutableStateOf("Firstname Lastname")
     var userEmail by mutableStateOf("example@student.tue.nl")

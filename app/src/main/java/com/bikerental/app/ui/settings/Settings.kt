@@ -18,9 +18,12 @@ import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import com.bikerental.app.ui.welcome.WelcomeViewModel
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = SettingsViewModel()) {
+fun Settings(modifier: Modifier,
+             viewModel: SettingsViewModel
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -44,27 +47,27 @@ fun SettingsScreen(viewModel: SettingsViewModel = SettingsViewModel()) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Profile Picture
-                Image(
-                    painter = rememberAsyncImagePainter(viewModel.userProfilePicture),
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+//                Image(
+//                    painter = rememberAsyncImagePainter(),
+//                    contentDescription = "Profile Picture",
+//                    modifier = Modifier
+//                        .size(80.dp)
+//                        .clip(CircleShape),
+//                    contentScale = ContentScale.Crop
+//                )
 
                 Spacer(modifier = Modifier.width(16.dp))
 
                 // User Info
                 Column {
                     Text(
-                        text = viewModel.userName,
+                        text = "test",
                         fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = viewModel.userEmail,
+                        text = "test",
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
@@ -95,7 +98,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = SettingsViewModel()) {
 
         // Log Out Button
         Button(
-            onClick = { viewModel.logout() },
+            onClick = { },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFFB0DCA4),
@@ -110,7 +113,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = SettingsViewModel()) {
 
         // Delete Account Button
         Button(
-            onClick = { viewModel.deleteAccount() },
+            onClick = { },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -152,6 +155,9 @@ fun SettingsItem(title: String) {
 @Composable
 fun PreviewSettingsScreen() {
     MaterialTheme {
-        SettingsScreen()
+        Settings(
+            modifier = TODO(),
+            viewModel = TODO()
+        )
     }
 }

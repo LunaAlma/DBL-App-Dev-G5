@@ -8,15 +8,13 @@ import javax.inject.Inject
 class AuthRepository @Inject constructor(
     private val authRemoteDataSource: AuthRemoteDataSource
 ) {
-    val currentUser: FirebaseUser? = authRemoteDataSource.currentUser
-    val currentUserIdFlow: Flow<String?> = authRemoteDataSource.currentUserIdFlow
+    val getCurrentUser: FirebaseUser? = authRemoteDataSource.fetchCurrentUser
 
-    suspend fun signIn(email: String, password: String) {
-        authRemoteDataSource.signIn(email, password)
-
+    suspend fun firebaseLogin(email: String, password: String) {
+        authRemoteDataSource.firebaseLogin(email, password)
     }
 
-    suspend fun signUp(email: String, password: String) {
+    suspend fun firebaseSignUp(email: String, password: String) {
        authRemoteDataSource.signUp(email, password)
     }
 

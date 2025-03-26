@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -25,7 +24,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -192,7 +190,7 @@ fun MapsScreen(viewModel: MapsViewModel = hiltViewModel()) {
             return
         }
 
-        // Listening for location updates
+        // Start listening for location updates
         fusedLocationClient.requestLocationUpdates(
             LocationRequest.Builder(1000L).build(),
             locationCallback,
@@ -202,6 +200,7 @@ fun MapsScreen(viewModel: MapsViewModel = hiltViewModel()) {
 
 
     Scaffold(
+
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             FloatingActionButton(

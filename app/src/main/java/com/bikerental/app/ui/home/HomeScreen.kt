@@ -35,9 +35,9 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
         if (isLoading) {
             CircularProgressIndicator(Modifier.align(Alignment.Center))
         } else {
-            BikeList(bikes = bikes)
-
-            UserList(users = users)
+//            BikeList(bikes = bikes)
+//
+//            UserList(users = users)
         }
 
         error?.let {
@@ -50,59 +50,3 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     }
 }
 
-@Composable
-fun BikeList(bikes: List<Bike>) {
-    LazyColumn {
-        items(bikes) { bike ->
-            BikeItem(bike = bike)
-        }
-    }
-}
-
-@Composable
-fun UserList(users: List<User>) {
-    LazyColumn {
-        items(users) { user ->
-            UserItem(user = user)
-        }
-    }
-}
-
-@Composable
-fun BikeItem(bike: Bike) {
-    Card(modifier = Modifier.padding(8.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = bike.bikeId, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = bike.price.toString())
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = bike.ownerId)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = bike.bikeId)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = bike.picture)
-        }
-    }
-}
-@Composable
-fun UserItem(user: User) {
-    Card(modifier = Modifier.padding(8.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = user.uid, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = user.firstName)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = user.lastName)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = user.username)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = user.email)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = (user.totalRating/user.numberOfRatings).toString())
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = user.profilePicture)
-//            Spacer(modifier = Modifier.height(4.dp))
-//            Text(text = user.currentLocation.toString())
-        }
-    }
-}

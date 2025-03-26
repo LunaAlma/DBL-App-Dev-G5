@@ -74,7 +74,7 @@ dependencies {
     implementation(libs.accompanist.permissions)
     ksp(libs.hilt.android.compiler)
     implementation(libs.coil.kt.coil.compose.v222)
-
+    implementation(libs.androidx.datastore)
 
     //Firebase
     implementation(platform(libs.firebase.bom))
