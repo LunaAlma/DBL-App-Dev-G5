@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.bikerental.app.ui.create.AddBike
 import com.bikerental.app.ui.create.AddBikeViewModel
+import com.bikerental.app.ui.messaging.Inbox
+import com.bikerental.app.ui.messaging.InboxViewModel
 import com.bikerental.app.ui.login.Login
 import com.bikerental.app.ui.login.LoginViewModel
 import com.bikerental.app.ui.maps.MapViewModel
@@ -17,9 +19,12 @@ import com.bikerental.app.ui.signup.SignUpViewModel
 import com.bikerental.app.ui.welcome.Welcome
 import com.bikerental.app.ui.welcome.WelcomeViewModel
 import com.bikerental.app.ui.maps.Map
+import com.bikerental.app.ui.messaging.Chat
+import com.bikerental.app.ui.messaging.ChatViewModel
+import com.bikerental.app.ui.profile.Profile
+import com.bikerental.app.ui.profile.ProfileViewModel
+import com.bikerental.app.ui.search.Search
 import com.bikerental.app.ui.search.SearchViewModel
-import com.bikerental.app.ui.settings.Settings
-import com.bikerental.app.ui.settings.SettingsViewModel
 import com.bikerental.app.ui.splash.Splash
 import com.bikerental.app.ui.splash.SplashViewModel
 
@@ -68,7 +73,7 @@ fun NavGraph(
         // Home
         navigation(
             route = Destination.Home.route,
-            startDestination = Destination.Home.Profile.route
+            startDestination = Destination.Home.Map.route
         ) {
             // Home.Map
             composable(Destination.Home.Map.route) {
@@ -78,8 +83,8 @@ fun NavGraph(
 
             // Home.Profile
             composable(Destination.Home.Profile.route) {
-                val viewModel: SettingsViewModel = hiltViewModel(key = SettingsViewModel.TAG)
-                Settings(modifier, viewModel)
+                val viewModel: ProfileViewModel = hiltViewModel(key = ProfileViewModel.TAG)
+                Profile(modifier, viewModel)
             }
 
             // Home.AddBike
@@ -87,12 +92,26 @@ fun NavGraph(
                 val viewModel: AddBikeViewModel = hiltViewModel(key = AddBikeViewModel.TAG)
                 AddBike(modifier, viewModel)
             }
+            // Home.Inbox
+            composable(Destination.Home.Inbox.route) {
+                val viewModel: InboxViewModel = hiltViewModel(key = InboxViewModel.TAG)
+                Inbox(modifier, viewModel)
+            }
 
-//            // Home.Search
-//            composable(Destination.Home.Search.route) {
-//                val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
-//                Search(modifier, viewModel)
-//            }
+            // Home.Chat
+            composable(
+                route = Destination.Home.Chat.route,
+                arguments = Destination.Home.Chat.navArguments
+            ) {
+                val viewModel: ChatViewModel = hiltViewModel(key = ChatViewModel.TAG)
+                Chat(modifier, viewModel)
+            }
+
+            // Home.Search
+            composable(Destination.Home.Search.route) {
+                val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
+                Search(modifier, viewModel)
+            }
         }
     }
 }

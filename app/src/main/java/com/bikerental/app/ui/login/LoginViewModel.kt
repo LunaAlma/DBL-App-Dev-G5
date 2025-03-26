@@ -1,5 +1,6 @@
 package com.bikerental.app.ui.login
 
+import android.widget.Toast
 import androidx.core.util.PatternsCompat
 import com.bikerental.app.data.datasource.AuthRemoteDataSource
 import com.bikerental.app.data.repositories.AuthRepository
@@ -59,6 +60,14 @@ class LoginViewModel @Inject constructor(
                 } else {
                     // TODO SHOW ERROR
                 }
+            }
+        }
+    }
+
+    fun resetPassword() {
+        if(email.value.isValidEmail()) {
+            launchFirebase {
+                authRepository.sendPasswordResetEmail(email.value)
             }
         }
     }

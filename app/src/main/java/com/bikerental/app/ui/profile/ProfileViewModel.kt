@@ -1,19 +1,19 @@
-package com.bikerental.app.ui.settings
+package com.bikerental.app.ui.profile
 
-import android.os.Messenger
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.bikerental.app.ui.MainViewModel
+import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.ui.base.BaseViewModel
+import com.bikerental.app.ui.navigation.Destination
 import com.bikerental.app.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
+class ProfileViewModel @Inject constructor(
     navigator: Navigator,
-//    private val authRepository: AuthRepository,
+    private val authRepository: AuthRepository,
 //    private val bikeRepository: BikeRepository,
 //    private val transactionRepository: TransactionRepository,
 //    private val userRepository: UserRepository
@@ -31,7 +31,7 @@ class SettingsViewModel @Inject constructor(
 //        loadUserDetails()
 //    }
 companion object {
-    const val TAG = "SettingsViewModel"
+    const val TAG = "ProfileViewModel"
 }
 
     var userName by mutableStateOf("Firstname Lastname")
@@ -53,8 +53,9 @@ companion object {
 //        }
 //    }
 
-    fun logout() {
-        // TODO: Implement logout logic
+    fun onLogout() {
+        authRepository.logout()
+        navigator.navigateTo(Destination.Login.route, true)
     }
 
     fun deleteAccount() {

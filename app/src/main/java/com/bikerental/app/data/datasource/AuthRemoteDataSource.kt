@@ -21,6 +21,14 @@ class AuthRemoteDataSource @Inject constructor(
         auth.createUserWithEmailAndPassword(email, password).await()
     }
 
+    suspend fun sendPasswordResetEmail(email: String) {
+        auth.sendPasswordResetEmail(email).await()
+    }
+
+    suspend fun deleteUserAccount() {
+
+    }
+
     fun signOut() {
         if (auth.currentUser!!.isAnonymous) {
             auth.currentUser!!.delete()

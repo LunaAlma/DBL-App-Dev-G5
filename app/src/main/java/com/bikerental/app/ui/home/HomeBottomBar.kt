@@ -50,6 +50,13 @@ enum class HomeTab(
         Destination.Home.AddBike.route,
         Destination.Home.AddBike.route,
     ),
+    MESSAGES(
+        R.string.menu_profile,
+        R.drawable.ic_search_unselected,
+        R.drawable.ic_search,
+        Destination.Home.Inbox.route,
+        Destination.Home.Inbox.route,
+    ),
     PROFILE(
         R.string.menu_profile,
         R.drawable.ic_mentor_unselected,
@@ -95,7 +102,7 @@ private fun HomeBottomBarView(
     tabClick: (HomeTab) -> Unit
 ) {
 
-    if (currentRoute in routes) {
+    if (currentRoute in routes || currentRoute.startsWith(Destination.Home.Chat.route)) {
         NavigationBar(
             Modifier
                 .windowInsetsBottomHeight(

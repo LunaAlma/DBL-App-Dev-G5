@@ -33,7 +33,6 @@ class FirebaseDataSource @Inject constructor(
                     close(error)
                     return@addSnapshotListener
                 }
-
                 val users = snapshot?.toObjects(User::class.java) ?: emptyList()
                 trySend(users)
             }

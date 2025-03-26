@@ -87,6 +87,14 @@ class SignUpViewModel @Inject constructor(
         return !error
     }
 
-    fun String.isValidEmail() =
-        this.isNotEmpty() && PatternsCompat.EMAIL_ADDRESS.matcher(this).matches()
+    fun String.isValidEmail(): Boolean {
+        // First check basic email pattern
+        val isEmailValid = this.isNotEmpty() && PatternsCompat.EMAIL_ADDRESS.matcher(this).matches()
+
+        // Then check for specific domain
+//        val hasStudentTueDomain = this.endsWith("@student.tue.nl", ignoreCase = true)
+        val hasStudentTueDomain = true
+
+        return isEmailValid && hasStudentTueDomain
+    }
 }

@@ -35,7 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bikerental.app.R
-import com.bikerental.app.ui.navigation.Destination
 
 @Composable
 fun SignUp(

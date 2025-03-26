@@ -7,6 +7,7 @@ import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.BikeRepository
 import com.bikerental.app.data.repositories.UserRepository
 import com.bikerental.app.ui.base.BaseViewModel
+import com.bikerental.app.ui.navigation.Destination
 import com.bikerental.app.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +49,10 @@ class MapViewModel @Inject constructor(
     // Update ownerId dynamically
     fun setOwnerId(ownerID: String) {
         _ownerID.value = ownerID
+    }
+
+    fun onSearchBarClick() {
+        navigator.navigateTo(Destination.Home.Search.route)
     }
 
 }

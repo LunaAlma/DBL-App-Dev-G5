@@ -16,6 +16,8 @@ object Destination {
         data object AddBike : Screen("home/add-bike")
         data object Profile : Screen("home/profile")
         data object Search : Screen("home/search")
+        data object Inbox : Screen("home/inbox")
+        data object Chat : DynamicScreen("home/chat", "userId")
     }
 }
 

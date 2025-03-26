@@ -18,7 +18,11 @@ class AuthRepository @Inject constructor(
        authRemoteDataSource.signUp(email, password)
     }
 
-    fun signOut() {
+    suspend fun sendPasswordResetEmail(email: String) {
+        authRemoteDataSource.sendPasswordResetEmail(email)
+    }
+
+    fun logout() {
         authRemoteDataSource.signOut()
     }
 

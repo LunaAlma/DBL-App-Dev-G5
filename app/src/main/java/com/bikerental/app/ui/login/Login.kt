@@ -64,7 +64,8 @@ fun Login(
         onEmailChange = { viewModel.onEmailChange(it) },
         onPasswordChange = { viewModel.onPasswordChange(it) },
         basicLogin = { viewModel.basicLogin() },
-        switchSignUp = { viewModel.switchSignUp() }
+        switchSignUp = { viewModel.switchSignUp() },
+        resetPassword = { viewModel.resetPassword() }
     )
 }
 
@@ -78,7 +79,8 @@ private fun LoginView(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     basicLogin: () -> Unit,
-    switchSignUp: () -> Unit
+    switchSignUp: () -> Unit,
+    resetPassword: () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -206,6 +208,23 @@ private fun LoginView(
                         switchSignUp()
                     },
                     text = "Want to create an account?",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Row(
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 4.dp,
+                    bottom = 48.dp
+                ).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    modifier = Modifier.clickable {
+                        resetPassword()
+                    },
+                    text = "Send password reset email.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
