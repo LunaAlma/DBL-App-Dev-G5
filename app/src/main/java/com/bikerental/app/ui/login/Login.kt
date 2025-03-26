@@ -3,6 +3,7 @@ package com.bikerental.app.ui.login
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +64,7 @@ fun Login(
         onEmailChange = { viewModel.onEmailChange(it) },
         onPasswordChange = { viewModel.onPasswordChange(it) },
         basicLogin = { viewModel.basicLogin() },
+        switchSignUp = { viewModel.switchSignUp() }
     )
 }
 
@@ -75,7 +77,8 @@ private fun LoginView(
     passwordError: String,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    basicLogin: () -> Unit
+    basicLogin: () -> Unit,
+    switchSignUp: () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -188,6 +191,23 @@ private fun LoginView(
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
+            }
+            Row(
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 4.dp,
+                    bottom = 48.dp
+                ).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    modifier = Modifier.clickable {
+                        switchSignUp()
+                    },
+                    text = "Want to create an account?",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }

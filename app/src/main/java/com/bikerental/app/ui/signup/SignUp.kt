@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bikerental.app.R
+import com.bikerental.app.ui.navigation.Destination
 
 @Composable
 fun SignUp(
@@ -54,6 +56,7 @@ fun SignUp(
         onEmailChange = { viewModel.onEmailChange(it) },
         onPasswordChange = { viewModel.onPasswordChange(it) },
         basicSignUp = { viewModel.basicSignUp() },
+        switchLogin = { viewModel.switchLogin() }
     )
 }
 
@@ -69,7 +72,8 @@ private fun SignUpView(
     onNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    basicSignUp: () -> Unit
+    basicSignUp: () -> Unit,
+    switchLogin: () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -114,17 +118,17 @@ private fun SignUpView(
                     modifier = Modifier.fillMaxWidth(),
                     value = name,
                     onValueChange = onNameChange,
-                    label = { Text("Username") },
+                    label = { Text("Name") },
                     singleLine = true,
                     leadingIcon = {
                         Icon(
                             Icons.Filled.Rocket,
-                            contentDescription = "Username"
+                            contentDescription = "Name"
                         )
                     },
                     isError = nameError.isNotEmpty(),
                     supportingText = {
-                        Text(text = emailError)
+                        Text(text = nameError)
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
@@ -212,6 +216,23 @@ private fun SignUpView(
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
+            }
+            Row(
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 4.dp,
+                    bottom = 48.dp
+                ).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    modifier = Modifier.clickable {
+                        switchLogin()
+                    },
+                    text = "Already have an account?",
+                    style = MaterialTheme.typography.bodyMedium
+                    )
             }
         }
     }

@@ -63,6 +63,10 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun switchSignUp() {
+        navigator.navigateTo(Destination.SignUp.route)
+    }
+
     private fun validate(): Boolean {
         var error = false
         if (!email.value.isValidEmail()) _emailError.tryEmit("Invalid Email").run { error = true }
