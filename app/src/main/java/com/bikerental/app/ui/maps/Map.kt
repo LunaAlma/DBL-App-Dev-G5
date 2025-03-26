@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -50,15 +52,22 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.maps.android.compose.Circle
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -144,7 +153,6 @@ fun Map(
     // Track which marker is currently selected
     var selectedMarker by remember { mutableStateOf<MarkerData?>(null) }
 
-
     // Location activation code
     val myLocationSource = object : LocationSource {
         var listener: LocationSource.OnLocationChangedListener? = null
@@ -200,10 +208,19 @@ fun Map(
         )
     }
 
-
     Scaffold(
-
-        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            // This ensures the search bar stays at the top
+            SearchBar(
+                text = "searchText",
+                onTextChange = { "searchText = it" },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                onClose = {}
+            )
+        },
+        modifier = Modifier.fillMaxSize().systemBarsPadding().padding(bottom = 60.dp),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -448,6 +465,63 @@ fun BottomCard(
                 }
             } // Closure of box added to close out when clicking X button
 
+        }
+    }
+}
+
+@Composable
+fun SearchBar(
+    modifier: Modifier = Modifier,
+    text: String,
+    onTextChange: (String) -> Unit,
+    onClose: () -> Unit
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .padding(8.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shadowElevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier.padding(start = 16.dp),
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search"
+            )
+
+            BasicTextField(
+                value = text,
+                onValueChange = onTextChange,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp, end = 8.dp),
+                singleLine = true,
+                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                decorationBox = { innerTextField ->
+                    if (text.isEmpty()) {
+                        Text(
+                            text = "Search...",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
+                    innerTextField()
+                }
+            )
+
+            if (text.isNotEmpty()) {
+                IconButton(onClick = { onTextChange("") }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Clear search"
+                    )
+                }
+            }
         }
     }
 }

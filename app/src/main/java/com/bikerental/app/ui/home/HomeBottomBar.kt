@@ -43,6 +43,13 @@ enum class HomeTab(
         Destination.Home.Map.route,
         Destination.Home.Map.route,
     ),
+    ADD_BIKE(
+        R.string.menu_add_bike,
+        R.drawable.ic_search_unselected,
+        R.drawable.ic_search,
+        Destination.Home.AddBike.route,
+        Destination.Home.AddBike.route,
+    ),
     PROFILE(
         R.string.menu_profile,
         R.drawable.ic_mentor_unselected,

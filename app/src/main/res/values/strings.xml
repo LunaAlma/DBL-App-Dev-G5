@@ -20,5 +20,6 @@
     <string name="repeat_password">Repeat password</string>
 
     <string name="menu_map">Map</string>
+    <string name="menu_add_bike">Add Bike</string>
     <string name="menu_profile">Profile</string>
 </resources>

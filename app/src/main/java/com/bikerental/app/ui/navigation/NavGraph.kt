@@ -7,6 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.bikerental.app.ui.create.AddBike
+import com.bikerental.app.ui.create.AddBikeViewModel
 import com.bikerental.app.ui.login.Login
 import com.bikerental.app.ui.login.LoginViewModel
 import com.bikerental.app.ui.maps.MapViewModel
@@ -15,6 +17,7 @@ import com.bikerental.app.ui.signup.SignUpViewModel
 import com.bikerental.app.ui.welcome.Welcome
 import com.bikerental.app.ui.welcome.WelcomeViewModel
 import com.bikerental.app.ui.maps.Map
+import com.bikerental.app.ui.search.SearchViewModel
 import com.bikerental.app.ui.settings.Settings
 import com.bikerental.app.ui.settings.SettingsViewModel
 import com.bikerental.app.ui.splash.Splash
@@ -78,6 +81,18 @@ fun NavGraph(
                 val viewModel: SettingsViewModel = hiltViewModel(key = SettingsViewModel.TAG)
                 Settings(modifier, viewModel)
             }
+
+            // Home.AddBike
+            composable(Destination.Home.AddBike.route) {
+                val viewModel: AddBikeViewModel = hiltViewModel(key = AddBikeViewModel.TAG)
+                AddBike(modifier, viewModel)
+            }
+
+//            // Home.Search
+//            composable(Destination.Home.Search.route) {
+//                val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
+//                Search(modifier, viewModel)
+//            }
         }
     }
 }
