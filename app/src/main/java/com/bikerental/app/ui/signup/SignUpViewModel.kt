@@ -32,6 +32,8 @@ class SignUpViewModel @Inject constructor(
     private val _nameError = MutableStateFlow("")
     private val _emailError = MutableStateFlow("")
     private val _passwordError = MutableStateFlow("")
+    private val _signUpError = MutableStateFlow("")
+    private val _isLoading = MutableStateFlow(false)
 
     val name = _name.asStateFlow()
     val email = _email.asStateFlow()
@@ -39,37 +41,50 @@ class SignUpViewModel @Inject constructor(
     val nameError = _nameError.asStateFlow()
     val emailError = _emailError.asStateFlow()
     val passwordError = _passwordError.asStateFlow()
+    val signUpError = _signUpError.asStateFlow()
+    val isLoading = _isLoading.asStateFlow()
 
     fun onNameChange(input: String) {
         _name.tryEmit(input)
         if (nameError.value.isNotEmpty()) _nameError.tryEmit("")
+        _signUpError.tryEmit("")
     }
 
     fun onEmailChange(input: String) {
         _email.tryEmit(input)
         if (emailError.value.isNotEmpty()) _emailError.tryEmit("")
+        _signUpError.tryEmit("")
     }
 
     fun onPasswordChange(input: String) {
         _password.tryEmit(input)
         if (passwordError.value.isNotEmpty()) _passwordError.tryEmit("")
+        _signUpError.tryEmit("")
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun basicSignUp() {
         if(validate()) {
+            _isLoading.tryEmit(true)
+            _signUpError.tryEmit("")
+            
             launchFirebase {
-                authRepository.firebaseSignUp(email.value, password.value)
-                if(auth.currentUser != null) {
-                    val uid = auth.currentUser!!.uid
-                    userRepository.createUserDocument(uid, name.value, email.value)
-
-                    withContext(Dispatchers.Main) {
-                        navigator.navigateTo(Destination.Home.route, true)
+                try {
+                    authRepository.firebaseSignUp(email.value, password.value)
+                    if(auth.currentUser != null) {
+                        val uid = auth.currentUser!!.uid
+                        userRepository.createUserDocument(uid, name.value, email.value)
+                        
+                        withContext(Dispatchers.Main) {
+                            navigator.navigateTo(Destination.Home.route, true)
+                        }
+                    } else {
+                        _signUpError.tryEmit("Sign up failed: User not created")
                     }
-                } else {
-//                    showErrorSnackbar(ErrorMessage.IdError(R.string.passwords_do_not_match))
-
+                } catch (e: Exception) {
+                    _signUpError.tryEmit(e.message ?: "Sign up failed")
+                } finally {
+                    _isLoading.tryEmit(false)
                 }
             }
         }
@@ -81,6 +96,7 @@ class SignUpViewModel @Inject constructor(
 
     private fun validate(): Boolean {
         var error = false
+        if (name.value.isBlank()) _nameError.tryEmit("Name is required").run { error = true }
         if (!email.value.isValidEmail()) _emailError.tryEmit("Invalid Email").run { error = true }
         if (password.value.length < 6) _passwordError.tryEmit("Password length should be at least 6")
             .run { error = true }

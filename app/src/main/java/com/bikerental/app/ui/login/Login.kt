@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -61,6 +62,8 @@ fun Login(
         password = viewModel.password.collectAsStateWithLifecycle().value,
         emailError = viewModel.emailError.collectAsStateWithLifecycle().value,
         passwordError = viewModel.passwordError.collectAsStateWithLifecycle().value,
+        loginError = viewModel.loginError.collectAsStateWithLifecycle().value,
+        isLoading = viewModel.isLoading.collectAsStateWithLifecycle().value,
         onEmailChange = { viewModel.onEmailChange(it) },
         onPasswordChange = { viewModel.onPasswordChange(it) },
         basicLogin = { viewModel.basicLogin() },
@@ -75,6 +78,8 @@ private fun LoginView(
     password: String,
     emailError: String,
     passwordError: String,
+    loginError: String,
+    isLoading: Boolean,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     basicLogin: () -> Unit,
@@ -173,6 +178,23 @@ private fun LoginView(
                 )
             }
 
+            if (loginError.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 4.dp,
+                        bottom = 4.dp
+                    )
+                ) {
+                    Text(
+                        text = loginError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -184,12 +206,20 @@ private fun LoginView(
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = basicLogin,
+                    enabled = !isLoading
                 ) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = "Login",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = "Login",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
             }
             Row(
