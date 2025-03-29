@@ -33,24 +33,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.bikerental.app.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-//import com.google.android.gms.maps.model.CameraPosition
-//import com.google.android.gms.maps.model.LatLng
-//import com.google.maps.android.compose.GoogleMap
-//import com.google.maps.android.compose.rememberCameraPositionState
-//import com.lucianocoletti.composemapstutorial.ui.theme.ComposeMapsTutorialTheme
-//import com.google.maps.android.compose.*
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.rememberCameraPositionState
-
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.maps.android.compose.Circle
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
@@ -66,8 +55,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,16 +71,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.LocationSource
 import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerInfoWindowContent
 import com.google.maps.android.compose.MarkerState
 import kotlinx.coroutines.launch
-
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import com.google.firebase.firestore.GeoPoint
 import coil.compose.rememberAsyncImagePainter
-import com.bikerental.app.data.model.Bike
 import com.bikerental.app.data.model.MarkerData
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -131,8 +113,8 @@ fun Map(
     // CHANGE bikes to availableBikes once debugging
     val markersData = bikes.map { bike ->
         // bike.location is a GeoPoint from Firebase
-        val lat = bike.location?.latitude ?: 0.0
-        val lng = bike.location?.longitude ?: 0.0
+        val lat = bike.location.latitude
+        val lng = bike.location.longitude
 
         MarkerData(
             location = LatLng(lat, lng),
@@ -145,7 +127,8 @@ fun Map(
             city = bike.city,
             startTime = bike.startTime,
             endTime = bike.endTime,
-            ownerId = bike.ownerId ?: "",
+            ownerId = bike.ownerId,
+            bikeId = bike.bikeId
         )
     }
 
@@ -165,7 +148,7 @@ fun Map(
     )
 
     // Track which marker is currently selected
-    var selectedMarker by remember { mutableStateOf<MarkerData?>(null) }
+    var selectedMarker: MarkerData? by remember { mutableStateOf<MarkerData?>(null) }
 
     // Location activation code
     val myLocationSource = object : LocationSource {
@@ -354,21 +337,6 @@ fun Map(
 //        bikePrice = 6,
 //    ),
 //)
-
-// Original MarkerData
-data class MarkerData(
-    val location: LatLng,
-    val ownerName: String,
-    val rating: Int,
-    val bikeImgId: String, // Null option here? String? = null
-    val bikePrice: Int,
-    val city: String,
-    val startTime: Timestamp? = null,
-    val endTime: Timestamp? = null,
-    val ownerId: String,
-)
-
-
 /**
  * Bottom card pop up when pin clicked
  */
