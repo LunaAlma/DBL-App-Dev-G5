@@ -18,12 +18,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     navigator: Navigator,
     private val authRepository: AuthRepository,
-    bikeRepository: BikeRepository,
+    private val bikeRepository: BikeRepository, // Added private val!
     private val userRepository: UserRepository,
 ) : BaseViewModel(navigator) {
     companion object {
@@ -53,6 +55,12 @@ class MapViewModel @Inject constructor(
 
     fun onSearchBarClick() {
         navigator.navigateTo(Destination.Home.Search.route)
+    }
+
+    fun updateBikeLocation(bikeId: String, newLocation: LatLng) {
+        viewModelScope.launch {
+            bikeRepository.updateBikeLocation(bikeId, newLocation)
+        }
     }
 
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,6 +69,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,6 +93,7 @@ import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.firestore.GeoPoint
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.data.model.Bike
@@ -104,36 +107,29 @@ import java.util.Locale
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun Map(
+fun MapAddBike(
+    bikeId: String,
     modifier: Modifier,
     viewModel: MapViewModel = hiltViewModel()) {
     val bikes by viewModel.bikes.collectAsState()
 
     val owner by viewModel.ownerDetails.collectAsState()
 
+    // Start with a default marker location (you might want to default to live location) (NEW)
+    var markerPosition by remember { mutableStateOf<LatLng?>(null) }
+    // State for showing confirmation dialog (NEW)
+    var showConfirmationDialog by remember { mutableStateOf(false) }
+
     fun onBikeSelected(ownerId: String) {
         viewModel.setOwnerId(ownerId)
     }
 
-    // Assume you have a list of bike rentals available (you may collect it from your view model)
-    // val bikeRentals by viewModel.bikeRentals.collectAsState(initial = emptyList())
-
-// Filter bikes based on conditions
-//    val nowMillis = System.currentTimeMillis()
-//    val availableBikes = bikes.filter { bike ->
-//        // Only show if the start time is in the future (or hasn't arrived yet)
-//        val isNotStarted = bike.startTime?.toDate()?.time?.let { it > nowMillis } ?: false
-//        // And the bike has not been rented yet (assuming BikeRental has a bikeId property)
-//        val isNotRented = bikeRentals.none { rental -> rental.bikeId == bike.bikeId }
-//        isNotStarted && isNotRented
-//    }
-    // CHANGE bikes to availableBikes once debugging
     val markersData = bikes.map { bike ->
         // bike.location is a GeoPoint from Firebase
         val lat = bike.location?.latitude ?: 0.0
         val lng = bike.location?.longitude ?: 0.0
 
-        MarkerData(
+        MarkerDataAddPin(
             location = LatLng(lat, lng),
             ownerName = bike.bikeName,
             rating = owner?.let {
@@ -163,8 +159,25 @@ fun Map(
         LocalContext.current
     )
 
+    // If not granted, request permission immediately (NEW)
+    LaunchedEffect(Unit) {
+        if (!locationsPermissions.allPermissionsGranted) {
+            locationsPermissions.launchMultiplePermissionRequest()
+        }
+    }
+
+    // When we get a live location update, update the marker if not already set (NEW)
+    LaunchedEffect(currentLocation) {
+        currentLocation?.let {
+            // Update markerPosition if not already set (or you may always want to reset)
+            if (markerPosition == null) {
+                markerPosition = LatLng(it.latitude, it.longitude)
+            }
+        }
+    }
+
     // Track which marker is currently selected
-    var selectedMarker by remember { mutableStateOf<MarkerData?>(null) }
+    var selectedMarker by remember { mutableStateOf<MarkerDataAddPin?>(null) }
 
     // Location activation code
     val myLocationSource = object : LocationSource {
@@ -221,10 +234,10 @@ fun Map(
         )
     }
 
-    Scaffold(
+    Scaffold( // Removed search bar for moment
         topBar = {
             // This ensures the search bar stays at the top
-            SearchBar(
+            SearchBarAddPin(
                 text = "searchText",
                 onTextChange = { "searchText = it" },
                 modifier = Modifier
@@ -261,11 +274,11 @@ fun Map(
                 shape = CircleShape,
                 containerColor = Color.White,
                 contentColor =
-                    if (locationsPermissions.allPermissionsGranted) {
-                        Color(0xFF1C73E8)
-                    } else {
-                        Color.Gray
-                    }
+                if (locationsPermissions.allPermissionsGranted) {
+                    Color(0xFF1C73E8)
+                } else {
+                    Color.Gray
+                }
             ) {
                 // Icon here
                 Icon(
@@ -296,37 +309,48 @@ fun Map(
             cameraPositionState = cameraPositionState,
             // Customizable map properties
             properties = mapProperties,
-            locationSource = myLocationSource
+            locationSource = myLocationSource,
+            onMapClick = { latLng ->
+                // Update marker location and show confirmation dialog
+                markerPosition = latLng
+                showConfirmationDialog = true
+            }
         ) {
-            for (data in markersData) {
-                val markerState = remember { MarkerState(position = data.location) }
+            markerPosition?.let { position ->
                 Marker(
-                    state = markerState,
-//                    title = data.ownerName,
-//                    snippet = data.rating,
+                    state = MarkerState(position = position),
                     onClick = {
-                        // Update the selected marker
-                        onBikeSelected(data.ownerId)
-                        selectedMarker = data
-                        // Return true to consume click
+                        // You might also update markerPosition here if you allow dragging
+                        showConfirmationDialog = true
                         true
                     }
                 )
             }
+//            for (data in markersData) {
+//                val markerState = remember { MarkerState(position = data.location) }
+//                Marker(
+//                    state = markerState,
+////                    title = data.ownerName,
+////                    snippet = data.rating,
+//                    onClick = {
+//                        // Update the selected marker
+//                        onBikeSelected(data.ownerId)
+//                        selectedMarker = data
+//                        // Return true to consume click
+//                        true
+//                    }
+//                )
+//            }
         }
 
-        // Show the bottom card if a marker is selected
-        selectedMarker?.let { marker ->
-            // Observe the owner details for the selected marker
-            val ownerDetails by viewModel.ownerDetails.collectAsState()
-            // Use ownerDetails to compute rating calc.
-            val rating = ownerDetails?.let {
-                if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
-            } ?: 0
-
-            BottomCard(
-                markerData = marker.copy(rating = rating), // markerData = marker,
-                onDismiss = { selectedMarker = null }
+        if (showConfirmationDialog && selectedMarker != null) {
+            BottomCardSetPin(
+                markerData = selectedMarker!!,
+                onDismiss = { showConfirmationDialog = false },
+                onConfirm = {
+                    viewModel.updateBikeLocation(bikeId, selectedMarker!!.location)
+                    showConfirmationDialog = false
+                }
             )
         }
     }
@@ -352,7 +376,7 @@ fun Map(
 //)
 
 // Original MarkerData
-data class MarkerData(
+data class MarkerDataAddPin(
     val location: LatLng,
     val ownerName: String,
     val rating: Int,
@@ -369,9 +393,10 @@ data class MarkerData(
  * Bottom card pop up when pin clicked
  */
 @Composable
-fun BottomCard(
-    markerData: MarkerData,
-    onDismiss: () -> Unit
+fun BottomCardSetPin(
+    markerData: MarkerDataAddPin,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
 ) {
     // Box that takes the entire screen
     Box(
@@ -380,7 +405,7 @@ fun BottomCard(
             .background(Color.Transparent)
             // If user taps outside the card, we dismiss it
             .clickable(
-                onClick = { },
+                onClick = { onDismiss() },
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ),
@@ -391,9 +416,9 @@ fun BottomCard(
             modifier = Modifier
                 .width(300.dp)
                 .heightIn(min = 150.dp, max = 300.dp)
-                // TODO: Clicking the card takes you to individual bike page
+                // Clicking the card doesn't do anything
                 .clickable(
-                    onClick = { /*  TODO: ADD LOGIC HERE (LUKA pg) */ },
+                    onClick = { /* nothing */ },
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 )
@@ -403,66 +428,29 @@ fun BottomCard(
                 topEnd = 16.dp
             )
         ) {
-            // Use a Row to arrange the image on the left and text on the right
-            Box() { // Added this outer box to add X button properties to close out
-                Row(modifier = Modifier.padding(16.dp)) {
-                    // Image on the left
-                    markerData.bikeImgId?.let { res ->
-                        Image(
-                            painter = rememberAsyncImagePainter(model = res),
-                            contentDescription = "Bike image",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                    }
-                    // Space between image and text
-                    Spacer(modifier = Modifier.width(16.dp))
-                    // Column for text on the right of image
-                    Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                        Text(
-                            text = markerData.city, // Used to be owner name
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color.Black
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Confirm Bike Location",
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = "Do you want to set the bike's location to (${markerData.location.latitude}, ${markerData.location.longitude})?"
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(onClick = onDismiss) {
                             Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = "Star",
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(16.dp).background(Color.Transparent)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "${markerData.rating}",
-                                style = MaterialTheme.typography.bodyMedium
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Close",
+                                tint = Color.Black
                             )
                         }
-
-                        Text(text = "${markerData.bikePrice}€")
-                        val dateFormatter = SimpleDateFormat("dd-MM HH:mm", Locale.getDefault())
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.CalendarMonth,
-                                contentDescription = "Calendar",
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(16.dp).background(Color.Transparent)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "${
-                                    markerData.startTime?.toDate()
-                                        ?.let { dateFormatter.format(it) } ?: "Unknown"
-                                } to ${
-                                    markerData.endTime?.toDate()
-                                        ?.let { dateFormatter.format(it) } ?: "Unknown"
-                                }"
-                            )
+                        IconButton(onClick = onConfirm) {
+                            Text(text = "Confirm", color = Color.Blue)
                         }
                     }
                 }
@@ -486,7 +474,7 @@ fun BottomCard(
 }
 
 @Composable
-fun SearchBar(
+fun SearchBarAddPin(
     modifier: Modifier = Modifier,
     text: String,
     onTextChange: (String) -> Unit,
