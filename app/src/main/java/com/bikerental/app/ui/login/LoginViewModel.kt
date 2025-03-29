@@ -88,7 +88,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun switchSignUp() {
-        navigator.navigateTo(Destination.SignUp.route)
+        navigator.navigateTo(Destination.SignUp.route, true)
     }
 
     private fun validate(): Boolean {
