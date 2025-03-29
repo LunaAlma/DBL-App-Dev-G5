@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import com.google.firebase.firestore.GeoPoint
+import com.google.android.gms.maps.model.LatLng
 
 class FirebaseDataSource @Inject constructor(
     private val db: FirebaseFirestore,
@@ -124,6 +126,12 @@ class FirebaseDataSource @Inject constructor(
 
     suspend fun deleteBike(bike: Bike) {
         db.collection("bikes").document(bike.bikeId).delete()
+    }
+
+    suspend fun updateBikeLocation(bikeId: String, newLocation: LatLng) {
+        db.collection("bikes").document(bikeId)
+            .update("location", GeoPoint(newLocation.latitude, newLocation.longitude))
+            .await()
     }
 
 
