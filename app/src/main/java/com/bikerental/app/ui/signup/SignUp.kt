@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -51,6 +52,8 @@ fun SignUp(
         nameError = viewModel.nameError.collectAsStateWithLifecycle().value,
         emailError = viewModel.emailError.collectAsStateWithLifecycle().value,
         passwordError = viewModel.passwordError.collectAsStateWithLifecycle().value,
+        signUpError = viewModel.signUpError.collectAsStateWithLifecycle().value,
+        isLoading = viewModel.isLoading.collectAsStateWithLifecycle().value,
         onNameChange = { viewModel.onNameChange(it) },
         onEmailChange = { viewModel.onEmailChange(it) },
         onPasswordChange = { viewModel.onPasswordChange(it) },
@@ -68,6 +71,8 @@ private fun SignUpView(
     nameError: String,
     emailError: String,
     passwordError: String,
+    signUpError: String,
+    isLoading: Boolean,
     onNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -197,6 +202,23 @@ private fun SignUpView(
                 )
             }
 
+            if (signUpError.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 4.dp,
+                        bottom = 4.dp
+                    )
+                ) {
+                    Text(
+                        text = signUpError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -208,12 +230,20 @@ private fun SignUpView(
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = basicSignUp,
+                    enabled = !isLoading
                 ) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = "Sign Up",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = "Sign Up",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
             }
             Row(
@@ -231,7 +261,7 @@ private fun SignUpView(
                     },
                     text = "Already have an account?",
                     style = MaterialTheme.typography.bodyMedium
-                    )
+                )
             }
         }
     }

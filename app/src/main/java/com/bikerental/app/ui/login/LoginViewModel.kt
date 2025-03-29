@@ -32,33 +32,48 @@ class LoginViewModel @Inject constructor(
     private val _password = MutableStateFlow("")
     private val _emailError = MutableStateFlow("")
     private val _passwordError = MutableStateFlow("")
+    private val _loginError = MutableStateFlow("")
+    private val _isLoading = MutableStateFlow(false)
 
     val email = _email.asStateFlow()
     val password = _password.asStateFlow()
     val emailError = _emailError.asStateFlow()
     val passwordError = _passwordError.asStateFlow()
+    val loginError = _loginError.asStateFlow()
+    val isLoading = _isLoading.asStateFlow()
 
     fun onEmailChange(input: String) {
         _email.tryEmit(input)
         if (emailError.value.isNotEmpty()) _emailError.tryEmit("")
+        _loginError.tryEmit("")
     }
 
     fun onPasswordChange(input: String) {
         _password.tryEmit(input)
         if (passwordError.value.isNotEmpty()) _passwordError.tryEmit("")
+        _loginError.tryEmit("")
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun basicLogin() {
         if(validate()) {
+            _isLoading.tryEmit(true)
+            _loginError.tryEmit("")
+            
             launchFirebase {
-                authRepository.firebaseLogin(email.value, password.value)
-                if(auth.currentUser != null) {
-                    withContext(Dispatchers.Main) {
-                        navigator.navigateTo(Destination.Home.route, true)
+                try {
+                    authRepository.firebaseLogin(email.value, password.value)
+                    if(auth.currentUser != null) {
+                        withContext(Dispatchers.Main) {
+                            navigator.navigateTo(Destination.Home.route, true)
+                        }
+                    } else {
+                        _loginError.tryEmit("Login failed: User not found")
                     }
-                } else {
-                    // TODO SHOW ERROR
+                } catch (e: Exception) {
+                    _loginError.tryEmit(e.message ?: "Login failed")
+                } finally {
+                    _isLoading.tryEmit(false)
                 }
             }
         }

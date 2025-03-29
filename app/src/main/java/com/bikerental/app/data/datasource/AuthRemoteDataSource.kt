@@ -14,11 +14,19 @@ class AuthRemoteDataSource @Inject constructor(
     val fetchCurrentUser: FirebaseUser? get() = auth.currentUser
 
     suspend fun firebaseLogin(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password).await()
+        try {
+            auth.signInWithEmailAndPassword(email, password).await()
+        } catch (e: Exception) {
+            throw Exception("Login failed: ${e.message}")
+        }
     }
 
     suspend fun signUp(email: String, password: String) {
-        auth.createUserWithEmailAndPassword(email, password).await()
+        try {
+            auth.createUserWithEmailAndPassword(email, password).await()
+        } catch (e: Exception) {
+            throw Exception("Sign up failed: ${e.message}")
+        }
     }
 
     suspend fun sendPasswordResetEmail(email: String) {
@@ -30,13 +38,19 @@ class AuthRemoteDataSource @Inject constructor(
     }
 
     fun signOut() {
-        if (auth.currentUser!!.isAnonymous) {
-            auth.currentUser!!.delete()
+        auth.currentUser?.let { user ->
+            if (user.isAnonymous) {
+                user.delete()
+            }
         }
         auth.signOut()
     }
 
     suspend fun deleteAccount() {
-        auth.currentUser!!.delete().await()
+        try {
+            auth.currentUser?.delete()?.await()
+        } catch (e: Exception) {
+            throw Exception("Account deletion failed: ${e.message}")
+        }
     }
 }
