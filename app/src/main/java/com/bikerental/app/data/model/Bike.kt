@@ -4,21 +4,21 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.Timestamp
 
 data class Bike(
-    val bikeId: String = "",
+    val bikeId: String,
 
-    val ownerId: String = "",
+    val ownerId: String,
 
-    val bikeName: String = "",
+    val bikeName: String,
 
-    val price: Int = 0,
+    val price: Int,
 
-    val picture: String = "",
+    val picture: String,
 
-    val location: GeoPoint? = null,
+    val location: GeoPoint,
 
-    val city: String = "",
+    val city: String,
 
-    val startTime: Timestamp? = null,
+    val startTime: Timestamp,
 
-    val endTime: Timestamp? = null
+    val endTime: Timestamp
 )

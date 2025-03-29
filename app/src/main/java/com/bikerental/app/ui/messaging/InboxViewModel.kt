@@ -47,7 +47,6 @@ class InboxViewModel @Inject constructor(
     }
 
         fun goToChat(uid: String) {
-            println("test")
             navigator.navigateTo(Destination.Home.Chat.route + uid)
         }
 }

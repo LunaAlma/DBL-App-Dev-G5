@@ -94,6 +94,7 @@ import androidx.compose.runtime.collectAsState
 import com.google.firebase.firestore.GeoPoint
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.data.model.Bike
+import com.bikerental.app.data.model.MarkerData
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -233,10 +234,13 @@ fun Map(
                     .clickable {
                         viewModel.onSearchBarClick()
                     },
-                onClose = {}
+                onClose = { }
             )
         },
-        modifier = Modifier.fillMaxSize().systemBarsPadding().padding(bottom = 60.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding()
+            .padding(bottom = 60.dp),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
