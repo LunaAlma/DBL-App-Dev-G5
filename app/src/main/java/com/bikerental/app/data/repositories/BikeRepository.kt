@@ -1,5 +1,6 @@
 package com.bikerental.app.data.repositories
 
+import android.net.Uri
 import com.bikerental.app.data.datasource.FirebaseDataSource
 import com.bikerental.app.data.model.Bike
 import javax.inject.Inject
@@ -11,11 +12,18 @@ class BikeRepository @Inject constructor(
 ) {
     fun getBikes(): Flow<List<Bike>> = firebaseDataSource.getBikes()
 
-    suspend fun createBike(bike: Bike) = firebaseDataSource.addBike(bike)
+    fun getBikeDetailsById(bikeId: String): Flow<Bike> = firebaseDataSource.fetchBikeById(bikeId)
 
-    suspend fun deleteBike(bike: Bike) = firebaseDataSource.deleteBike(bike)
+    suspend fun addBike(uuid: String, ownerId: String, bikeName: String, city: String, description: String) =
+        firebaseDataSource.createBikeDocument(uuid, ownerId, bikeName, city, description)
+
+    fun removeBike(bike: Bike) = firebaseDataSource.deleteBike(bike)
 
     suspend fun updateBikeLocation(bikeId: String, newLocation: LatLng) {
         firebaseDataSource.updateBikeLocation(bikeId, newLocation)
+    }
+
+    suspend fun addBikeImage(imageUri: Uri) {
+        firebaseDataSource.uploadBikeImage(imageUri)
     }
 }

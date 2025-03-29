@@ -78,6 +78,7 @@ import androidx.compose.runtime.collectAsState
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.data.model.MarkerData
 import com.google.firebase.Timestamp
+import com.google.maps.android.compose.MapUiSettings
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -122,7 +123,7 @@ fun Map(
             rating = owner?.let {
                 if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
             } ?: 0,
-            bikeImgId = bike.picture,  // uses Coil to load this image
+            bikeImgId = bike.imageUrl,  // uses Coil to load this image
             bikePrice = bike.price,
             city = bike.city,
             startTime = bike.startTime,
@@ -208,60 +209,60 @@ fun Map(
     Scaffold(
         topBar = {
             // This ensures the search bar stays at the top
-            SearchBar(
-                text = "searchText",
-                onTextChange = { "searchText = it" },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable {
-                        viewModel.onSearchBarClick()
-                    },
-                onClose = { }
-            )
+//            SearchBar(
+//                text = "searchText",
+//                onTextChange = { "searchText = it" },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(8.dp)
+//                    .clickable {
+//                        viewModel.onSearchBarClick()
+//                    },
+//                onClose = { }
+//            )
         },
         modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding()
             .padding(bottom = 60.dp),
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    if (locationsPermissions.allPermissionsGranted) {
-                        startListeningToLocations()
-                        // Navigate to live location now
-                        currentLocation?.let { location ->
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    update = CameraUpdateFactory.newLatLngZoom(
-                                        LatLng(location.latitude, location.longitude),
-                                        cameraPositionState.position.zoom
-                                    )
-                                )
-                            }
-                        }
-                    } else {
-                        locationsPermissions.launchMultiplePermissionRequest()
-                    }
-                },
-                modifier = Modifier.offset(x = (13).dp, y = (-85).dp),
-                shape = CircleShape,
-                containerColor = Color.White,
-                contentColor =
-                    if (locationsPermissions.allPermissionsGranted) {
-                        Color(0xFF1C73E8)
-                    } else {
-                        Color.Gray
-                    }
-            ) {
-                // Icon here
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(id = R.drawable.target),
-                    contentDescription = "Live Location"
-                )
-            }
-        }
+//        floatingActionButton = {
+//            FloatingActionButton(
+//                onClick = {
+//                    if (locationsPermissions.allPermissionsGranted) {
+//                        startListeningToLocations()
+//                        // Navigate to live location now
+//                        currentLocation?.let { location ->
+//                            coroutineScope.launch {
+//                                cameraPositionState.animate(
+//                                    update = CameraUpdateFactory.newLatLngZoom(
+//                                        LatLng(location.latitude, location.longitude),
+//                                        cameraPositionState.position.zoom
+//                                    )
+//                                )
+//                            }
+//                        }
+//                    } else {
+//                        locationsPermissions.launchMultiplePermissionRequest()
+//                    }
+//                },
+//                modifier = Modifier.offset(x = (13).dp, y = (-85).dp),
+//                shape = CircleShape,
+//                containerColor = Color.White,
+//                contentColor =
+//                    if (locationsPermissions.allPermissionsGranted) {
+//                        Color(0xFF1C73E8)
+//                    } else {
+//                        Color.Gray
+//                    }
+//            ) {
+//                // Icon here
+//                Icon(
+//                    modifier = Modifier.size(24.dp),
+//                    painter = painterResource(id = R.drawable.target),
+//                    contentDescription = "Live Location"
+//                )
+//            }
+//        }
     ) {
         // Gives error when empty
         val mapProperties = MapProperties(
@@ -283,7 +284,12 @@ fun Map(
             cameraPositionState = cameraPositionState,
             // Customizable map properties
             properties = mapProperties,
-            locationSource = myLocationSource
+            locationSource = myLocationSource,
+            uiSettings = MapUiSettings(
+                zoomControlsEnabled = false,
+                myLocationButtonEnabled = true,
+                compassEnabled = false
+            )
         ) {
             for (data in markersData) {
                 val markerState = remember { MarkerState(position = data.location) }
@@ -320,23 +326,6 @@ fun Map(
 
 }
 
-// Hardcoded data
-//private val markersData = listOf(
-//    MarkerData(
-//        location = LatLng(51.423,5.462),
-//        ownerName = "John",
-//        rating = "5",
-//        bikeImgId = R.drawable.target,
-//        bikePrice = 5,
-//    ),
-//    MarkerData(
-//        location = LatLng(51.508,5.398),
-//        ownerName = "Tim",
-//        rating = "4",
-//        bikeImgId = R.drawable.target,
-//        bikePrice = 6,
-//    ),
-//)
 /**
  * Bottom card pop up when pin clicked
  */
@@ -349,10 +338,9 @@ fun BottomCard(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Transparent)
             // If user taps outside the card, we dismiss it
             .clickable(
-                onClick = { },
+                onClick = { onDismiss },
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ),
@@ -361,33 +349,33 @@ fun BottomCard(
         // The pop-up at the bottom
         Card(
             modifier = Modifier
-                .width(300.dp)
-                .heightIn(min = 150.dp, max = 300.dp)
+                .fillMaxWidth()
+                .heightIn(min = 200.dp, max = 300.dp)
                 // TODO: Clicking the card takes you to individual bike page
                 .clickable(
                     onClick = { /*  TODO: ADD LOGIC HERE (LUKA pg) */ },
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 )
-                .padding(bottom = 20.dp), // prev. 16
+                .padding(bottom = 10.dp, start = 10.dp, end = 10.dp ), // prev. 16
             shape = RoundedCornerShape(
                 topStart = 16.dp,
-                topEnd = 16.dp
+                topEnd = 16.dp,
+                bottomStart = 16.dp,
+                bottomEnd = 16.dp
             )
         ) {
             // Use a Row to arrange the image on the left and text on the right
-            Box() { // Added this outer box to add X button properties to close out
+            Box { // Added this outer box to add X button properties to close out
                 Row(modifier = Modifier.padding(16.dp)) {
                     // Image on the left
-                    markerData.bikeImgId?.let { res ->
-                        Image(
-                            painter = rememberAsyncImagePainter(model = res),
-                            contentDescription = "Bike image",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                    }
+                    Image(
+                        painter = rememberAsyncImagePainter(model = markerData.bikeImgId),
+                        contentDescription = "Bike image",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .align(Alignment.CenterVertically)
+                    )
                     // Space between image and text
                     Spacer(modifier = Modifier.width(16.dp))
                     // Column for text on the right of image
@@ -452,64 +440,63 @@ fun BottomCard(
                     )
                 }
             } // Closure of box added to close out when clicking X button
-
         }
     }
 }
 
-@Composable
-fun SearchBar(
-    modifier: Modifier = Modifier,
-    text: String,
-    onTextChange: (String) -> Unit,
-    onClose: () -> Unit
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(8.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shadowElevation = 4.dp
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                modifier = Modifier.padding(start = 16.dp),
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search"
-            )
-
-            BasicTextField(
-                value = text,
-                onValueChange = onTextChange,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp, end = 8.dp),
-                singleLine = true,
-                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                decorationBox = { innerTextField ->
-                    if (text.isEmpty()) {
-                        Text(
-                            text = "Search...",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                        )
-                    }
-                    innerTextField()
-                }
-            )
-
-            if (text.isNotEmpty()) {
-                IconButton(onClick = { onTextChange("") }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Clear search"
-                    )
-                }
-            }
-        }
-    }
-}
+//@Composable
+//fun SearchBar(
+//    modifier: Modifier = Modifier,
+//    text: String,
+//    onTextChange: (String) -> Unit,
+//    onClose: () -> Unit
+//) {
+//    Surface(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .height(56.dp)
+//            .padding(8.dp),
+//        shape = RoundedCornerShape(16.dp),
+//        color = MaterialTheme.colorScheme.surfaceVariant,
+//        shadowElevation = 4.dp
+//    ) {
+//        Row(
+//            modifier = Modifier.fillMaxSize(),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Icon(
+//                modifier = Modifier.padding(start = 16.dp),
+//                imageVector = Icons.Default.Search,
+//                contentDescription = "Search"
+//            )
+//
+//            BasicTextField(
+//                value = text,
+//                onValueChange = onTextChange,
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .padding(start = 8.dp, end = 8.dp),
+//                singleLine = true,
+//                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+//                decorationBox = { innerTextField ->
+//                    if (text.isEmpty()) {
+//                        Text(
+//                            text = "Search...",
+//                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+//                        )
+//                    }
+//                    innerTextField()
+//                }
+//            )
+//
+//            if (text.isNotEmpty()) {
+//                IconButton(onClick = { onTextChange("") }) {
+//                    Icon(
+//                        imageVector = Icons.Default.Close,
+//                        contentDescription = "Clear search"
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}

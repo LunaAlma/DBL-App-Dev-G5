@@ -21,7 +21,7 @@ class AuthRemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun signUp(email: String, password: String) {
+    suspend fun firebaseSignUp(email: String, password: String) {
         try {
             auth.createUserWithEmailAndPassword(email, password).await()
         } catch (e: Exception) {

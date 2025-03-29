@@ -15,7 +15,7 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun firebaseSignUp(email: String, password: String) {
-       authRemoteDataSource.signUp(email, password)
+       authRemoteDataSource.firebaseSignUp(email, password)
     }
 
     suspend fun sendPasswordResetEmail(email: String) {

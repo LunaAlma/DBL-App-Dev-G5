@@ -73,8 +73,8 @@ dependencies {
     implementation(libs.maps.compose.widgets)
     implementation(libs.accompanist.permissions)
     ksp(libs.hilt.android.compiler)
-    implementation(libs.coil.kt.coil.compose.v222)
     implementation(libs.androidx.datastore)
+    implementation(libs.play.services.base)
 
     //Firebase
     implementation(platform(libs.firebase.bom))
@@ -83,7 +83,6 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.storage)
-    implementation("io.coil-kt:coil-compose:2.5.0") // For image loading
 
     //Test
     testImplementation(libs.junit)

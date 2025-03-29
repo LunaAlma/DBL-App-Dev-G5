@@ -44,7 +44,7 @@ class MapViewModel @Inject constructor(
     val ownerDetails: StateFlow<User?> = _ownerID
         .filterNotNull()
         .flatMapLatest { userId ->
-            userRepository.getUserDetailsBasedOnID(userId)
+            userRepository.getUserById(userId)
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 

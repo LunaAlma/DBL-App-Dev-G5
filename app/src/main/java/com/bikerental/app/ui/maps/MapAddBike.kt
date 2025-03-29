@@ -126,21 +126,21 @@ fun MapAddBike(
 
     val markersData = bikes.map { bike ->
         // bike.location is a GeoPoint from Firebase
-        val lat = bike.location?.latitude ?: 0.0
-        val lng = bike.location?.longitude ?: 0.0
-
+        val lat = bike.location.latitude
+        val lng = bike.location.longitude
+        
         MarkerDataAddPin(
             location = LatLng(lat, lng),
             ownerName = bike.bikeName,
             rating = owner?.let {
                 if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
             } ?: 0,
-            bikeImgId = bike.picture,  // uses Coil to load this image
+            bikeImgId = bike.imageUrl,  // uses Coil to load this image
             bikePrice = bike.price,
             city = bike.city,
             startTime = bike.startTime,
             endTime = bike.endTime,
-            ownerId = bike.ownerId ?: "",
+            ownerId = bike.ownerId,
         )
     }
 

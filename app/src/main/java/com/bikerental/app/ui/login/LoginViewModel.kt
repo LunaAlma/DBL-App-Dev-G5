@@ -1,8 +1,6 @@
 package com.bikerental.app.ui.login
 
-import android.widget.Toast
 import androidx.core.util.PatternsCompat
-import com.bikerental.app.data.datasource.AuthRemoteDataSource
 import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.ui.base.BaseViewModel
 import com.bikerental.app.ui.navigation.Destination
@@ -14,7 +12,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 @HiltViewModel

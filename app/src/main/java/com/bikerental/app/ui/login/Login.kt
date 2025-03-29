@@ -52,7 +52,7 @@ import com.bikerental.app.ui.login.LoginViewModel
 
 @Composable
 fun Login(
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     viewModel: LoginViewModel
 ) {
     BackHandler { viewModel.navigator.finish() }
@@ -196,7 +196,6 @@ private fun LoginView(
                     )
                 }
             }
-
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,

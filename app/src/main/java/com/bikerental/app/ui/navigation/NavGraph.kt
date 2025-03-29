@@ -25,7 +25,6 @@ import com.bikerental.app.ui.messaging.ChatViewModel
 import com.bikerental.app.ui.navigation.Destination.Home.BikeDetails
 import com.bikerental.app.ui.profile.Profile
 import com.bikerental.app.ui.profile.ProfileViewModel
-import com.bikerental.app.ui.search.Search
 import com.bikerental.app.ui.search.SearchViewModel
 import com.bikerental.app.ui.splash.Splash
 import com.bikerental.app.ui.splash.SplashViewModel
@@ -119,11 +118,11 @@ fun NavGraph(
                 Chat(modifier, viewModel)
             }
 
-            // Home.Search
-            composable(Destination.Home.Search.route) {
-                val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
-                Search(modifier, viewModel)
-            }
+//            // Home.Search
+//            composable(Destination.Home.Search.route) {
+//                val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
+//                Search(modifier, viewModel)
+//            }
         }
     }
 }

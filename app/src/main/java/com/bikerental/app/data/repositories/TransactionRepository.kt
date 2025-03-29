@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.Flow
 class TransactionRepository @Inject constructor(
     private val firebaseDataSource: FirebaseDataSource
 ) {
-    fun getAllUserTransactions(): Flow<List<Transaction>> =
-        firebaseDataSource.getAllUserTransactions()
-
-    suspend fun createTransaction(transaction: Transaction) =
-        firebaseDataSource.createTransaction(transaction)
+//    fun getAllUserTransactions(): Flow<List<Transaction>> =
+//        firebaseDataSource.getAllUserTransactions()
+//
+//    suspend fun createTransaction(transaction: Transaction) =
+//        firebaseDataSource.createTransaction(transaction)
 }
