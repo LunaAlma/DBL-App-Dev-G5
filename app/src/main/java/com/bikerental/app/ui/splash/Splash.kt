@@ -14,15 +14,33 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bikerental.app.R
 
+/**
+ * Splash screen composable that handles:
+ * - Displaying app branding/logo
+ * - Preventing back button navigation
+ * - Delegating auth flow logic to ViewModel
+ *
+ * @param modifier Modifier for styling/layout adjustments
+ * @param viewModel Handles business logic and navigation decisions
+ */
 @Composable
 fun Splash(
     modifier: Modifier = Modifier,
     viewModel: SplashViewModel
 ) {
-    BackHandler {viewModel.navigator.finish() }
+    // Disable back button during splash screen
+    BackHandler { viewModel.navigator.finish() }
+
+    // Pure UI component without business logic
     SplashView(modifier)
 }
 
+/**
+ * Stateless splash screen content that only handles UI rendering.
+ * Shows centered app logo on a full-screen column.
+ *
+ * @param modifier Modifier for layout adjustments
+ */
 @Composable
 private fun SplashView(modifier: Modifier) {
     Column(
@@ -32,12 +50,16 @@ private fun SplashView(modifier: Modifier) {
     ) {
         Image(
             modifier = Modifier.size(96.dp),
-            painter = painterResource(R.drawable.getstarted),
+            painter = painterResource(R.drawable.logo),
             contentDescription = "Logo"
         )
     }
 }
 
+/**
+ * Preview function for design-time rendering of the splash screen.
+ * Shows the splash screen UI without any ViewModel dependencies.
+ */
 @Preview(showBackground = true)
 @Composable
 private fun LoginPreview() {
