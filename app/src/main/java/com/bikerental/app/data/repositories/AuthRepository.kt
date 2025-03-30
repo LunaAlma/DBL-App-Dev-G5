@@ -2,7 +2,6 @@ package com.bikerental.app.data.repositories
 
 import com.google.firebase.auth.FirebaseUser
 import com.bikerental.app.data.datasource.AuthRemoteDataSource
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
@@ -15,7 +14,7 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun firebaseSignUp(email: String, password: String) {
-       authRemoteDataSource.firebaseSignUp(email, password)
+        authRemoteDataSource.firebaseSignUp(email, password)
     }
 
     suspend fun sendPasswordResetEmail(email: String) {

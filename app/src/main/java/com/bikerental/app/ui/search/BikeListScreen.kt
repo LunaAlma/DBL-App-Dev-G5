@@ -1,5 +1,6 @@
 package com.bikerental.app.ui.search
 
+import android.app.DatePickerDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.material3.*
@@ -13,11 +14,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.bikerental.app.data.model.Bike
 import coil.compose.rememberAsyncImagePainter
+import com.bikerental.app.ui.navigation.Destination
+import com.bikerental.app.ui.navigation.Navigator
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -28,9 +35,7 @@ import java.util.Locale
 
 @Composable
 fun BikeListScreen(
-    navController: NavController,
-    modifier: Modifier,
-    viewModel: SearchViewModel
+    navigator: Navigator,
 ) {
     var bikeList by remember { mutableStateOf(listOf<Bike>()) }
     var selectedCity by remember { mutableStateOf("Select City") }
@@ -68,7 +73,9 @@ fun BikeListScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         RentalPeriodSelector(
             selectedCity = selectedCity,
@@ -90,8 +97,7 @@ fun BikeListScreen(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(16.dp)
         )
-
-        BikeList(bikeList, navController)
+        BikeList(bikeList, navigator)
     }
 }
 
@@ -114,7 +120,7 @@ fun RentalPeriodSelector(
     var expanded by remember { mutableStateOf(false) }
 
     if (showStartDatePicker) {
-        android.app.DatePickerDialog(
+        DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
                 val selectedCalendar = Calendar.getInstance()
@@ -131,7 +137,7 @@ fun RentalPeriodSelector(
     }
 
     if (showEndDatePicker) {
-        android.app.DatePickerDialog(
+        DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
                 val selectedCalendar = Calendar.getInstance()
@@ -196,11 +202,42 @@ fun RentalPeriodSelector(
 }
 
 @Composable
-fun BikeList(bikeList: List<Bike>, navController: NavController) {
-    LazyRow(modifier = Modifier.padding(start = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(bikeList) { bike ->
-            BikeCard(bike) { navController.navigate("bikeDetails/${bike.bikeId}") }
+fun BikeList(bikeList: List<Bike>, navigator: Navigator) {
+    LazyColumn(
+        modifier = Modifier.padding(start = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(count = (bikeList.size + 1) / 2) { rowIndex ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                val firstIndex = rowIndex * 2
+                val secondIndex = rowIndex * 2 + 1
+
+                // First item in the row
+                bikeList.getOrNull(firstIndex)?.let { bike ->
+                    Box(
+                        modifier = Modifier.weight(
+                            // Take full width if there's no second item
+                            if (secondIndex < bikeList.size) 1f else 2f
+                        )
+                    ) {
+                        BikeCard(bike) {
+                            navigator.navigateTo("${Destination.Home.Search.route}${bike.bikeId}")
+                        }
+                    }
+                }
+
+                // Second item in the row (if exists)
+                bikeList.getOrNull(secondIndex)?.let { bike ->
+                    Box(modifier = Modifier.weight(1f)) {
+                        BikeCard(bike) {
+                            navigator.navigateTo("${Destination.Home.Search.route}${bike.bikeId}")
+                        }
+                    }
+                }
+            }
         }
     }
 }

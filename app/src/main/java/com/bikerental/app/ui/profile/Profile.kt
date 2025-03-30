@@ -34,16 +34,11 @@ fun ProfileView(
     viewModel: ProfileViewModel,
     onLogout: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-
-    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Profile Card
@@ -140,7 +135,7 @@ fun ProfileView(
                 Text("Delete Account", fontSize = 16.sp)
             }
         }
-    }
+
 }
 @Composable
 fun SettingsItem(title: String) {
