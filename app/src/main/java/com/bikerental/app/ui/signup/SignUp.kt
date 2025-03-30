@@ -29,12 +29,13 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.Rocket
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bikerental.app.R
@@ -117,7 +118,6 @@ private fun SignUpView(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-
         ) {
             Row(
                 modifier = Modifier.padding(
@@ -130,7 +130,7 @@ private fun SignUpView(
                 // Application Logo
                 Image(
                     painterResource(R.drawable.logo),
-                    contentDescription = "logo",
+                    contentDescription = stringResource(R.string.image_logo_description),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(80.dp)
                 )
@@ -148,12 +148,12 @@ private fun SignUpView(
                     modifier = Modifier.fillMaxWidth(),
                     value = name,
                     onValueChange = onNameChange,
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.name)) },
                     singleLine = true,
                     leadingIcon = {
                         Icon(
-                            Icons.Filled.Rocket,
-                            contentDescription = "Name"
+                            Icons.Filled.AccountCircle,
+                            contentDescription = stringResource(R.string.name)
                         )
                     },
                     isError = nameError.isNotEmpty(),
@@ -179,12 +179,12 @@ private fun SignUpView(
                     modifier = Modifier.fillMaxWidth(),
                     value = email,
                     onValueChange = onEmailChange,
-                    label = { Text("Email") },
+                    label = { Text(stringResource(R.string.email)) },
                     singleLine = true,
                     leadingIcon = {
                         Icon(
                             Icons.Filled.Email,
-                            contentDescription = "Email"
+                            contentDescription = stringResource(R.string.email)
                         )
                     },
                     isError = emailError.isNotEmpty(),
@@ -210,12 +210,12 @@ private fun SignUpView(
                     modifier = Modifier.fillMaxWidth(),
                     value = password,
                     onValueChange = onPasswordChange,
-                    label = { Text("Password") },
+                    label = { Text(stringResource(R.string.password)) },
                     singleLine = true,
                     leadingIcon = {
                         Icon(
                             Icons.Filled.Password,
-                            contentDescription = "Password"
+                            contentDescription = stringResource(R.string.password)
                         )
                     },
                     isError = passwordError.isNotEmpty(),
@@ -245,7 +245,6 @@ private fun SignUpView(
                     )
                 }
             }
-
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -268,7 +267,7 @@ private fun SignUpView(
                     } else {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = "Sign Up",
+                            text = stringResource(R.string.sign_up),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -288,7 +287,7 @@ private fun SignUpView(
                     modifier = Modifier.clickable {
                         switchLogin()
                     },
-                    text = "Already have an account?",
+                    text = stringResource(R.string.login_text),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
