@@ -1,6 +1,7 @@
 package com.bikerental.app.data.repositories
 
 import com.bikerental.app.data.datasource.FirebaseDataSource
+import com.bikerental.app.data.model.Rental
 import com.bikerental.app.data.model.User
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -50,4 +51,8 @@ class UserRepository @Inject constructor(
      *         when the document changes
      */
     fun getUserById(uid: String): Flow<User> = firebaseDataSource.fetchUserById(uid)
+
+    fun getUserRentals(userId: String): Flow<List<Rental>> {
+        return firebaseDataSource.getUserRentals(userId)
+    }
 }

@@ -1,6 +1,9 @@
 package com.bikerental.app.data.model
+import com.google.firebase.Timestamp
 
 data class Rental(
+    val id: String = "",
+
     val bikeId: String = "",
 
     val renterId: String = "",
@@ -9,7 +12,7 @@ data class Rental(
 
     val status: String = "",
 
-    val startTime: String = "",
+    val startTime: Timestamp = Timestamp.now(),
 
-    val endTime: String = "",
+    val endTime: Timestamp = Timestamp.now(),
 )

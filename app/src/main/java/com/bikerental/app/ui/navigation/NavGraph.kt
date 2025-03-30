@@ -25,6 +25,8 @@ import com.bikerental.app.ui.search.BikeListScreen
 import com.bikerental.app.ui.search.SearchViewModel
 import com.bikerental.app.ui.splash.Splash
 import com.bikerental.app.ui.splash.SplashViewModel
+import com.bikerental.app.ui.pastrentals.PastRentalsViewModel
+import com.bikerental.app.ui.pastrentals.PastRentalsScreen
 
 @Composable
 fun NavGraph(
@@ -105,7 +107,13 @@ fun NavGraph(
                 val viewModel: SearchViewModel = hiltViewModel()
                 BikeListScreen(navigator)
             }
-
+            composable(Destination.Home.PastRentals.route) {
+                val viewModel: PastRentalsViewModel = hiltViewModel()
+                PastRentalsScreen(
+                    navigator = viewModel.navigator,
+                    viewModel = viewModel
+                )
+            }
         }
     }
 }
