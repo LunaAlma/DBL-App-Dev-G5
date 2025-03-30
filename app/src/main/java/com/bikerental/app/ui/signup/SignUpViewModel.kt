@@ -8,13 +8,25 @@ import com.bikerental.app.ui.navigation.Destination
 import com.bikerental.app.ui.navigation.Navigator
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+/**
+ * ViewModel for the Sign Up screen.
+ *
+ * Responsibilities:
+ * - Manages form state (name, email, password)
+ * - Handles input validation
+ * - Coordinates authentication flow with AuthRepository
+ * - Manages user creation in FireStore
+ * - Handles navigation events
+ *
+ * @property authRepository Handles Firebase authentication
+ * @property userRepository Manages user data in FireStore
+ * @property auth FirebaseAuth instance for current user access
+ */
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     navigator: Navigator,
@@ -22,10 +34,8 @@ class SignUpViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val auth: FirebaseAuth
 ) : BaseViewModel(navigator) {
-    companion object {
-        const val TAG = "SignUpViewModel"
-    }
 
+    // Form state flows
     private val _name = MutableStateFlow("")
     private val _email = MutableStateFlow("")
     private val _password = MutableStateFlow("")
@@ -44,73 +54,99 @@ class SignUpViewModel @Inject constructor(
     val signUpError = _signUpError.asStateFlow()
     val isLoading = _isLoading.asStateFlow()
 
+    /**
+     * Handles name field changes and clears related errors
+     */
     fun onNameChange(input: String) {
         _name.tryEmit(input)
         if (nameError.value.isNotEmpty()) _nameError.tryEmit("")
         _signUpError.tryEmit("")
     }
 
+    /**
+     * Handles email field changes and clears related errors
+     */
     fun onEmailChange(input: String) {
         _email.tryEmit(input)
         if (emailError.value.isNotEmpty()) _emailError.tryEmit("")
         _signUpError.tryEmit("")
     }
 
+    /**
+     * Handles password field changes and clears related errors
+     */
     fun onPasswordChange(input: String) {
         _password.tryEmit(input)
         if (passwordError.value.isNotEmpty()) _passwordError.tryEmit("")
         _signUpError.tryEmit("")
     }
 
+    /**
+     * Initiates the sign-up process:
+     * 1. Validates inputs
+     * 2. Creates Firebase auth user
+     * 3. Creates user document in FireStore
+     * 4. Navigates to Home on success
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun basicSignUp() {
-        if(validate()) {
-            _isLoading.tryEmit(true)
-            _signUpError.tryEmit("")
-            
+        if (validate()) {
+            _isLoading.value = true
+
             launchFirebase {
                 try {
+                    // 1. Firebase Authentication
                     authRepository.firebaseSignUp(email.value, password.value)
-                    if(auth.currentUser != null) {
-                        val uid = auth.currentUser!!.uid
-                        userRepository.createUserDocument(uid, name.value, email.value)
-                        
-                        withContext(Dispatchers.Main) {
-                            navigator.navigateTo(Destination.Home.route, true)
-                        }
-                    } else {
-                        _signUpError.tryEmit("Sign up failed: User not created")
+
+                    // 2. FireStore User document creation
+                    auth.currentUser?.let { user ->
+                        userRepository.createUserDocument(
+                            uid = user.uid,
+                            name = name.value,
+                            email = email.value
+                        )
+
+                        // 3. Navigation to Home
+                        navigator.navigateTo(Destination.Home.route, true)
                     }
                 } catch (e: Exception) {
-                    _signUpError.tryEmit(e.message ?: "Sign up failed")
+                    _signUpError.value = e.message ?: "Sign Up Failed"
                 } finally {
-                    _isLoading.tryEmit(false)
+                    _isLoading.value = false
                 }
             }
         }
     }
 
-    fun switchLogin() {
-        navigator.navigateTo(Destination.Login.route, true)
-    }
-
+    /**
+     * Validates form inputs and sets error messages
+     * @return Boolean indicating if all inputs are valid
+     */
     private fun validate(): Boolean {
         var error = false
         if (name.value.isBlank()) _nameError.tryEmit("Name is required").run { error = true }
         if (!email.value.isValidEmail()) _emailError.tryEmit("Invalid Email").run { error = true }
-        if (password.value.length < 6) _passwordError.tryEmit("Password length should be at least 6")
-            .run { error = true }
+        if (password.value.length < 6) {
+            _passwordError.tryEmit("Password length should be at least 6")
+                .run { error = true }
+        }
         return !error
     }
 
+    /**
+     * Custom email validator with domain check
+     */
     fun String.isValidEmail(): Boolean {
-        // First check basic email pattern
         val isEmailValid = this.isNotEmpty() && PatternsCompat.EMAIL_ADDRESS.matcher(this).matches()
-
-        // Then check for specific domain
-//        val hasStudentTueDomain = this.endsWith("@student.tue.nl", ignoreCase = true)
-        val hasStudentTueDomain = true
+        val hasStudentTueDomain = this.endsWith("@student.tue.nl", ignoreCase = true)
 
         return isEmailValid && hasStudentTueDomain
+    }
+
+    /**
+     * Navigates to Login screen with clean back stack
+     */
+    fun switchLogin() {
+        navigator.navigateTo(Destination.Login.route, true)
     }
 }

@@ -39,11 +39,24 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bikerental.app.R
 
+/**
+ * Composable function for the Sign Up screen.
+ *
+ * Responsibilities:
+ * - Displays sign-up form with name, email, and password fields
+ * - Shows validation errors and loading states
+ * - Handles back button press via ViewModel
+ * - Delegates user actions to ViewModel
+ *
+ * @param modifier Modifier for layout adjustments
+ * @param viewModel Handles business logic and state management
+ */
 @Composable
 fun SignUp(
     modifier: Modifier,
     viewModel: SignUpViewModel
 ) {
+    // Prevent back navigation during sign-up process
     BackHandler { viewModel.navigator.finish() }
 
     SignUpView(
@@ -64,6 +77,15 @@ fun SignUp(
     )
 }
 
+/**
+ * Stateless UI component for the Sign Up screen.
+ *
+ * @param name Current value of name field
+ * @param onNameChange Callback for name field changes
+ * @param isLoading Loading state indicator
+ * @param basicSignUp Callback for sign-up button press
+ * @param switchLogin Callback for "Already have an account" link
+ */
 @Composable
 private fun SignUpView(
     modifier: Modifier = Modifier,
@@ -81,10 +103,9 @@ private fun SignUpView(
     basicSignUp: () -> Unit,
     switchLogin: () -> Unit
 ) {
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
+    Box(modifier = modifier.fillMaxSize()) {
         Column(
+            // Centered form container with scrollable content
             modifier = Modifier
                 .fillMaxWidth(.8f)
                 .verticalScroll(rememberScrollState())
@@ -106,9 +127,10 @@ private fun SignUpView(
                     bottom = 4.dp
                 )
             ) {
+                // Application Logo
                 Image(
-                    painterResource(R.drawable.bike),
-                    contentDescription = "",
+                    painterResource(R.drawable.logo),
+                    contentDescription = "logo",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(80.dp)
                 )
@@ -121,6 +143,7 @@ private fun SignUpView(
                     bottom = 4.dp
                 )
             ) {
+                // Name input field
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = name,
@@ -151,6 +174,7 @@ private fun SignUpView(
                     bottom = 4.dp
                 )
             ) {
+                // Email input field
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = email,
@@ -181,6 +205,7 @@ private fun SignUpView(
                     bottom = 4.dp
                 )
             ) {
+                // Password input field
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = password,
@@ -204,7 +229,6 @@ private fun SignUpView(
                     visualTransformation = PasswordVisualTransformation(),
                 )
             }
-
             if (signUpError.isNotEmpty()) {
                 Row(
                     modifier = Modifier.padding(
@@ -230,6 +254,7 @@ private fun SignUpView(
                     bottom = 48.dp
                 )
             ) {
+                // Sign Up button with loading state
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = basicSignUp,
@@ -258,6 +283,7 @@ private fun SignUpView(
                 ).fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
+                // Switch to Login
                 Text(
                     modifier = Modifier.clickable {
                         switchLogin()
