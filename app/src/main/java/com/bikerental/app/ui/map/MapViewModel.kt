@@ -1,4 +1,4 @@
-package com.bikerental.app.ui.maps
+package com.bikerental.app.ui.map
 
 import androidx.lifecycle.viewModelScope
 import com.bikerental.app.data.model.Bike
@@ -28,9 +28,6 @@ class MapViewModel @Inject constructor(
     private val bikeRepository: BikeRepository, // Added private val!
     private val userRepository: UserRepository,
 ) : BaseViewModel(navigator) {
-    companion object {
-        const val TAG = "MapViewModel"
-    }
 
     // Classify bikes as a StateFlow with an initial empty list
     val bikes: StateFlow<List<Bike>> = bikeRepository.getBikes()

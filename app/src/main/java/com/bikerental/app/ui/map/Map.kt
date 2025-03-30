@@ -1,4 +1,4 @@
-package com.bikerental.app.ui.maps
+package com.bikerental.app.ui.map
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -17,12 +17,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import com.bikerental.app.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.CameraPosition
@@ -41,19 +36,14 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,11 +67,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.data.model.MarkerData
-import com.google.firebase.Timestamp
 import com.google.maps.android.compose.MapUiSettings
 import java.text.SimpleDateFormat
 import java.util.Locale
-
 
 // Note that rememberMultiplePermissions is using an experimental API
 // Regularly check if it is working (this is easier code than alternative though)
@@ -223,8 +211,6 @@ fun Map(
         },
         modifier = Modifier
             .fillMaxSize()
-            .systemBarsPadding()
-            .padding(bottom = 60.dp),
 //        floatingActionButton = {
 //            FloatingActionButton(
 //                onClick = {
@@ -382,7 +368,9 @@ fun BottomCard(
                     Column(modifier = Modifier.align(Alignment.CenterVertically)) {
                         Text(
                             text = markerData.city, // Used to be owner name
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
                             color = Color.Black
                         )
                         Row(
@@ -477,7 +465,9 @@ fun BottomCard(
 //                    .weight(1f)
 //                    .padding(start = 8.dp, end = 8.dp),
 //                singleLine = true,
-//                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+//                textStyle = LocalTextStyle.current.copy(
+//                color = MaterialTheme.colorScheme.onSurfaceVariant
+//                ),
 //                decorationBox = { innerTextField ->
 //                    if (text.isEmpty()) {
 //                        Text(

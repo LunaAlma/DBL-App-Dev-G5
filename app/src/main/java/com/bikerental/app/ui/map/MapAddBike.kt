@@ -1,4 +1,4 @@
-package com.bikerental.app.ui.maps
+package com.bikerental.app.ui.map
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,41 +32,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.bikerental.app.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-//import com.google.android.gms.maps.model.CameraPosition
-//import com.google.android.gms.maps.model.LatLng
-//import com.google.maps.android.compose.GoogleMap
-//import com.google.maps.android.compose.rememberCameraPositionState
-//import com.lucianocoletti.composemapstutorial.ui.theme.ComposeMapsTutorialTheme
-//import com.google.maps.android.compose.*
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.rememberCameraPositionState
-
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.maps.android.compose.Circle
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,21 +69,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.LocationSource
 import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerInfoWindowContent
 import com.google.maps.android.compose.MarkerState
 import kotlinx.coroutines.launch
-
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.tooling.preview.Preview
-import com.google.firebase.firestore.GeoPoint
-import coil.compose.rememberAsyncImagePainter
-import com.bikerental.app.data.model.Bike
 import com.google.firebase.Timestamp
-import java.text.SimpleDateFormat
-import java.util.Locale
-
 
 // Note that rememberMultiplePermissions is using an experimental API
 // Regularly check if it is working (this is easier code than alternative though)
@@ -128,7 +101,7 @@ fun MapAddBike(
         // bike.location is a GeoPoint from Firebase
         val lat = bike.location.latitude
         val lng = bike.location.longitude
-        
+
         MarkerDataAddPin(
             location = LatLng(lat, lng),
             ownerName = bike.bikeName,
