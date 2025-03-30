@@ -102,12 +102,11 @@ fun Map(
     // CHANGE bikes to availableBikes once debugging
     val markersData = bikes.map { bike ->
         // bike.location is a GeoPoint from Firebase
-        val lat = bike.location.latitude
-        val lng = bike.location.longitude
+        val lat = bike.location?.latitude ?: 0.0
+        val lng = bike.location?.longitude ?: 0.0
 
         MarkerData(
             location = LatLng(lat, lng),
-            ownerName = bike.bikeName,
             rating = owner?.let {
                 if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
             } ?: 0,
