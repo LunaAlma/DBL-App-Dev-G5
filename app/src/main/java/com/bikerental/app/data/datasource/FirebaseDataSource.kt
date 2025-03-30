@@ -2,7 +2,6 @@ package com.bikerental.app.data.datasource
 
 import android.net.Uri
 import com.bikerental.app.data.model.Bike
-import com.bikerental.app.data.model.Transaction
 import com.bikerental.app.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,12 +15,33 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 
+/**
+ * Firebase Data Source implementation handling all Firestore and Storage operations.
+ *
+ * Responsibilities:
+ * - Manages CRUD operations for Users and Bikes in Firestore
+ * - Handles bike image uploads to Firebase Storage
+ * - Provides real-time data streams using Flow
+ * - Abstracts all Firebase-specific implementations
+ *
+ * @property db Firestore database instance
+ * @property auth Firebase Authentication instance
+ * @property storage Firebase Storage instance
+ */
 class FirebaseDataSource @Inject constructor(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth,
     private val storage: FirebaseStorage
 
-){
+) {
+    /**
+     * Creates a new user document in Firestore.
+     *
+     * @param uid Unique user ID from Firebase Auth
+     * @param name User's full name
+     * @param email User's email address
+     * @throws Exception if document creation fails
+     */
     suspend fun createUserDocument(uid: String, name: String, email: String) {
         db.collection("users").document(uid).set(
             User(
@@ -32,7 +52,23 @@ class FirebaseDataSource @Inject constructor(
         ).await()
     }
 
-    suspend fun createBikeDocument(uuid: String, ownerId: String, bikeName: String, city: String, description: String) {
+    /**
+     * Creates a new bike document in Firestore.
+     *
+     * @param uuid Unique bike ID
+     * @param ownerId ID of the bike owner (user)
+     * @param bikeName Display name of the bike
+     * @param city City where the bike is located
+     * @param description Bike description/details
+     * @throws Exception if document creation fails
+     */
+    suspend fun createBikeDocument(
+        uuid: String,
+        ownerId: String,
+        bikeName: String,
+        city: String,
+        description: String
+    ) {
         db.collection("bikes").document(uuid).set(
             Bike(
                 bikeId = uuid,
@@ -44,6 +80,12 @@ class FirebaseDataSource @Inject constructor(
         ).await()
     }
 
+    /**
+     * Gets a real-time stream of all users.
+     *
+     * @return Flow emitting List<User> that updates whenever the users collection changes
+     * @throws Exception if listener registration fails
+     */
     fun getUsers(): Flow<List<User>> = callbackFlow {
         val subscription = db.collection("users")
             .addSnapshotListener { snapshot, error ->
@@ -58,23 +100,13 @@ class FirebaseDataSource @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
-    fun getUserDetails(): Flow<User> = callbackFlow {
-        val subscription = db.collection("users").document(auth.currentUser!!.uid)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-                val user = snapshot?.toObject(User::class.java)
-                if(user != null) {
-                    trySend(user)
-                } else {
-                    close(IllegalStateException("User document not found"))
-                }
-            }
-        awaitClose { subscription.remove() }
-    }
-
+    /**
+     * Gets a real-time stream of a specific user's data.
+     *
+     * @param uid User ID to fetch
+     * @return Flow<User> that emits when the user document changes
+     * @throws IllegalStateException if user document doesn't exist
+     */
     fun fetchUserById(uid: String): Flow<User> = callbackFlow {
         val subscription = db.collection("users").document(uid)
             .addSnapshotListener { snapshot, error ->
@@ -92,12 +124,11 @@ class FirebaseDataSource @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
-    suspend fun updateUserDetails(user: User) {
-        if(auth.currentUser?.uid != null) {
-            db.collection("users").document(auth.currentUser!!.uid).set(user).await()
-        }
-    }
-
+    /**
+     * Gets a real-time stream of all bikes.
+     *
+     * @return Flow<List<Bike>> emitting current bike collection
+     */
     fun getBikes(): Flow<List<Bike>> = callbackFlow {
         val subscription = db.collection("bike_rentals")
             .addSnapshotListener { snapshot, error ->
@@ -112,6 +143,13 @@ class FirebaseDataSource @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
+    /**
+     * Gets a real-time stream of a specific bike's data.
+     *
+     * @param uid Bike ID to fetch
+     * @return Flow<Bike> emitting bike data updates
+     * @throws IllegalStateException if bike doesn't exist
+     */
     fun fetchBikeById(uid: String): Flow<Bike> = callbackFlow {
         val subscription = db.collection("bikes").document(uid)
             .addSnapshotListener { snapshot, error ->
@@ -129,16 +167,34 @@ class FirebaseDataSource @Inject constructor(
         awaitClose { subscription.remove() }
     }
 
+    /**
+     * Deletes a bike document from Firestore.
+     *
+     * @param bike Bike object to delete
+     */
     fun deleteBike(bike: Bike) {
         db.collection("bikes").document(bike.bikeId).delete()
     }
 
+    /**
+     * Updates a bike's location in Firestore.
+     *
+     * @param bikeId ID of bike to update
+     * @param newLocation New LatLng coordinates
+     * @throws Exception if update fails
+     */
     suspend fun updateBikeLocation(bikeId: String, newLocation: LatLng) {
         db.collection("bikes").document(bikeId)
             .update("location", GeoPoint(newLocation.latitude, newLocation.longitude))
             .await()
     }
 
+    /**
+     * Uploads a bike image to Firebase Storage.
+     *
+     * @param imageUri URI of image to upload
+     * @return Result<String> containing download URL on success
+     */
     suspend fun uploadBikeImage(imageUri: Uri): Result<String> {
         return try {
             val imageRef = storage.reference
