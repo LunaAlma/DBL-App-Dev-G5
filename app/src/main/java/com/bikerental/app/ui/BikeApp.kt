@@ -1,11 +1,18 @@
 package com.bikerental.app.ui
 
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.bikerental.app.ui.home.HomeNavigation
 import com.bikerental.app.ui.navigation.NavGraph
@@ -17,32 +24,47 @@ fun BikeApp(
     navigator: Navigator,
     finish: () -> Unit
 ) {
-    // Wrap the entire application in our custom Material Theme.
     AppTheme {
-
-        // Create the navigation Controller to navigate between different screens.
         val navController = rememberNavController()
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-        // Use Material3 Scaffold for the layout.
-        // Apply imePadding to adjust for keyboard visibility.
-        // Apply systemBarsPadding to adjust for status bar and navigation bar.
-        Scaffold(
-            modifier = Modifier
-                .imePadding()
-                .systemBarsPadding(),
-            bottomBar = { HomeNavigation(navController = navController) },
-        ) { innerPaddingModifier ->
-
-            // Receive navController.
-            // Apply Scaffold padding.
-            // Pass through the navigator.
-            // Pass through finish callbacks.
-            NavGraph(
-                navController = navController,
-                modifier = Modifier.padding(innerPaddingModifier),
-                navigator = navigator,
-                finish = finish
-            )
+        if (isLandscape) {
+            // Landscape layout with NavigationRail
+            Row(
+                modifier = Modifier
+                    .systemBarsPadding()
+                    .imePadding()
+            ) {
+                HomeNavigation(navController = navController)
+                NavContent(navController, navigator, finish)
+            }
+        } else {
+            // Portrait layout using Scaffold with BottomBar
+            Scaffold(
+                modifier = Modifier
+                    .systemBarsPadding()
+                    .imePadding(),
+                bottomBar = { HomeNavigation(navController = navController) },
+                contentWindowInsets = WindowInsets.systemBars
+            ) { innerPadding ->
+                NavContent(navController, navigator, finish, Modifier.padding(innerPadding))
+            }
         }
     }
+}
+
+@Composable
+private fun NavContent(
+    navController: NavHostController,
+    navigator: Navigator,
+    finish: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    NavGraph(
+        navController = navController,
+        modifier = modifier,
+        navigator = navigator,
+        finish = finish
+    )
 }
