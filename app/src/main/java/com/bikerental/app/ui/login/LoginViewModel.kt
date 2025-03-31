@@ -21,10 +21,6 @@ class LoginViewModel @Inject constructor(
     private val auth: FirebaseAuth
 ) : BaseViewModel(navigator) {
 
-    companion object {
-        const val TAG = "LoginViewModel"
-    }
-
     private val _email = MutableStateFlow("")
     private val _password = MutableStateFlow("")
     private val _emailError = MutableStateFlow("")
@@ -56,7 +52,7 @@ class LoginViewModel @Inject constructor(
         if(validate()) {
             _isLoading.tryEmit(true)
             _loginError.tryEmit("")
-            
+
             launchFirebase {
                 try {
                     authRepository.firebaseLogin(email.value, password.value)
@@ -91,8 +87,10 @@ class LoginViewModel @Inject constructor(
     private fun validate(): Boolean {
         var error = false
         if (!email.value.isValidEmail()) _emailError.tryEmit("Invalid Email").run { error = true }
-        if (password.value.length < 6) _passwordError.tryEmit("Password length should be at least 6")
-            .run { error = true }
+        if (password.value.length < 6) {
+            _passwordError.tryEmit("Password length should be at least 6")
+                .run { error = true }
+        }
         return !error
     }
 

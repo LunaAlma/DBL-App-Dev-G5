@@ -6,8 +6,6 @@ import com.google.firebase.Timestamp
 data class MarkerData(
     val location: LatLng,
 
-    val ownerName: String,
-
     val rating: Int,
 
     val bikeImgId: String, // Null option here? String? = null
@@ -16,9 +14,9 @@ data class MarkerData(
 
     val city: String,
 
-    val startTime: Timestamp? = null,
+    val startTime: Timestamp?,
 
-    val endTime: Timestamp? = null,
+    val endTime: Timestamp?,
 
     val ownerId: String,
 

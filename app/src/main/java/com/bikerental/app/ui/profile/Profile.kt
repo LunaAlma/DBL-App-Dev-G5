@@ -42,6 +42,7 @@ fun ProfileView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .systemBarsPadding()
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

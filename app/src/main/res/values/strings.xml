@@ -23,4 +23,12 @@
     <string name="menu_add_bike">Add Bike</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_search">Search</string>
+    <string name="password_icon_description">Password</string>
+    <string name="login">Login</string>
+    <string name="forgot_password">Send password reset email</string>
+    <string name="email_icon_description">Email</string>
+    <string name="image_logo_description">Logo</string>
+    <string name="name">Name</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="login_text">Already have an account?</string>
 </resources>

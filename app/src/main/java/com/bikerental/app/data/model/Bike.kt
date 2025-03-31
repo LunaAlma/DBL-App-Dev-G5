@@ -10,19 +10,13 @@ data class Bike(
 
     val bikeName: String = "",
 
-    val description: String = "",
-
     val price: Int = 0,
 
     val imageUrl: String = "",
 
-    val location: GeoPoint = GeoPoint(0.0, 0.0),
+    val location: GeoPoint = GeoPoint(0.0 , 0.0),
 
     val city: String = "",
-
-    val status: String = "available",
-
-    val createdAt: Timestamp = Timestamp.now(),
 
     val startTime: Timestamp = Timestamp.now(),
 

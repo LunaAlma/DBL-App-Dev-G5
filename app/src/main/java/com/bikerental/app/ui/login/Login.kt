@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -76,7 +78,7 @@ private fun LoginView(
     resetPassword: () -> Unit
 ) {
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize().systemBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -90,7 +92,6 @@ private fun LoginView(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-
         ) {
             Row(
                 modifier = Modifier.padding(
@@ -102,7 +103,7 @@ private fun LoginView(
             ) {
                 Image(
                     painterResource(R.drawable.logo),
-                    contentDescription = "logo",
+                    contentDescription = stringResource(R.string.image_logo_description),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(80.dp)
                 )
@@ -119,12 +120,12 @@ private fun LoginView(
                     modifier = Modifier.fillMaxWidth(),
                     value = email,
                     onValueChange = onEmailChange,
-                    label = { Text("Email") },
+                    label = { Text(stringResource(R.string.email)) },
                     singleLine = true,
                     leadingIcon = {
                         Icon(
                             Icons.Filled.Email,
-                            contentDescription = "Email"
+                            contentDescription = stringResource(R.string.email_icon_description)
                         )
                     },
                     isError = emailError.isNotEmpty(),
@@ -149,12 +150,12 @@ private fun LoginView(
                     modifier = Modifier.fillMaxWidth(),
                     value = password,
                     onValueChange = onPasswordChange,
-                    label = { Text("Password") },
+                    label = { Text(stringResource(R.string.password)) },
                     singleLine = true,
                     leadingIcon = {
                         Icon(
                             Icons.Filled.Password,
-                            contentDescription = "Password"
+                            contentDescription = stringResource(R.string.password_icon_description)
                         )
                     },
                     isError = passwordError.isNotEmpty(),
@@ -168,7 +169,6 @@ private fun LoginView(
                     visualTransformation = PasswordVisualTransformation(),
                 )
             }
-
             if (loginError.isNotEmpty()) {
                 Row(
                     modifier = Modifier.padding(
@@ -206,7 +206,7 @@ private fun LoginView(
                     } else {
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = "Login",
+                            text = stringResource(R.string.login),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -225,7 +225,7 @@ private fun LoginView(
                     modifier = Modifier.clickable {
                         switchSignUp()
                     },
-                    text = "Want to create an account?",
+                    text = stringResource(R.string.sign_up_text),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -242,7 +242,7 @@ private fun LoginView(
                     modifier = Modifier.clickable {
                         resetPassword()
                     },
-                    text = "Send password reset email.",
+                    text = stringResource(R.string.forgot_password),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

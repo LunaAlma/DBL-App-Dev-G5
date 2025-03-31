@@ -18,9 +18,6 @@ class InboxViewModel @Inject constructor(
     private val auth: FirebaseAuth
 ) : BaseViewModel(navigator) {
 
-    companion object {
-        const val TAG = "InboxViewModel"
-    }
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users = _users.asStateFlow()
 
