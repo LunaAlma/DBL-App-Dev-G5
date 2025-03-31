@@ -1,11 +1,18 @@
 package com.bikerental.app.ui.create
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PedalBike
@@ -13,12 +20,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.rememberAsyncImagePainter
 
 @Composable
 fun AddBike(
@@ -33,6 +43,8 @@ fun AddBike(
         bikeNameError = viewModel.bikeNameError.collectAsStateWithLifecycle().value,
         bikeDescriptionError = viewModel.bikeDescriptionError.collectAsStateWithLifecycle().value,
         bikeCityError = viewModel.bikeCityError.collectAsStateWithLifecycle().value,
+        bikeImageUri = viewModel.bikeImageUri.collectAsStateWithLifecycle().value,
+        onBikeImageChange = { viewModel.onBikeImageChange(it) },
         onBikeNameChange = { viewModel.onBikeNameChange(it) },
         onBikeDescriptionChange = { viewModel.onBikeDescriptionChange(it) },
         onBikeCityChange = { viewModel.onBikeCityChange(it) },
@@ -54,6 +66,8 @@ fun AddBikeView(
     bikeCityError: String,
     firebaseError: String,
     isLoading: Boolean,
+    bikeImageUri: Uri?,
+    onBikeImageChange: (Uri) -> Unit,
     onBikeNameChange: (String) -> Unit = {},
     onBikeDescriptionChange: (String) -> Unit = {},
     onBikeCityChange: (String) -> Unit = {},
@@ -88,6 +102,21 @@ fun AddBikeView(
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.headlineSmall // Uses Material Design typography
+                )
+            }
+            Row(
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 32.dp,
+                    bottom = 4.dp
+                )
+            ) {
+                // Add profile image selector
+                BikeImageSelector(
+                    bikeImageUri = bikeImageUri,
+                    onImageSelected = onBikeImageChange,
+                    modifier = Modifier.padding(16.dp)
                 )
             }
             Row(
@@ -211,6 +240,46 @@ fun AddBikeView(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun BikeImageSelector(
+    bikeImageUri: Uri?,
+    onImageSelected: (Uri) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { onImageSelected(it) }
+    }
+    Box(
+        modifier = modifier
+            .size(120.dp)
+            .clip(CircleShape)
+            .clickable { launcher.launch("image/*") }
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (bikeImageUri != null) {
+            Image(
+                painter = rememberAsyncImagePainter(bikeImageUri),
+                contentDescription = "Bike image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.AddAPhoto,
+                contentDescription = "Select bike image",
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

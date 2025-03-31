@@ -46,6 +46,8 @@ class AddBikeViewModel @Inject constructor(
     private val _bikeCityError = MutableStateFlow("")
     private val _firebaseError = MutableStateFlow("")
     private val _isLoading = MutableStateFlow(false)
+    private val _bikeImageUri = MutableStateFlow<Uri?>(null)
+
 
     val bikeName = _bikeName.asStateFlow()
     val description = _description.asStateFlow()
@@ -55,6 +57,11 @@ class AddBikeViewModel @Inject constructor(
     val bikeCityError = _bikeCityError.asStateFlow()
     val firebaseError = _firebaseError.asStateFlow()
     val isLoading = _isLoading.asStateFlow()
+    val bikeImageUri = _bikeImageUri.asStateFlow()
+
+    fun onBikeImageChange(uri: Uri) {
+        _bikeImageUri.value = uri
+    }
 
     fun onBikeNameChange(input: String) {
         _bikeName.tryEmit(input)
