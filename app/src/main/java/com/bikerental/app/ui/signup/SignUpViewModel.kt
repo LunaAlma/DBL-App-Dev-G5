@@ -1,5 +1,6 @@
 package com.bikerental.app.ui.signup
 
+import android.net.Uri
 import androidx.core.util.PatternsCompat
 import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.UserRepository
@@ -44,6 +45,7 @@ class SignUpViewModel @Inject constructor(
     private val _passwordError = MutableStateFlow("")
     private val _signUpError = MutableStateFlow("")
     private val _isLoading = MutableStateFlow(false)
+    private val _profileImageUri = MutableStateFlow<Uri?>(null)
 
     val name = _name.asStateFlow()
     val email = _email.asStateFlow()
@@ -53,6 +55,11 @@ class SignUpViewModel @Inject constructor(
     val passwordError = _passwordError.asStateFlow()
     val signUpError = _signUpError.asStateFlow()
     val isLoading = _isLoading.asStateFlow()
+    val profileImageUri = _profileImageUri.asStateFlow()
+
+    fun onProfileImageChange(uri: Uri) {
+        _profileImageUri.value = uri
+    }
 
     /**
      * Handles name field changes and clears related errors

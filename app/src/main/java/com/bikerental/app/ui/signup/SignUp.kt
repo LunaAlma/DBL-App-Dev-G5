@@ -1,5 +1,6 @@
 package com.bikerental.app.ui.signup
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,22 +23,27 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.R
 
 /**
@@ -60,6 +66,8 @@ fun SignUp(
     // Prevent back navigation during sign-up process
     BackHandler { viewModel.navigator.finish() }
 
+//    val profileImageUri = viewModel.profileImageUri.collectAsStateWithLifecycle().value
+
     SignUpView(
         modifier,
         name = viewModel.name.collectAsStateWithLifecycle().value,
@@ -70,6 +78,8 @@ fun SignUp(
         passwordError = viewModel.passwordError.collectAsStateWithLifecycle().value,
         signUpError = viewModel.signUpError.collectAsStateWithLifecycle().value,
         isLoading = viewModel.isLoading.collectAsStateWithLifecycle().value,
+        profileImageUri = viewModel.profileImageUri.collectAsStateWithLifecycle().value,
+        onProfileImageChange = { viewModel.onProfileImageChange(it) },
         onNameChange = { viewModel.onNameChange(it) },
         onEmailChange = { viewModel.onEmailChange(it) },
         onPasswordChange = { viewModel.onPasswordChange(it) },
@@ -98,6 +108,8 @@ private fun SignUpView(
     passwordError: String,
     signUpError: String,
     isLoading: Boolean,
+    profileImageUri: Uri?,
+    onProfileImageChange: (Uri) -> Unit,
     onNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -119,22 +131,12 @@ private fun SignUpView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Row(
-                modifier = Modifier.padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 32.dp,
-                    bottom = 4.dp
-                )
-            ) {
-                // Application Logo
-                Image(
-                    painterResource(R.drawable.logo),
-                    contentDescription = stringResource(R.string.image_logo_description),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(80.dp)
-                )
-            }
+            // Add profile image selector
+            ProfileImageSelector(
+                profileImageUri = profileImageUri,
+                onImageSelected = onProfileImageChange,
+                modifier = Modifier.padding(16.dp)
+            )
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -291,6 +293,47 @@ private fun SignUpView(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+        }
+    }
+}
+
+
+@Composable
+private fun ProfileImageSelector(
+    profileImageUri: Uri?,
+    onImageSelected: (Uri) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { onImageSelected(it) }
+    }
+    Box(
+        modifier = modifier
+            .size(120.dp)
+            .clip(CircleShape)
+            .clickable { launcher.launch("image/*") }
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (profileImageUri != null) {
+            Image(
+                painter = rememberAsyncImagePainter(profileImageUri),
+                contentDescription = "Profile image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.AddAPhoto,
+                contentDescription = "Select profile image",
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
