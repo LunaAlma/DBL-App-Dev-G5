@@ -8,15 +8,17 @@ data class Bike(
 
     val ownerId: String = "",
 
+    val bikeName: String = "",
+
     val price: Int = 0,
 
     val imageUrl: String = "",
 
-    val location: GeoPoint? = null,
+    val location: GeoPoint = GeoPoint(0.0 , 0.0),
 
     val city: String = "",
 
-    val startTime: Timestamp? = null,
+    val startTime: Timestamp = Timestamp.now(),
 
-    val endTime: Timestamp? = null
+    val endTime: Timestamp = Timestamp.now(),
 )

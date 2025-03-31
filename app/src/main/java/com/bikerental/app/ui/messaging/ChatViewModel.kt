@@ -19,10 +19,6 @@ class ChatViewModel @Inject constructor(
 
     val userId: String = savedStateHandle.get<String>("userId") ?: ""
 
-    companion object {
-        const val TAG = "InboxViewModel"
-    }
-
     val otherUser = MutableStateFlow<User?>(null)
 
     init {

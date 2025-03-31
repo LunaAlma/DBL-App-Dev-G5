@@ -100,7 +100,6 @@ class AddBikeViewModel @Inject constructor(
                         UUID.randomUUID().toString(),
                         auth.getCurrentUser!!.uid,
                         bikeName.value, city.value,
-                        description.value,
 //                        imageUrl.toString()
                         )
                 } catch (e: Exception) {

@@ -1,14 +1,20 @@
 package com.bikerental.app.ui
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -29,26 +35,36 @@ fun BikeApp(
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-        if (isLandscape) {
-            // Landscape layout with NavigationRail
-            Row(
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Box(
                 modifier = Modifier
-                    .systemBarsPadding()
-                    .imePadding()
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
             ) {
-                HomeNavigation(navController = navController)
-                NavContent(navController, navigator, finish)
-            }
-        } else {
-            // Portrait layout using Scaffold with BottomBar
-            Scaffold(
-                modifier = Modifier
-                    .systemBarsPadding()
-                    .imePadding(),
-                bottomBar = { HomeNavigation(navController = navController) },
-                contentWindowInsets = WindowInsets.systemBars
-            ) { innerPadding ->
-                NavContent(navController, navigator, finish, Modifier.padding(innerPadding))
+                if (isLandscape) {
+                    // Landscape layout with NavigationRail
+                    Row(
+                        modifier = Modifier
+                            .imePadding()
+                    ) {
+                        HomeNavigation(navController = navController)
+                        NavContent(navController, navigator, finish)
+                    }
+                } else {
+                    // Portrait layout using Scaffold with BottomBar
+                    Scaffold(
+                        modifier = Modifier
+                            .imePadding(),
+                        bottomBar = { HomeNavigation(navController = navController) },
+                        contentWindowInsets = WindowInsets.systemBars
+                    ) { innerPadding ->
+                        NavContent(navController, navigator, finish, Modifier.padding(innerPadding))
+                    }
+                }
             }
         }
     }

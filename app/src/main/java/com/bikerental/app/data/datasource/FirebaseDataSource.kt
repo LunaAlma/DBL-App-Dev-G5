@@ -12,6 +12,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import com.google.firebase.firestore.GeoPoint
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.Timestamp
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 
@@ -59,7 +60,6 @@ class FirebaseDataSource @Inject constructor(
      * @param ownerId ID of the bike owner (user)
      * @param bikeName Display name of the bike
      * @param city City where the bike is located
-     * @param description Bike description/details
      * @throws Exception if document creation fails
      */
     suspend fun createBikeDocument(
@@ -67,15 +67,18 @@ class FirebaseDataSource @Inject constructor(
         ownerId: String,
         bikeName: String,
         city: String,
-        description: String
-    ) {
+        ) {
         db.collection("bikes").document(uuid).set(
             Bike(
                 bikeId = uuid,
                 ownerId = ownerId,
                 bikeName = bikeName,
                 city = city,
-                description = description,
+                price = 5,
+                imageUrl = "",
+                location = GeoPoint(0.0, 0.0),
+                startTime = Timestamp.now(),
+                endTime = Timestamp.now(),
             )
         ).await()
     }
