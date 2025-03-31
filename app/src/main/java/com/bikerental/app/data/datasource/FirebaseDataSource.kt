@@ -2,6 +2,7 @@ package com.bikerental.app.data.datasource
 
 import android.net.Uri
 import com.bikerental.app.data.model.Bike
+import com.bikerental.app.data.model.Rental
 import com.bikerental.app.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -12,8 +13,14 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import com.google.firebase.firestore.GeoPoint
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import com.google.firebase.Timestamp
 import java.util.UUID
 
 /**
@@ -211,5 +218,25 @@ class FirebaseDataSource @Inject constructor(
             Result.failure(e)
         }
     }
+
+    fun getUserRentals(userId: String): Flow<List<Rental>> = flow {
+        val snapshot = Firebase.firestore
+            .collection("rentals")
+            .whereEqualTo("renterId", userId)
+            .get()
+            .await()
+
+        val rentals = snapshot.documents.mapNotNull { doc ->
+            Rental(
+                bikeId = doc.getString("bikeId") ?: "",
+                renterId = doc.getString("renterId") ?: "",
+                ownerId = doc.getString("ownerId") ?: "",
+                status = doc.getString("status") ?: "",
+                startTime = doc.getTimestamp("startTime") ?: Timestamp.now(),
+                endTime = doc.getTimestamp("endTime") ?: Timestamp.now()
+            )
+        }
+        emit(rentals)
+    }.flowOn(Dispatchers.IO)
 
 }

@@ -1,6 +1,5 @@
 package com.bikerental.app.ui.profile
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +15,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import coil.compose.AsyncImage
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun Profile(modifier: Modifier,
@@ -34,6 +37,7 @@ fun ProfileView(
     viewModel: ProfileViewModel,
     onLogout: () -> Unit
 ) {
+        val userState by viewModel.user.collectAsState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -59,29 +63,21 @@ fun ProfileView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Profile Picture
-//                Image(
-//                    painter = rememberAsyncImagePainter(),
-//                    contentDescription = "Profile Picture",
-//                    modifier = Modifier
-//                        .size(80.dp)
-//                        .clip(CircleShape),
-//                    contentScale = ContentScale.Crop
-//                )
+                    AsyncImage(
+                        model = userState?.profilePicture ?: "https://example.com/default.jpg",
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)  // No extra parenthesis here
+                    )
 
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    // User Info
                     Column {
                         Text(
-                            text = "test",
-                            fontSize = 20.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            text = userState?.name ?: "Loading...",
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "test",
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            text = userState?.email ?: "Loading...",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -96,7 +92,9 @@ fun ProfileView(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column {
-                    SettingsItem("Past Rentals")
+                    SettingsItem("Past Rentals") {
+                        viewModel.navigateToPastRentals()
+                    }
 
                     SettingsItem("Payments & Invoices")
 
@@ -139,12 +137,12 @@ fun ProfileView(
 
 }
 @Composable
-fun SettingsItem(title: String) {
+fun SettingsItem(title: String, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp)
-            .clickable { /* TODO: Navigate */ },
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
