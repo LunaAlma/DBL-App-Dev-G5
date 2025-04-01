@@ -1,5 +1,7 @@
 package com.bikerental.app.ui.bike
 import com.bikerental.app.R
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,18 +15,42 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.tooling.preview.Preview
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.bikerental.app.ui.theme.AppTheme
+import com.bikerental.app.viewmodel.BikeDetailsViewModel
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 
+
+
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun BikeRentalCard() {
+fun BikeRentalCard(bikeId: String){
+    val bikeViewModel: BikeDetailsViewModel = viewModel()
+    val bikeData = bikeViewModel.bikeDetails.value
+
+    Log.d("BikeDetails", "bikeId: $bikeId")
+    LaunchedEffect(bikeId) {
+        bikeViewModel.fetchBikeDetails(bikeId)
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
 
     }
@@ -36,16 +62,32 @@ fun BikeRentalCard() {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
+            val context = LocalContext.current
+            var painter: Painter = painterResource(id = R.drawable.bike)
+            var imageLoaded by remember { mutableStateOf(false) }
 
-            Image(
-                painter = painterResource(id = R.drawable.bike),
-                contentDescription = "Bike Image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+            if (bikeData?.imageRef != null && !imageLoaded) {
+                val storageRef = Firebase.storage.reference.child(bikeData.imageRef)
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    val request = ImageRequest.Builder(context)
+                        .data(uri)
+                        .build()
+                    painter = rememberAsyncImagePainter(model = request)
+                    imageLoaded = true
+                }.addOnFailureListener { exception ->
+                    Log.e("BikeRentalCard", "Failed to load image: ${exception.message}")
+                }
+            }
+
+                Image(
+                    painter = painter,
+                    contentDescription = "Bike Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -64,23 +106,23 @@ fun BikeRentalCard() {
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(text = "5.0", style = MaterialTheme.typography.bodyMedium)
                 }
-                Text(text = "50 €", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${bikeData?.price}", style = MaterialTheme.typography.bodyMedium)
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
 
-            Text(text = "5-10 days", style = MaterialTheme.typography.bodySmall)
+            Text(text = "${bikeData?.startTime} - ${bikeData?.endTime}", style = MaterialTheme.typography.bodySmall)
 
             Spacer(modifier = Modifier.height(8.dp))
 
 
             Text(
-                text = "Enjoy the city with a reliable bike. Perfect for short or long rides.",
+                text = bikeData?.bikeName ?: "No name found",
                 style = MaterialTheme.typography.bodyMedium
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = bikeData?.ownerName ?: "no owner",style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(8.dp))
 
 
             Button(
@@ -98,6 +140,6 @@ fun BikeRentalCard() {
 @Composable
 fun BikeRentalCardPreview() {
     AppTheme {
-        BikeRentalCard()
+        BikeRentalCard("bike_1")
     }
 }
