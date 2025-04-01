@@ -75,8 +75,13 @@ companion object {
             }
         }
     }
-        fun navigateToPastRentals() {
+
+    fun navigateToPastRentals() {
         navigator.navigateTo(Destination.Home.PastRentals.route)
+    }
+
+    fun navigateToMyBikes() {
+        navigator.navigateTo(Destination.Home.MyBikes.route)
     }
 
     fun onLogout() {

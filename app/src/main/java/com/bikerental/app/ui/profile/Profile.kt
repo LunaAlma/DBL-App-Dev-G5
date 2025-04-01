@@ -38,15 +38,20 @@ fun Profile(
         modifier = modifier,
         viewModel = viewModel,
         user = viewModel.user.collectAsState().value,
-        onLogout = { viewModel.onLogout() }
+        onLogout = { viewModel.onLogout() },
+        navigateToMyBikes = { viewModel.navigateToMyBikes() },
+        navigateToPastRentals = { viewModel.navigateToPastRentals() }
     )
 }
 
 @Composable
-fun ProfileView(
-    modifier: Modifier = Modifier,
+private fun ProfileView(
+    modifier: Modifier,
+    user: User?,
     viewModel: ProfileViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    navigateToMyBikes: () -> Unit,
+    navigateToPastRentals: () -> Unit
 ) {
 //    val userState by viewModel.user.collectAsState()
 
@@ -129,7 +134,10 @@ private fun ProfileCard(user: User?) {
 }
 
 @Composable
-private fun SettingsSection() {
+private fun SettingsSection(
+    navigateToMyBikes: () -> Unit = {},
+    navigateToPastRentals: () -> Unit = {}
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge
@@ -138,7 +146,7 @@ private fun SettingsSection() {
             ListItem(
                 headlineContent = { Text("My Bikes") },
                 trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
-                modifier = Modifier.clickable { /* Handle click */ }
+                modifier = Modifier.clickable { navigateToMyBikes() }
             )
             Divider(
                 thickness = 0.5.dp,
