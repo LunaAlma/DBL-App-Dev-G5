@@ -1,6 +1,7 @@
 package com.bikerental.app.data.datasource
 
 import android.net.Uri
+import android.util.Log
 import com.bikerental.app.data.model.Bike
 import com.bikerental.app.data.model.Rental
 import com.bikerental.app.data.model.User
@@ -371,6 +372,74 @@ class FirebaseDataSource @Inject constructor(
 
         awaitClose { /* No subscription to cancel in this implementation */ }
     }
+
+    // Fetch all bikes and filter out rented ones based on the bikeId from rentals
+    fun getAvailableBikes(startTime: Timestamp, endTime: Timestamp): Flow<List<Bike>> = flow {
+        // Step 1: Get all rentals
+        Log.d("BikeRepository", "Fetching all rentals from Firestore...")
+        val rentalsSnapshot = Firebase.firestore
+            .collection("rentals")
+            .get()
+            .await()
+
+        Log.d("BikeRepository", "Fetched rentals: ${rentalsSnapshot.size()}")
+
+        // Step 2: Extract the bikeIds of rented bikes
+        val rentedBikeIds = rentalsSnapshot.documents
+            .mapNotNull { it.getString("bikeId") }
+            .toSet()
+
+        Log.d("BikeRepository", "Rented bike IDs: $rentedBikeIds")
+
+        // Step 3: Fetch all bikes
+        Log.d("BikeRepository", "Fetching all bikes from Firestore...")
+        val bikesSnapshot = Firebase.firestore
+            .collection("bikes")
+            .get()
+            .await()
+
+        Log.d("BikeRepository", "Fetched bikes: ${bikesSnapshot.size()}")
+
+        // Step 4: Filter bikes - Remove rented bikes from the list
+        val availableBikes = bikesSnapshot.documents
+            .mapNotNull { doc ->
+                val bikeId = doc.getString("bikeId") ?: return@mapNotNull null
+                val startTime = doc.getTimestamp("startTime") ?: return@mapNotNull null
+                val endTime = doc.getTimestamp("endTime") ?: return@mapNotNull null
+                val location = doc.getGeoPoint("location") ?: return@mapNotNull null  // Ensure location is extracted
+
+                // Log the values we are working with for each bike
+                Log.d("BikeRepository", "Processing bikeId: $bikeId, startTime: $startTime, endTime: $endTime, location: $location")
+
+                // Filter out rented bikes (if the bikeId is in rentedBikeIds, skip it)
+                if (bikeId !in rentedBikeIds && startTime <= endTime) {
+                    Log.d("BikeRepository", "Bike $bikeId is available.")
+                    Bike(
+                        bikeId = bikeId,
+                        bikeName = doc.getString("bikeName") ?: "",
+                        city = doc.getString("city") ?: "",
+                        price = doc.getDouble("price") ?: 0.0,
+                        startTime = startTime,
+                        endTime = endTime,
+                        location = location, // Ensure location is passed to the Bike object
+                        ownerId = doc.getString("ownerId") ?: "", // Fetch ownerId and provide a default value
+                        imageUrl = doc.getString("imageUrl") ?: "",
+                    )
+                } else {
+                    Log.d("BikeRepository", "Bike $bikeId is rented or time invalid.")
+                    null
+                }
+            }
+            .filter { bike ->
+                // Step 5: Filter bikes by the provided timestamp range
+                Log.d("BikeRepository", "Checking if bike is within the range: $startTime <= ${bike.startTime} && ${bike.endTime} >= $endTime")
+                bike.startTime <= endTime && bike.endTime >= startTime
+            }
+
+        Log.d("BikeRepository", "Available bikes after time filtering: $availableBikes")
+
+        emit(availableBikes)
+    }.flowOn(Dispatchers.IO)
 
     /**
      * Gets bikes filtered by owner and available in a date range.
