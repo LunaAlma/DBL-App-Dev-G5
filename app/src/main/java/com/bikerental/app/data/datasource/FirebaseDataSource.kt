@@ -74,16 +74,18 @@ class FirebaseDataSource @Inject constructor(
         uuid: String,
         ownerId: String,
         bikeName: String,
+        bikePrice: Double,
         city: String,
+        bikeImageUrl: String
         ) {
         db.collection("bikes").document(uuid).set(
             Bike(
                 bikeId = uuid,
                 ownerId = ownerId,
                 bikeName = bikeName,
+                price = bikePrice,
                 city = city,
-                price = 5,
-                imageUrl = "",
+                imageUrl = bikeImageUrl,
                 location = GeoPoint(0.0, 0.0),
                 startTime = Timestamp.now(),
                 endTime = Timestamp.now(),
@@ -220,6 +222,12 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Uploads a profile image to Firebase Storage.
+     *
+     * @param imageUri URI of image to upload
+     * @return Result<String> containing download URL on success
+     */
     suspend fun uploadProfileImage(imageUri: Uri): Result<String> {
         return try {
             val imageRef = storage.reference

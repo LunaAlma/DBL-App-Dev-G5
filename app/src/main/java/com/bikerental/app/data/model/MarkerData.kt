@@ -10,7 +10,7 @@ data class MarkerData(
 
     val bikeImgId: String, // Null option here? String? = null
 
-    val bikePrice: Int,
+    val bikePrice: Double,
 
     val city: String,
 

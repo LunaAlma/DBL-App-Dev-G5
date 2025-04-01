@@ -14,8 +14,8 @@ class BikeRepository @Inject constructor(
 
     fun getBikeDetailsById(bikeId: String): Flow<Bike> = firebaseDataSource.fetchBikeById(bikeId)
 
-    suspend fun addBike(uuid: String, ownerId: String, bikeName: String, city: String) =
-        firebaseDataSource.createBikeDocument(uuid, ownerId, bikeName, city)
+    suspend fun addBike(uuid: String, ownerId: String, bikePrice: Double, bikeName: String, city: String, bikeImageUrl: String) =
+        firebaseDataSource.createBikeDocument(uuid, ownerId, bikeName, bikePrice, city, bikeImageUrl)
 
     fun removeBike(bike: Bike) = firebaseDataSource.deleteBike(bike)
 
@@ -23,7 +23,7 @@ class BikeRepository @Inject constructor(
         firebaseDataSource.updateBikeLocation(bikeId, newLocation)
     }
 
-    suspend fun addBikeImage(imageUri: Uri) {
-        firebaseDataSource.uploadBikeImage(imageUri)
+    suspend fun addBikeImage(imageUri: Uri): Result<String> {
+        return firebaseDataSource.uploadBikeImage(imageUri)
     }
 }

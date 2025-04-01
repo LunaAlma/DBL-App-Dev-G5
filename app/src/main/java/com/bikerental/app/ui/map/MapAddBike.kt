@@ -354,7 +354,7 @@ data class MarkerDataAddPin(
     val ownerName: String,
     val rating: Int,
     val bikeImgId: String, // Null option here? String? = null
-    val bikePrice: Int,
+    val bikePrice: Double,
     val city: String,
     val startTime: Timestamp? = null,
     val endTime: Timestamp? = null,

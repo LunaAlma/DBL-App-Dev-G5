@@ -1,5 +1,7 @@
 package com.bikerental.app.ui.create
 
+import android.R.attr.label
+import android.R.attr.singleLine
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,10 +12,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
-import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Euro
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PedalBike
 import androidx.compose.material3.*
@@ -24,6 +29,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,14 +46,15 @@ fun AddBike(
         modifier,
         bikeName = viewModel.bikeName.collectAsStateWithLifecycle().value,
         bikeCity = viewModel.city.collectAsStateWithLifecycle().value,
-        bikeDescription = viewModel.description.collectAsStateWithLifecycle().value,
-        bikeNameError = viewModel.bikeNameError.collectAsStateWithLifecycle().value,
-        bikeDescriptionError = viewModel.bikeDescriptionError.collectAsStateWithLifecycle().value,
-        bikeCityError = viewModel.bikeCityError.collectAsStateWithLifecycle().value,
+        bikePrice = viewModel.bikePrice.collectAsStateWithLifecycle().value,
         bikeImageUri = viewModel.bikeImageUri.collectAsStateWithLifecycle().value,
+        bikeNameError = viewModel.bikeNameError.collectAsStateWithLifecycle().value,
+        bikePriceError = viewModel.bikePriceError.collectAsStateWithLifecycle().value,
+        bikeCityError = viewModel.bikeCityError.collectAsStateWithLifecycle().value,
+        bikeImageError = viewModel.bikeImageError.collectAsStateWithLifecycle().value,
         onBikeImageChange = { viewModel.onBikeImageChange(it) },
         onBikeNameChange = { viewModel.onBikeNameChange(it) },
-        onBikeDescriptionChange = { viewModel.onBikeDescriptionChange(it) },
+        onBikePriceChange = { viewModel.onBikePriceChange(it) },
         onBikeCityChange = { viewModel.onBikeCityChange(it) },
         firebaseError = viewModel.firebaseError.collectAsStateWithLifecycle().value,
         isLoading = viewModel.isLoading.collectAsStateWithLifecycle().value,
@@ -59,18 +67,19 @@ fun AddBike(
 fun AddBikeView(
     modifier: Modifier = Modifier,
     bikeName: String,
-    bikeDescription: String,
     bikeCity: String,
+    bikePrice: String,
     bikeNameError: String,
-    bikeDescriptionError: String,
     bikeCityError: String,
+    bikePriceError: String,
+    bikeImageError: String,
     firebaseError: String,
     isLoading: Boolean,
     bikeImageUri: Uri?,
     onBikeImageChange: (Uri) -> Unit,
     onBikeNameChange: (String) -> Unit = {},
-    onBikeDescriptionChange: (String) -> Unit = {},
     onBikeCityChange: (String) -> Unit = {},
+    onBikePriceChange: (String) -> Unit = {},
     addBike: () -> Unit = {},
     ) {
     Scaffold { padding ->
@@ -116,8 +125,24 @@ fun AddBikeView(
                 BikeImageSelector(
                     bikeImageUri = bikeImageUri,
                     onImageSelected = onBikeImageChange,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 )
+            }
+            if (bikeImageError.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 4.dp,
+                        bottom = 4.dp
+                    )
+                ) {
+                    Text(
+                        text = bikeImageError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
             Row(
                 modifier = Modifier.padding(
@@ -155,20 +180,24 @@ fun AddBikeView(
             ) {
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = bikeDescription,
-                    onValueChange = onBikeDescriptionChange,
-                    label = { Text("Description") },
+                    value = bikePrice,
+                    onValueChange = onBikePriceChange,
+                    label = { Text("Price") },
                     singleLine = true,
                     leadingIcon = {
                         Icon(
-                            Icons.Filled.Description,
-                            contentDescription = "Description"
+                            Icons.Filled.Euro,
+                            contentDescription = "Price"
                         )
                     },
-                    isError = bikeDescriptionError.isNotEmpty(),
+                    isError = bikePriceError.isNotEmpty(),
                     supportingText = {
-                        Text(text = bikeDescriptionError)
+                        Text(text = bikePriceError)
                     },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    )
                 )
             }
             Row(
@@ -179,23 +208,81 @@ fun AddBikeView(
                     bottom = 4.dp
                 )
             ) {
-                OutlinedTextField(
+                var expanded by remember { mutableStateOf(false) }
+
+                ExposedDropdownMenuBox(
                     modifier = Modifier.fillMaxWidth(),
-                    value = bikeCity,
-                    onValueChange = onBikeCityChange,
-                    label = { Text("City") },
-                    singleLine = true,
-                    leadingIcon = {
-                        Icon(
-                            Icons.Filled.LocationOn,
-                            contentDescription = "Location"
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    val cities = listOf("Eindhoven", "Amsterdam", "Utrecht", "Den Haag", "Rotterdam")
+                    var expanded by remember { mutableStateOf(false) }
+
+                    ExposedDropdownMenuBox(
+                        modifier = Modifier.fillMaxWidth(),
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded }
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            value = bikeCity,
+                            onValueChange = {},
+                            label = { Text("City") },
+                            singleLine = true,
+                            readOnly = true,  // Disables keyboard input
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Filled.LocationOn,
+                                    contentDescription = "Location"
+                                )
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                    contentDescription = if (expanded) "Collapse" else "Expand"
+                                )
+                            },
+                            isError = bikeCityError.isNotEmpty(),
+                            supportingText = {
+                                Text(text = bikeCityError)
+                            },
                         )
-                    },
-                    isError = bikeCityError.isNotEmpty(),
-                    supportingText = {
-                        Text(text = bikeCityError)
-                    },
-                )
+
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            cities.forEach { city ->
+                                DropdownMenuItem(
+                                    text = { Text(city) },
+                                    onClick = {
+                                        onBikeCityChange(city)
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+//                OutlinedTextField(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    value = bikeCity,
+//                    onValueChange = onBikeCityChange,
+//                    label = { Text("City") },
+//                    singleLine = true,
+//                    leadingIcon = {
+//                        Icon(
+//                            Icons.Filled.LocationOn,
+//                            contentDescription = "Location"
+//                        )
+//                    },
+//                    isError = bikeCityError.isNotEmpty(),
+//                    supportingText = {
+//                        Text(text = bikeCityError)
+//                    },
+//                )
             }
             if (firebaseError.isNotEmpty()) {
                 Row(

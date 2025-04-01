@@ -1,28 +1,18 @@
 package com.bikerental.app.ui.create
 
-import android.content.Context
+import android.R.attr.description
 import android.net.Uri
-import android.os.Environment
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.FileProvider
-import androidx.lifecycle.viewModelScope
 import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.BikeRepository
 import com.bikerental.app.ui.base.BaseViewModel
 import com.bikerental.app.ui.navigation.Destination
 import com.bikerental.app.ui.navigation.Navigator
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.String
@@ -31,36 +21,36 @@ import kotlin.String
 class AddBikeViewModel @Inject constructor(
     navigator: Navigator,
     private val bikeRepository: BikeRepository,
-    private val auth: AuthRepository
+    private val auth: AuthRepository,
+    private val db: FirebaseStorage
 ) : BaseViewModel(navigator) {
 
-    companion object {
-        const val TAG = "AddBikeViewModel"
-    }
-
     private val _bikeName = MutableStateFlow("")
-    private val _description = MutableStateFlow("")
+    private val _bikePrice = MutableStateFlow("")
     private val _city = MutableStateFlow("")
     private val _bikeNameError = MutableStateFlow("")
-    private val _bikeDescriptionError = MutableStateFlow("")
+    private val _bikePriceError = MutableStateFlow("")
     private val _bikeCityError = MutableStateFlow("")
+    private val _bikeImageError = MutableStateFlow("")
     private val _firebaseError = MutableStateFlow("")
     private val _isLoading = MutableStateFlow(false)
     private val _bikeImageUri = MutableStateFlow<Uri?>(null)
 
-
     val bikeName = _bikeName.asStateFlow()
-    val description = _description.asStateFlow()
+    val bikePrice = _bikePrice.asStateFlow()
     val city = _city.asStateFlow()
     val bikeNameError = _bikeNameError.asStateFlow()
-    val bikeDescriptionError = _bikeDescriptionError.asStateFlow()
+    val bikePriceError = _bikePriceError.asStateFlow()
     val bikeCityError = _bikeCityError.asStateFlow()
+    val bikeImageError = _bikeImageError.asStateFlow()
     val firebaseError = _firebaseError.asStateFlow()
     val isLoading = _isLoading.asStateFlow()
     val bikeImageUri = _bikeImageUri.asStateFlow()
 
     fun onBikeImageChange(uri: Uri) {
         _bikeImageUri.value = uri
+        if (bikeImageUri.value != null) _bikeImageError.tryEmit("")
+        _firebaseError.tryEmit("")
     }
 
     fun onBikeNameChange(input: String) {
@@ -69,9 +59,9 @@ class AddBikeViewModel @Inject constructor(
         _firebaseError.tryEmit("")
     }
 
-    fun onBikeDescriptionChange(input: String) {
-        _description.tryEmit(input)
-        if (bikeDescriptionError.value.isNotEmpty()) _bikeDescriptionError.tryEmit("")
+    fun onBikePriceChange(input: String) {
+        _bikePrice.tryEmit(input)
+        if (bikePrice.value.isNotEmpty()) _bikePriceError.tryEmit("")
         _firebaseError.tryEmit("")
     }
 
@@ -84,9 +74,16 @@ class AddBikeViewModel @Inject constructor(
     private fun validate(): Boolean {
         var error = false
         if (bikeName.value.length < 6) _bikeNameError.tryEmit("Bike Name length should be at least 6").run { error = true }
-        if (description.value.length < 10) _bikeDescriptionError.tryEmit("Description length should be at least 10").run { error = true }
+        if (!isPriceValid(bikePrice.value)) _bikePriceError.tryEmit("Not a valid price").run { error = true }
         if (city.value.length < 3) _bikeCityError.tryEmit("City length should be at least 3").run { error = true }
+        if(bikeImageUri.value == null) _bikeImageError.tryEmit("Bike image is required").run { error = true }
         return !error
+    }
+
+    fun isPriceValid(finalPrice: String): Boolean {
+        return finalPrice.isNotEmpty() &&
+                finalPrice.toDoubleOrNull() != null &&
+                finalPrice.matches(Regex("^\\d+\\.\\d{2}$"))
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -97,17 +94,17 @@ class AddBikeViewModel @Inject constructor(
 
             launchFirebase {
                 try {
-//                    var imageUrl: String? = null
-//                    // Upload image if selected
-//                    _capturedImageUri.value?.let { uri ->
-//                        imageUrl = bikeRepository.addBikeImage(uri).toString()
-//                    }
+                    val imageUri = _bikeImageUri.value ?: throw Exception("Profile image is required")
+                    val uploadResult = bikeRepository.addBikeImage(imageUri)
+                    val downloadUrl = uploadResult.getOrElse { throw Exception("Profile image upload failed") }
 
                     bikeRepository.addBike(
-                        UUID.randomUUID().toString(),
-                        auth.getCurrentUser!!.uid,
-                        bikeName.value, city.value,
-//                        imageUrl.toString()
+                        uuid = UUID.randomUUID().toString(),
+                        ownerId = auth.getCurrentUser!!.uid,
+                        bikeName = bikeName.value,
+                        bikePrice = bikePrice.value.toDouble(),
+                        city = city.value,
+                        bikeImageUrl = downloadUrl
                         )
                 } catch (e: Exception) {
                     _firebaseError.tryEmit(e.message ?: "Adding bike failed")
