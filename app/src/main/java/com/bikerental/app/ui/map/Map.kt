@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,11 +14,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +48,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +69,7 @@ import com.google.maps.android.compose.MarkerState
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.zIndex
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.data.model.MarkerData
 import com.google.maps.android.compose.MapUiSettings
@@ -79,8 +84,8 @@ import java.util.Locale
 fun Map(
     modifier: Modifier,
     viewModel: MapViewModel = hiltViewModel()) {
-    val bikes by viewModel.bikes.collectAsState()
 
+    val bikes by viewModel.bikes.collectAsState()
     val owner by viewModel.ownerDetails.collectAsState()
 
     fun onBikeSelected(ownerId: String) {
@@ -102,8 +107,8 @@ fun Map(
     // CHANGE bikes to availableBikes once debugging
     val markersData = bikes.map { bike ->
         // bike.location is a GeoPoint from Firebase
-        val lat = bike.location?.latitude ?: 0.0
-        val lng = bike.location?.longitude ?: 0.0
+        val lat = bike.location.latitude ?: 0.0
+        val lng = bike.location.longitude ?: 0.0
 
         MarkerData(
             location = LatLng(lat, lng),
@@ -124,8 +129,10 @@ fun Map(
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
     val mapStyleResId = if (isDarkTheme) R.raw.map_style_night else R.raw.map_style
+    // Use Eindhoven coordinates as default
+    val defaultLocation = LatLng(51.4416, 5.4697)
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(51.423, 5.46), 10f)
+        position = CameraPosition.fromLatLngZoom(defaultLocation, 10f)
     }
 
     val locationsPermissions = rememberMultiplePermissionsState(
@@ -160,16 +167,17 @@ fun Map(
     val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult : LocationResult) {
             for (location in locationResult.locations) {
+//                currentLocation = location
+//                myLocationSource.onLocation(location)
+//                coroutineScope.launch {
+//                    cameraPositionState.animate(
+//                        update = CameraUpdateFactory.newLatLngZoom(
+//                            LatLng(location.latitude, location.longitude),
+//                            cameraPositionState.position.zoom
+//                        )
+//                    )
+//                }
                 currentLocation = location
-                myLocationSource.onLocation(location)
-                coroutineScope.launch {
-                    cameraPositionState.animate(
-                        update = CameraUpdateFactory.newLatLngZoom(
-                            LatLng(location.latitude, location.longitude),
-                            cameraPositionState.position.zoom
-                        )
-                    )
-                }
             }
         }
     }
@@ -193,66 +201,97 @@ fun Map(
         )
     }
 
+    LaunchedEffect(locationsPermissions.allPermissionsGranted) {
+        if (locationsPermissions.allPermissionsGranted) {
+            // Start listening for location updates
+            startListeningToLocations()
+
+            // Optionally, get the last known location and center the camera immediately
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    coroutineScope.launch {
+                        cameraPositionState.animate(
+                            update = CameraUpdateFactory.newLatLngZoom(
+                                LatLng(it.latitude, it.longitude),
+                                cameraPositionState.position.zoom
+                            )
+                        )
+                    }
+                }
+            }
+        } else {
+            // If permission is not granted, center on Eindhoven
+            coroutineScope.launch {
+                cameraPositionState.animate(
+                    update = CameraUpdateFactory.newLatLngZoom(
+                        LatLng(51.423, 5.46), // Eindhoven coordinates
+                        10f // Default zoom level
+                    )
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!locationsPermissions.allPermissionsGranted) {
+            locationsPermissions.launchMultiplePermissionRequest()
+        } else {
+            startListeningToLocations()
+        }
+    }
+
     Scaffold(
-        topBar = {
-            // This ensures the search bar stays at the top
-//            SearchBar(
-//                text = "searchText",
-//                onTextChange = { "searchText = it" },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(8.dp)
-//                    .clickable {
-//                        viewModel.onSearchBarClick()
-//                    },
-//                onClose = { }
-//            )
-        },
-        modifier = Modifier
-            .fillMaxSize()
-//        floatingActionButton = {
-//            FloatingActionButton(
-//                onClick = {
-//                    if (locationsPermissions.allPermissionsGranted) {
-//                        startListeningToLocations()
-//                        // Navigate to live location now
-//                        currentLocation?.let { location ->
-//                            coroutineScope.launch {
-//                                cameraPositionState.animate(
-//                                    update = CameraUpdateFactory.newLatLngZoom(
-//                                        LatLng(location.latitude, location.longitude),
-//                                        cameraPositionState.position.zoom
-//                                    )
-//                                )
-//                            }
-//                        }
-//                    } else {
-//                        locationsPermissions.launchMultiplePermissionRequest()
-//                    }
-//                },
-//                modifier = Modifier.offset(x = (13).dp, y = (-85).dp),
-//                shape = CircleShape,
-//                containerColor = Color.White,
-//                contentColor =
-//                    if (locationsPermissions.allPermissionsGranted) {
-//                        Color(0xFF1C73E8)
-//                    } else {
-//                        Color.Gray
-//                    }
-//            ) {
-//                // Icon here
-//                Icon(
-//                    modifier = Modifier.size(24.dp),
-//                    painter = painterResource(id = R.drawable.target),
-//                    contentDescription = "Live Location"
-//                )
-//            }
-//        }
+        modifier = Modifier.fillMaxSize(),
+        floatingActionButton = {
+            androidx.compose.material3.FloatingActionButton(
+                onClick = {
+                    if (locationsPermissions.allPermissionsGranted) {
+                        startListeningToLocations()
+                        if (currentLocation != null) {
+                            coroutineScope.launch {
+                                cameraPositionState.animate(
+                                    update = CameraUpdateFactory.newLatLngZoom(
+                                        LatLng(currentLocation!!.latitude, currentLocation!!.longitude),
+                                        cameraPositionState.position.zoom
+                                    )
+                                )
+                            }
+                        } else {
+                            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                                location?.let {
+                                    coroutineScope.launch {
+                                        cameraPositionState.animate(
+                                            update = CameraUpdateFactory.newLatLngZoom(
+                                                LatLng(it.latitude, it.longitude),
+                                                cameraPositionState.position.zoom
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        locationsPermissions.launchMultiplePermissionRequest()
+                    }
+                },
+                modifier = Modifier
+                    .padding(10.dp, 170.dp)
+                    .offset(x = 23.dp),
+                shape = androidx.compose.foundation.shape.CircleShape,
+                containerColor = Color.White,
+                contentColor = if (locationsPermissions.allPermissionsGranted) Color(0xFF1C73E8) else Color.Gray
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Star, // Replace with your desired icon if needed
+                    contentDescription = "Live Location",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
     ) {
         // Gives error when empty
         val mapProperties = MapProperties(
             mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, mapStyleResId),
-            // Zoom limitations
             maxZoomPreference = 18f,
             minZoomPreference = 3f,
 //         Restrict map bounds to Europe?
@@ -269,14 +308,16 @@ fun Map(
             cameraPositionState = cameraPositionState,
             // Customizable map properties
             properties = mapProperties,
-            locationSource = myLocationSource,
+//            locationSource = myLocationSource,
             uiSettings = MapUiSettings(
-                zoomControlsEnabled = false,
-                myLocationButtonEnabled = true,
-                compassEnabled = false
-            )
+                zoomControlsEnabled = true,
+                myLocationButtonEnabled = false,
+                compassEnabled = false,
+            ),
+            contentPadding = PaddingValues(bottom = 70.dp) // Adds padding to zoom in/out functionality
         ) {
             for (data in markersData) {
+                Log.d("MarkersData", "Data: $data")
                 val markerState = remember { MarkerState(position = data.location) }
                 Marker(
                     state = markerState,
@@ -325,7 +366,7 @@ fun BottomCard(
             .fillMaxSize()
             // If user taps outside the card, we dismiss it
             .clickable(
-                onClick = { onDismiss },
+                onClick = { onDismiss() },
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ),
@@ -430,62 +471,3 @@ fun BottomCard(
         }
     }
 }
-
-//@Composable
-//fun SearchBar(
-//    modifier: Modifier = Modifier,
-//    text: String,
-//    onTextChange: (String) -> Unit,
-//    onClose: () -> Unit
-//) {
-//    Surface(
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .height(56.dp)
-//            .padding(8.dp),
-//        shape = RoundedCornerShape(16.dp),
-//        color = MaterialTheme.colorScheme.surfaceVariant,
-//        shadowElevation = 4.dp
-//    ) {
-//        Row(
-//            modifier = Modifier.fillMaxSize(),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Icon(
-//                modifier = Modifier.padding(start = 16.dp),
-//                imageVector = Icons.Default.Search,
-//                contentDescription = "Search"
-//            )
-//
-//            BasicTextField(
-//                value = text,
-//                onValueChange = onTextChange,
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .padding(start = 8.dp, end = 8.dp),
-//                singleLine = true,
-//                textStyle = LocalTextStyle.current.copy(
-//                color = MaterialTheme.colorScheme.onSurfaceVariant
-//                ),
-//                decorationBox = { innerTextField ->
-//                    if (text.isEmpty()) {
-//                        Text(
-//                            text = "Search...",
-//                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-//                        )
-//                    }
-//                    innerTextField()
-//                }
-//            )
-//
-//            if (text.isNotEmpty()) {
-//                IconButton(onClick = { onTextChange("") }) {
-//                    Icon(
-//                        imageVector = Icons.Default.Close,
-//                        contentDescription = "Clear search"
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
