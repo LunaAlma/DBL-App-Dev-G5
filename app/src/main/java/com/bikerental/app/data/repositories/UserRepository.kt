@@ -65,4 +65,13 @@ class UserRepository @Inject constructor(
     suspend fun deleteUserDetails(uid: String) {
         firebaseDataSource.deleteUserDetails(uid)
     }
+
+    suspend fun updateUserImage(uid: String, imageUrl: String) {
+        firebaseDataSource.updateUserImage(uid, imageUrl)
+    }
+
+    suspend fun updateUserName(uid: String, name: String) {
+        firebaseDataSource.updateUserName(uid, name)
+    }
+
 }

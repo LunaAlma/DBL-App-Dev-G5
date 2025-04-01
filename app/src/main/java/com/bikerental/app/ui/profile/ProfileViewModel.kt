@@ -1,9 +1,7 @@
 package com.bikerental.app.ui.profile
 
+import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import com.bikerental.app.data.model.User
 import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.BikeRepository
@@ -34,6 +32,40 @@ class ProfileViewModel @Inject constructor(
 
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user.asStateFlow()
+
+    // Form state flows
+    private val _name = MutableStateFlow("")
+    private val _email = MutableStateFlow("")
+    private val _isLoading = MutableStateFlow(false)
+    private val _profileImageUri = MutableStateFlow<Uri?>(null)
+
+    val name = _name.asStateFlow()
+    val email = _email.asStateFlow()
+    val isLoading = _isLoading.asStateFlow()
+
+    fun onProfileImageChange(uri: Uri) {
+        _profileImageUri.value = uri
+
+        launchFirebase {
+            val imageUri = _profileImageUri.value ?: throw Exception("Profile image is required")
+            val uploadResult = userRepository.addProfileImage(imageUri)
+            val downloadUrl = uploadResult.getOrElse { throw Exception("Profile image upload failed") }
+            val uid = authRepository.getCurrentUser?.uid ?: throw Exception("User is not authenticated")
+
+            userRepository.updateUserImage(uid, downloadUrl)
+        }
+    }
+
+    /**
+     * Handles name field changes and clears related errors
+     */
+    fun onNameChanged(input: String) {
+        launchFirebase {
+            auth.currentUser?.let { user ->
+                userRepository.updateUserName(user.uid, input)
+            }
+        }
+    }
 
     init {
        loadUserDetails()

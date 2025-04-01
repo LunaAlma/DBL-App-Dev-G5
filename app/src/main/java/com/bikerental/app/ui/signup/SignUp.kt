@@ -78,8 +78,6 @@ fun SignUp(
     // Prevent back navigation during sign-up process
     BackHandler { viewModel.navigator.finish() }
 
-//    val profileImageUri = viewModel.profileImageUri.collectAsStateWithLifecycle().value
-
     SignUpView(
         modifier,
         name = viewModel.name.collectAsStateWithLifecycle().value,

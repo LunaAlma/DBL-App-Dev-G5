@@ -478,4 +478,31 @@ class FirebaseDataSource @Inject constructor(
         }
         awaitClose { /* No subscription to cancel in this implementation */ }
     }
+
+    suspend fun deleteUsersBikes(userId: String) {
+        // Get all bikes where ownerId == userId
+        val querySnapshot = db.collection("bikes")
+            .whereEqualTo("ownerId", userId)
+            .get()
+            .await()
+
+        // Delete each bike in batch
+        val batch = db.batch()
+        for (document in querySnapshot.documents) {
+            batch.delete(document.reference)
+        }
+        batch.commit().await()
+    }
+
+    suspend fun deleteUserDetails(uid: String) {
+        db.collection("users").document(uid).delete().await()
+    }
+
+    suspend fun updateUserImage(uid: String, imageUrl: String) {
+        db.collection("users").document(uid).update("profileImageUrl", imageUrl).await()
+    }
+
+    suspend fun updateUserName(uid: String, name: String) {
+        db.collection("users").document(uid).update("name", name).await()
+    }
 }
