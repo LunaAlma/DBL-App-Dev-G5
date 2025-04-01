@@ -20,5 +20,7 @@ data class MarkerData(
 
     val ownerId: String,
 
-    val bikeId: String
+    val bikeId: String,
+
+    val bikeName: String,
 )
