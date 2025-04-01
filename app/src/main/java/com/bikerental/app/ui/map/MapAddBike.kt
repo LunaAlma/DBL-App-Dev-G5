@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,7 +48,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -74,6 +79,7 @@ import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import com.google.firebase.Timestamp
+import com.google.maps.android.compose.MapUiSettings
 
 @Composable
 fun MapAddBike(
@@ -81,7 +87,7 @@ fun MapAddBike(
     viewModel: MapViewModel
 ) {
     MapAddBikeView(
-        bikeId = viewModel.bikeId,
+        bikeId = viewModel.bikeId.removePrefix("{bikeId}"), //Gets rid of {bikeId} from  bikeId passed in
         modifier = modifier,
         viewModel = viewModel
     )
@@ -130,6 +136,7 @@ fun MapAddBikeView(
     }
 
     var currentLocation by remember { mutableStateOf<Location?>(null) }
+    var isPinManuallyMoved by remember { mutableStateOf(false) }  // Tracks manual movement
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
     val mapStyleResId = if (isDarkTheme) R.raw.map_style_night else R.raw.map_style
@@ -144,19 +151,54 @@ fun MapAddBikeView(
         LocalContext.current
     )
 
+    val coroutineScope = rememberCoroutineScope()
+
     // If not granted, request permission immediately (NEW)
-    LaunchedEffect(Unit) {
-        if (!locationsPermissions.allPermissionsGranted) {
+    LaunchedEffect(locationsPermissions.allPermissionsGranted) {
+        if (locationsPermissions.allPermissionsGranted) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    markerPosition = LatLng(it.latitude, it.longitude)
+                    showConfirmationDialog = true  // Show confirmation immediately
+                    coroutineScope.launch {
+                        cameraPositionState.animate(
+                            update = CameraUpdateFactory.newLatLngZoom(
+                                LatLng(it.latitude, it.longitude),
+                                cameraPositionState.position.zoom
+                            )
+                        )
+                    }
+                }
+            }
+
+            val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    for (location in locationResult.locations) {
+                        currentLocation = location
+                    }
+                }
+            }
+
+            if (ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                fusedLocationClient.requestLocationUpdates(
+                    LocationRequest.Builder(1000L).build(),
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+            }
+        } else {
             locationsPermissions.launchMultiplePermissionRequest()
         }
     }
 
     // When we get a live location update, update the marker if not already set (NEW)
     LaunchedEffect(currentLocation) {
-        currentLocation?.let {
-            // Update markerPosition if not already set (or you may always want to reset)
-            if (markerPosition == null) {
+        if (!isPinManuallyMoved) {  // Only update if the user hasn't moved the pin
+            currentLocation?.let {
                 markerPosition = LatLng(it.latitude, it.longitude)
+                showConfirmationDialog = true
             }
         }
     }
@@ -180,8 +222,6 @@ fun MapAddBikeView(
             listener?.onLocationChanged(userLocation)
         }
     }
-
-    val coroutineScope = rememberCoroutineScope()
 
     val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult : LocationResult) {
@@ -220,20 +260,6 @@ fun MapAddBikeView(
     }
 
     Scaffold( // Removed search bar for moment
-        topBar = {
-            // This ensures the search bar stays at the top
-            SearchBarAddPin(
-                text = "searchText",
-                onTextChange = { "searchText = it" },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable {
-                        viewModel.onSearchBarClick()
-                    },
-                onClose = {}
-            )
-        },
         modifier = Modifier.fillMaxSize().systemBarsPadding().padding(bottom = 60.dp),
         floatingActionButton = {
             FloatingActionButton(
@@ -295,10 +321,24 @@ fun MapAddBikeView(
             // Customizable map properties
             properties = mapProperties,
             locationSource = myLocationSource,
+            uiSettings = MapUiSettings(
+                zoomControlsEnabled = true,
+                myLocationButtonEnabled = false,
+                compassEnabled = false,
+            ),
             onMapClick = { latLng ->
-                // Update marker location and show confirmation dialog
                 markerPosition = latLng
+                isPinManuallyMoved = true  // The user moved the pin manually
                 showConfirmationDialog = true
+                selectedMarker = MarkerDataAddPin( //IDK ABOUT THIS
+                    location = latLng,
+                    ownerName = "New Location",
+                    rating = 0,
+                    bikeImgId = "",
+                    bikePrice = 0.0,
+                    city = "",
+                    ownerId = ""
+                )
             }
         ) {
             markerPosition?.let { position ->
@@ -306,7 +346,22 @@ fun MapAddBikeView(
                     state = MarkerState(position = position),
                     onClick = {
                         // You might also update markerPosition here if you allow dragging
-                        showConfirmationDialog = true
+                        val existingMarkerData = markersData.find { it.location == position }
+
+                        if (existingMarkerData != null) {
+                            selectedMarker = existingMarkerData.copy(location = position) // Keep all other fields intact
+                            showConfirmationDialog = true
+                        } else {
+                            selectedMarker = MarkerDataAddPin(
+                                location = position,
+                                ownerName = "New Location",
+                                rating = 0,
+                                bikeImgId = "",
+                                bikePrice = 0.0,
+                                city = "",
+                                ownerId = ""
+                            )
+                        }
                         true
                     }
                 )
@@ -328,37 +383,37 @@ fun MapAddBikeView(
 //            }
         }
 
-        if (showConfirmationDialog && selectedMarker != null) {
+        if (showConfirmationDialog && markerPosition != null) {
             BottomCardSetPin(
-                markerData = selectedMarker!!,
-                onDismiss = { showConfirmationDialog = false },
-                onConfirm = {
-                    viewModel.updateBikeLocation(bikeId, selectedMarker!!.location)
+                markerData = selectedMarker ?: MarkerDataAddPin(
+                    location = markerPosition!!,
+                    ownerName = "New Location",
+                    rating = 0,
+                    bikeImgId = "",
+                    bikePrice = 0.0,
+                    city = "",
+                    ownerId = ""
+                ),
+                onDismiss = {
                     showConfirmationDialog = false
+                    selectedMarker = null
+                },
+                onConfirm = {
+                    if (bikeId.isNotBlank()) {
+                        Log.e("MapViewModel", bikeId)
+                    }
+                    selectedMarker?.let {
+                        viewModel.updateBikeLocation(bikeId, it.location)
+                    }
+                    showConfirmationDialog = false
+                    selectedMarker = null
+                    viewModel.goToMap()
                 }
             )
         }
     }
 
 }
-
-// Hardcoded data
-//private val markersData = listOf(
-//    MarkerData(
-//        location = LatLng(51.423,5.462),
-//        ownerName = "John",
-//        rating = "5",
-//        bikeImgId = R.drawable.target,
-//        bikePrice = 5,
-//    ),
-//    MarkerData(
-//        location = LatLng(51.508,5.398),
-//        ownerName = "Tim",
-//        rating = "4",
-//        bikeImgId = R.drawable.target,
-//        bikePrice = 6,
-//    ),
-//)
 
 // Original MarkerData
 data class MarkerDataAddPin(
@@ -387,7 +442,7 @@ fun BottomCardSetPin(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Transparent)
+//            .background(Color.Transparent)
             // If user taps outside the card, we dismiss it
             .clickable(
                 onClick = { onDismiss() },
@@ -399,43 +454,66 @@ fun BottomCardSetPin(
         // The pop-up at the bottom
         Card(
             modifier = Modifier
-                .width(300.dp)
-                .heightIn(min = 150.dp, max = 300.dp)
-                // Clicking the card doesn't do anything
-                .clickable(
-                    onClick = { /* nothing */ },
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                )
-                .padding(bottom = 20.dp), // prev. 16
+                .fillMaxWidth()
+                .heightIn(min = 200.dp, max = 250.dp)
+                .padding(bottom = 10.dp, start = 10.dp, end = 10.dp),
             shape = RoundedCornerShape(
                 topStart = 16.dp,
-                topEnd = 16.dp
+                topEnd = 16.dp,
+                bottomStart = 16.dp,
+                bottomEnd = 16.dp
             )
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Confirm Bike Location",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = "Do you want to set the bike's location to (${markerData.location.latitude}, ${markerData.location.longitude})?"
-                    )
-                    Row(
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        IconButton(onClick = onDismiss) {
+                        Text(
+                            text = "Confirm Location",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Close",
-                                tint = Color.Black
+                                imageVector = Icons.Filled.LocationOn,
+                                contentDescription = "Location",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "${"%.2f".format(markerData.location.latitude)}, ${"%.2f".format(markerData.location.longitude)}",
+                                style = MaterialTheme.typography.bodyLarge
                             )
                         }
-                        IconButton(onClick = onConfirm) {
-                            Text(text = "Confirm", color = Color.Blue)
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            onClick = onConfirm,
+                            modifier = Modifier.width(150.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text("Confirm")
                         }
                     }
                 }
@@ -444,73 +522,16 @@ fun BottomCardSetPin(
                     onClick = onDismiss,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(8.dp) // Adjust padding if awkward
+                        .padding(8.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close",
-                        tint = Color.Black
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             } // Closure of box added to close out when clicking X button
 
-        }
-    }
-}
-
-@Composable
-fun SearchBarAddPin(
-    modifier: Modifier = Modifier,
-    text: String,
-    onTextChange: (String) -> Unit,
-    onClose: () -> Unit
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(8.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shadowElevation = 4.dp
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                modifier = Modifier.padding(start = 16.dp),
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search"
-            )
-
-            BasicTextField(
-                value = text,
-                onValueChange = onTextChange,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp, end = 8.dp),
-                singleLine = true,
-                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                decorationBox = { innerTextField ->
-                    if (text.isEmpty()) {
-                        Text(
-                            text = "Search...",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                        )
-                    }
-                    innerTextField()
-                }
-            )
-
-            if (text.isNotEmpty()) {
-                IconButton(onClick = { onTextChange("") }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Clear search"
-                    )
-                }
-            }
         }
     }
 }
