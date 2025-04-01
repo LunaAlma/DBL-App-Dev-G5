@@ -220,6 +220,22 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
+    suspend fun uploadProfileImage(imageUri: Uri): Result<String> {
+        return try {
+            val imageRef = storage.reference
+                .child("profile_images")
+                .child("${UUID.randomUUID()}.jpg")
+
+            imageRef.putFile(imageUri).await()
+
+            val downloadUrl = imageRef.downloadUrl.await().toString()
+
+            Result.success(downloadUrl)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     fun getUserRentals(userId: String): Flow<List<Rental>> = flow {
         val snapshot = Firebase.firestore
             .collection("rentals")
