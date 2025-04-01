@@ -75,15 +75,27 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import com.google.firebase.Timestamp
 
+@Composable
+fun MapAddBike(
+    modifier: Modifier,
+    viewModel: MapViewModel
+) {
+    MapAddBikeView(
+        bikeId = viewModel.bikeId,
+        modifier = modifier,
+        viewModel = viewModel
+    )
+}
 // Note that rememberMultiplePermissions is using an experimental API
 // Regularly check if it is working (this is easier code than alternative though)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MapAddBike(
+fun MapAddBikeView(
     bikeId: String,
     modifier: Modifier,
     viewModel: MapViewModel = hiltViewModel()) {
+
     val bikes by viewModel.bikes.collectAsState()
 
     val owner by viewModel.ownerDetails.collectAsState()

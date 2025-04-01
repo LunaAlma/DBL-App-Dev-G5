@@ -1,5 +1,7 @@
 package com.bikerental.app.ui.map
 
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.bikerental.app.data.model.Bike
 import com.bikerental.app.data.model.User
@@ -24,10 +26,30 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MapViewModel @Inject constructor(
     navigator: Navigator,
+    private val savedStateHandle: SavedStateHandle,
     private val authRepository: AuthRepository,
     private val bikeRepository: BikeRepository, // Added private val!
     private val userRepository: UserRepository,
 ) : BaseViewModel(navigator) {
+
+
+    val bikeId: String = savedStateHandle.get<String>("bikeId") ?: ""
+
+    val addedBike = MutableStateFlow<Bike?>(null)
+
+    init {
+        loadBikeData()
+    }
+
+    private fun loadBikeData() {
+        Log.d("MapViewModel", "Loading bike data for bikeId: $bikeId")
+        launchFirebase {
+            bikeRepository.getBikes().collect { bikes ->
+                addedBike.value = bikes.firstOrNull { it.bikeId == bikeId }
+            }
+        }
+        Log.d("MapViewModel", "Bike data loaded: $addedBike")
+    }
 
     // Classify bikes as a StateFlow with an initial empty list
     val bikes: StateFlow<List<Bike>> = bikeRepository.getBikes()

@@ -17,6 +17,7 @@ import com.bikerental.app.ui.map.MapViewModel
 import com.bikerental.app.ui.signup.SignUp
 import com.bikerental.app.ui.signup.SignUpViewModel
 import com.bikerental.app.ui.map.Map
+import com.bikerental.app.ui.map.MapAddBike
 import com.bikerental.app.ui.messaging.Chat
 import com.bikerental.app.ui.messaging.ChatViewModel
 import com.bikerental.app.ui.profile.Profile
@@ -73,6 +74,14 @@ fun NavGraph(
             composable(Destination.Home.Map.route) {
                 val viewModel: MapViewModel = hiltViewModel()
                 Map(modifier, viewModel)
+            }
+
+            // Home.MapAddBike
+            composable(
+                route = Destination.Home.MapAddBike.route,
+                arguments = Destination.Home.MapAddBike.navArguments) {
+                val viewModel: MapViewModel = hiltViewModel()
+                    MapAddBike(modifier, viewModel)
             }
 
             // Home.Profile

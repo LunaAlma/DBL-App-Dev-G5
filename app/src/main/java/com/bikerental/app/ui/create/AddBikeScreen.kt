@@ -1,13 +1,13 @@
 package com.bikerental.app.ui.create
 
-import android.R.attr.label
-import android.R.attr.singleLine
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Euro
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -36,6 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
+import java.security.Timestamp
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun AddBike(
@@ -48,10 +54,13 @@ fun AddBike(
         bikeCity = viewModel.city.collectAsStateWithLifecycle().value,
         bikePrice = viewModel.bikePrice.collectAsStateWithLifecycle().value,
         bikeImageUri = viewModel.bikeImageUri.collectAsStateWithLifecycle().value,
+        selectedStartDate = viewModel.selectedStartDate.collectAsStateWithLifecycle().value,
+        selectedEndDate = viewModel.selectedEndDate.collectAsStateWithLifecycle().value,
         bikeNameError = viewModel.bikeNameError.collectAsStateWithLifecycle().value,
         bikePriceError = viewModel.bikePriceError.collectAsStateWithLifecycle().value,
         bikeCityError = viewModel.bikeCityError.collectAsStateWithLifecycle().value,
         bikeImageError = viewModel.bikeImageError.collectAsStateWithLifecycle().value,
+        selectedStartDateError = viewModel.selectedStartDateError.collectAsStateWithLifecycle().value,
         onBikeImageChange = { viewModel.onBikeImageChange(it) },
         onBikeNameChange = { viewModel.onBikeNameChange(it) },
         onBikePriceChange = { viewModel.onBikePriceChange(it) },
@@ -69,10 +78,13 @@ fun AddBikeView(
     bikeName: String,
     bikeCity: String,
     bikePrice: String,
+    selectedStartDate: Timestamp?,
+    selectedEndDate: Timestamp?,
     bikeNameError: String,
     bikeCityError: String,
     bikePriceError: String,
     bikeImageError: String,
+    selectedStartDateError: String,
     firebaseError: String,
     isLoading: Boolean,
     bikeImageUri: Uri?,
@@ -266,21 +278,22 @@ fun AddBikeView(
                         }
                     }
                 }
-//                OutlinedTextField(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    value = bikeCity,
-//                    onValueChange = onBikeCityChange,
-//                    label = { Text("City") },
-//                    singleLine = true,
-//                    leadingIcon = {
-//                        Icon(
-//                            Icons.Filled.LocationOn,
-//                            contentDescription = "Location"
-//                        )
-//                    },
-//                    isError = bikeCityError.isNotEmpty(),
-//                    supportingText = {
-//                        Text(text = bikeCityError)
+            }
+            Row(
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 4.dp,
+                    bottom = 4.dp
+                )
+            ) {
+// Date picker field
+//                DatePickerField(
+//                    label = "Start Date",
+//                    selectedDate = selectedStartDate,
+//                    onDateSelected = { date ->
+//                        selectedStartDate = date
+//                        selectedStartDateError = ""
 //                    },
 //                )
             }
@@ -369,4 +382,75 @@ private fun BikeImageSelector(
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerField(
+    label: String,
+    selectedDate: LocalDate?,
+    onDateSelected: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    errorMessage: String = ""
+) {
+    val showDatePicker = remember { mutableStateOf(false) }
+    val dateFormatter = remember { DateTimeFormatter.ofPattern("MMM dd, yyyy") }
+
+    if (showDatePicker.value) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker.value = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            val date = Instant.ofEpochMilli(it)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                            onDateSelected(date)
+                        }
+                        showDatePicker.value = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    OutlinedTextField(
+        value = selectedDate?.format(dateFormatter) ?: "",
+        onValueChange = {},
+        label = { Text(label) },
+        modifier = modifier.fillMaxWidth(),
+        readOnly = true,
+        trailingIcon = {
+            Icon(
+                imageVector = Icons.Default.CalendarToday,
+                contentDescription = "Select date"
+            )
+        },
+        isError = isError,
+        supportingText = {
+            if (isError) {
+                Text(text = errorMessage)
+            }
+        },
+        interactionSource = remember { MutableInteractionSource() }
+            .also { interactionSource ->
+                LaunchedEffect(interactionSource) {
+                    interactionSource.interactions.collect {
+                        if (it is PressInteraction.Release) {
+                            showDatePicker.value = true
+                        }
+                    }
+                }
+            }
+    )
 }

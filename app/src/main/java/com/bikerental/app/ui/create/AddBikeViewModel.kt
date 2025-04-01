@@ -12,7 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.io.ByteArrayOutputStream
+import java.security.Timestamp
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.String
@@ -28,10 +28,14 @@ class AddBikeViewModel @Inject constructor(
     private val _bikeName = MutableStateFlow("")
     private val _bikePrice = MutableStateFlow("")
     private val _city = MutableStateFlow("")
+    private val _selectedStartDate = MutableStateFlow<Timestamp?>(null)
+    private val _selectedEndDate = MutableStateFlow<Timestamp?>(null)
     private val _bikeNameError = MutableStateFlow("")
     private val _bikePriceError = MutableStateFlow("")
     private val _bikeCityError = MutableStateFlow("")
     private val _bikeImageError = MutableStateFlow("")
+    private val _selectedStartDateError = MutableStateFlow("")
+    private val _selectedEndDateError = MutableStateFlow("")
     private val _firebaseError = MutableStateFlow("")
     private val _isLoading = MutableStateFlow(false)
     private val _bikeImageUri = MutableStateFlow<Uri?>(null)
@@ -39,10 +43,14 @@ class AddBikeViewModel @Inject constructor(
     val bikeName = _bikeName.asStateFlow()
     val bikePrice = _bikePrice.asStateFlow()
     val city = _city.asStateFlow()
+    val selectedStartDate = _selectedStartDate.asStateFlow()
+    val selectedEndDate = _selectedEndDate.asStateFlow()
     val bikeNameError = _bikeNameError.asStateFlow()
     val bikePriceError = _bikePriceError.asStateFlow()
     val bikeCityError = _bikeCityError.asStateFlow()
     val bikeImageError = _bikeImageError.asStateFlow()
+    val selectedStartDateError = _selectedStartDateError.asStateFlow()
+    val selectedEndDateError = _selectedEndDateError.asStateFlow()
     val firebaseError = _firebaseError.asStateFlow()
     val isLoading = _isLoading.asStateFlow()
     val bikeImageUri = _bikeImageUri.asStateFlow()
@@ -75,7 +83,7 @@ class AddBikeViewModel @Inject constructor(
         var error = false
         if (bikeName.value.length < 6) _bikeNameError.tryEmit("Bike Name length should be at least 6").run { error = true }
         if (!isPriceValid(bikePrice.value)) _bikePriceError.tryEmit("Not a valid price").run { error = true }
-        if (city.value.length < 3) _bikeCityError.tryEmit("City length should be at least 3").run { error = true }
+        if (city.value.isEmpty()) _bikeCityError.tryEmit("Please select a city").run { error = true }
         if(bikeImageUri.value == null) _bikeImageError.tryEmit("Bike image is required").run { error = true }
         return !error
     }
@@ -92,6 +100,8 @@ class AddBikeViewModel @Inject constructor(
             _isLoading.tryEmit(true)
             _firebaseError.tryEmit("")
 
+            val uuid = UUID.randomUUID().toString()
+
             launchFirebase {
                 try {
                     val imageUri = _bikeImageUri.value ?: throw Exception("Profile image is required")
@@ -99,7 +109,7 @@ class AddBikeViewModel @Inject constructor(
                     val downloadUrl = uploadResult.getOrElse { throw Exception("Profile image upload failed") }
 
                     bikeRepository.addBike(
-                        uuid = UUID.randomUUID().toString(),
+                        uuid = uuid,
                         ownerId = auth.getCurrentUser!!.uid,
                         bikeName = bikeName.value,
                         bikePrice = bikePrice.value.toDouble(),
@@ -110,9 +120,12 @@ class AddBikeViewModel @Inject constructor(
                     _firebaseError.tryEmit(e.message ?: "Adding bike failed")
                 } finally {
                     _isLoading.tryEmit(false)
-                    navigator.navigateTo(Destination.Home.route, true)
+                    goToMapAddBike(uuid)
                 }
             }
         }
+    }
+    fun goToMapAddBike(uid: String) {
+        navigator.navigateTo(Destination.Home.MapAddBike.route + uid)
     }
 }
