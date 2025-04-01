@@ -27,15 +27,9 @@ class ProfileViewModel @Inject constructor(
     navigator: Navigator,
     private val authRepository: AuthRepository,
     private val bikeRepository: BikeRepository,
-//    private val transactionRepository: TransactionRepository,
     private val userRepository: UserRepository
 ) : BaseViewModel(navigator) {
-//    private val _isLoading = mutableStateOf(false)
-//    val isLoading: State<Boolean> = _isLoading
-//
-//    private val _error = mutableStateOf<String?>(null)
-//    val error: State<String?> = _error
-//
+
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user.asStateFlow()
 

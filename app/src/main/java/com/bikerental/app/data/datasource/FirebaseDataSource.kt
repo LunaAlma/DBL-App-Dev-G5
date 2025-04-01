@@ -159,25 +159,17 @@ class FirebaseDataSource @Inject constructor(
     /**
      * Gets a real-time stream of a specific bike's data.
      *
-     * @param uid Bike ID to fetch
-     * @return Flow<Bike> emitting bike data updates
+     * @param uuid Bike ID to fetch
+     * @return Bike object
      * @throws IllegalStateException if bike doesn't exist
      */
-    fun fetchBikeById(uid: String): Flow<Bike> = callbackFlow {
-        val subscription = db.collection("bikes").document(uid)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-                val bike = snapshot?.toObject(Bike::class.java)
-                if(bike != null) {
-                    trySend(bike)
-                } else {
-                    close(IllegalStateException("User document not found"))
-                }
-            }
-        awaitClose { subscription.remove() }
+    suspend fun fetchBikeById(uuid: String): Bike {
+        return try {
+            val document = db.collection("bikes").document(uuid).get().await()
+            document.toObject(Bike::class.java) ?: throw Exception("Bike not found")
+        } catch (e: Exception) {
+            throw Exception("Failed to fetch bike: ${e.message}")
+        }
     }
 
     /**
@@ -264,4 +256,157 @@ class FirebaseDataSource @Inject constructor(
         emit(rentals)
     }.flowOn(Dispatchers.IO)
 
+    /**
+     * Gets bikes filtered by city.
+     *
+     * @param city City to filter bikes by
+     * @return Flow<List<Bike>> emitting bikes in the specified city
+     */
+    fun fetchBikesByCity(city: String): Flow<List<Bike>> = callbackFlow {
+        val subscription = db.collection("bikes")
+            .whereEqualTo("city", city)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val bikes = snapshot?.toObjects(Bike::class.java) ?: emptyList()
+                trySend(bikes)
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    /**
+     * Gets bikes filtered by owner ID.
+     *
+     * @param ownerId ID of the bike owner
+     * @return Flow<List<Bike>> emitting bikes owned by the specified user
+     */
+    fun fetchBikesByOwner(ownerId: String): Flow<List<Bike>> = callbackFlow {
+        val subscription = db.collection("bikes")
+            .whereEqualTo("ownerId", ownerId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val bikes = snapshot?.toObjects(Bike::class.java) ?: emptyList()
+                trySend(bikes)
+            }
+        awaitClose { subscription.remove() }
+    }
+
+    /**
+     * Gets bikes available in a date range (not rented during the specified period).
+     *
+     * @param startTime Start of availability period
+     * @param endTime End of availability period
+     * @return Flow<List<Bike>> emitting bikes available during the specified period
+     */
+    fun fetchAvailableBikes(startTime: Timestamp, endTime: Timestamp): Flow<List<Bike>> = callbackFlow {
+        // First get all rentals that overlap with the requested period
+        val rentalsQuery = db.collection("rentals")
+            .whereLessThan("startTime", endTime)
+            .whereGreaterThan("endTime", startTime)
+
+        rentalsQuery.get().addOnSuccessListener { rentalsSnapshot ->
+            // Get IDs of all bikes that are rented during this period
+            val unavailableBikeIds = rentalsSnapshot.documents
+                .mapNotNull { it.getString("bikeId") }
+                .toSet()
+
+            // Then get all bikes that are NOT in the unavailable list
+            db.collection("bikes")
+                .whereNotIn("bikeId", unavailableBikeIds.toList())
+                .get()
+                .addOnSuccessListener { bikesSnapshot ->
+                    val bikes = bikesSnapshot.toObjects(Bike::class.java)
+                    trySend(bikes)
+                }
+                .addOnFailureListener { error ->
+                    close(error)
+                }
+        }.addOnFailureListener { error ->
+            close(error)
+        }
+
+        awaitClose { /* No subscription to cancel in this implementation */ }
+    }
+
+    /**
+     * Gets bikes filtered by city and available in a date range.
+     *
+     * @param city City to filter by
+     * @param startTime Start of availability period
+     * @param endTime End of availability period
+     * @return Flow<List<Bike>> emitting available bikes in the specified city
+     */
+    fun fetchAvailableBikesByCity(city: String, startTime: Timestamp, endTime: Timestamp): Flow<List<Bike>> = callbackFlow {
+        // First get all rentals that overlap with the requested period
+        val rentalsQuery = db.collection("rentals")
+            .whereLessThan("startTime", endTime)
+            .whereGreaterThan("endTime", startTime)
+
+        rentalsQuery.get().addOnSuccessListener { rentalsSnapshot ->
+            // Get IDs of all bikes that are rented during this period
+            val unavailableBikeIds = rentalsSnapshot.documents
+                .mapNotNull { it.getString("bikeId") }
+                .toSet()
+
+            // Then get all bikes that are NOT in the unavailable list AND are in the specified city
+            db.collection("bikes")
+                .whereEqualTo("city", city)
+                .whereNotIn("bikeId", unavailableBikeIds.toList())
+                .get()
+                .addOnSuccessListener { bikesSnapshot ->
+                    val bikes = bikesSnapshot.toObjects(Bike::class.java)
+                    trySend(bikes)
+                }
+                .addOnFailureListener { error ->
+                    close(error)
+                }
+        }.addOnFailureListener { error ->
+            close(error)
+        }
+
+        awaitClose { /* No subscription to cancel in this implementation */ }
+    }
+
+    /**
+     * Gets bikes filtered by owner and available in a date range.
+     *
+     * @param ownerId Owner ID to filter by
+     * @param startTime Start of availability period
+     * @param endTime End of availability period
+     * @return Flow<List<Bike>> emitting available bikes owned by the specified user
+     */
+    fun fetchAvailableBikesByOwner(ownerId: String, startTime: Timestamp, endTime: Timestamp): Flow<List<Bike>> = callbackFlow {
+        // First get all rentals that overlap with the requested period
+        val rentalsQuery = db.collection("rentals")
+            .whereLessThan("startTime", endTime)
+            .whereGreaterThan("endTime", startTime)
+
+        rentalsQuery.get().addOnSuccessListener { rentalsSnapshot ->
+            // Get IDs of all bikes that are rented during this period
+            val unavailableBikeIds = rentalsSnapshot.documents
+                .mapNotNull { it.getString("bikeId") }
+                .toSet()
+
+            // Then get all bikes that are NOT in the unavailable list AND are owned by the specified user
+            db.collection("bikes")
+                .whereEqualTo("ownerId", ownerId)
+                .whereNotIn("bikeId", unavailableBikeIds.toList())
+                .get()
+                .addOnSuccessListener { bikesSnapshot ->
+                    val bikes = bikesSnapshot.toObjects(Bike::class.java)
+                    trySend(bikes)
+                }
+                .addOnFailureListener { error ->
+                    close(error)
+                }
+        }.addOnFailureListener { error ->
+            close(error)
+        }
+        awaitClose { /* No subscription to cancel in this implementation */ }
+    }
 }

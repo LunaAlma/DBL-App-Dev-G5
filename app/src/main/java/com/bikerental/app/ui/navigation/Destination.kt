@@ -14,9 +14,9 @@ object Destination {
         data object Map : Screen("home/map")
         data object MapAddBike : DynamicScreen("home/map-add-bike", "bikeId")
         data object AddBike : Screen("home/add-bike")
-        data object BikeDetails : DynamicScreen("home/bike-details", "bikeId")
         data object Profile : Screen("home/profile")
         data object Search : Screen("home/search")
+        data object BikeDetails : DynamicScreen("home/bike-details", "bikeId")
         data object Inbox : Screen("home/inbox")
         data object Chat : DynamicScreen("home/chat", "userId")
     }

@@ -1,32 +1,43 @@
 package com.bikerental.app.ui.profile
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import coil.compose.AsyncImage
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.clip
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.ui.layout.ContentScale
+import com.bikerental.app.data.model.User
 
 @Composable
-fun Profile(modifier: Modifier,
-             viewModel: ProfileViewModel
+fun Profile(
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel
 ) {
     ProfileView(
-        modifier,
-        viewModel,
+        modifier = modifier,
+        viewModel = viewModel,
+        user = viewModel.user.collectAsState().value,
         onLogout = { viewModel.onLogout() }
     )
 }
@@ -37,137 +48,139 @@ fun ProfileView(
     viewModel: ProfileViewModel,
     onLogout: () -> Unit
 ) {
-        val userState by viewModel.user.collectAsState()
+//    val userState by viewModel.user.collectAsState()
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(16.dp)
-                .systemBarsPadding()
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Profile Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFB0DCA4) // Your green color
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Profile Picture
-                    AsyncImage(
-                        model = userState?.profileImageUrl ?: "https://example.com/default.jpg",
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)  // No extra parenthesis here
-                    )
-
-                    Column {
-                        Text(
-                            text = userState?.name ?: "Loading...",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = userState?.email ?: "Loading...",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
+            ProfileCard(user)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Settings Items
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column {
-                    SettingsItem("Past Rentals") {
-                        viewModel.navigateToPastRentals()
-                    }
-
-                    SettingsItem("Payments & Invoices")
-
-                    SettingsItem("Account Details")
-
-                    SettingsItem("App Settings")
-                }
-            }
+            SettingsSection()
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Log Out Button
-            Button(
-                onClick = { viewModel.onLogout() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFB0DCA4),
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Log Out", fontSize = 16.sp)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Delete Account Button
-            Button(
-                onClick = { },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text("Delete Account", fontSize = 16.sp)
-            }
+            ActionButtons(onLogout)
         }
-
-}
-@Composable
-fun SettingsItem(title: String, onClick: () -> Unit = {}) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp)
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            modifier = Modifier.padding(start = 16.dp),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = "Navigate",
-            modifier = Modifier.padding(end = 16.dp)
-        )
     }
 }
 
-// Preview
-@Preview(name = "Settings Screen", showBackground = true)
 @Composable
-fun PreviewSettingsScreen() {
-    MaterialTheme {
-        Profile(
-            modifier = TODO(),
-            viewModel = TODO(),
+private fun ProfileCard(user: User?) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Image column
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AsyncImage(
+                    model = user?.profileImageUrl,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = CircleShape
+                        ),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            // User info column
+            Column(
+                modifier = Modifier.weight(2f)
+            ) {
+                Text(
+                    text = user?.name ?: "err",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = user?.email ?: "err",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsSection() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
+        Column {
+            ListItem(
+                headlineContent = { Text("My Bikes") },
+                trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
+                modifier = Modifier.clickable { /* Handle click */ }
+            )
+            Divider(
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            ListItem(
+                headlineContent = { Text("Past Rentals") },
+                trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
+                modifier = Modifier.clickable { /* Handle click */ }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActionButtons(onLogout: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Button(
+            onClick = onLogout,
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        ) {
+            Text("Log Out")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { /* Handle account deletion */ },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            )
+        ) {
+            Text("Delete Account")
+        }
     }
 }
