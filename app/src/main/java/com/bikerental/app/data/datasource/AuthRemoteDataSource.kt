@@ -82,18 +82,4 @@ class AuthRemoteDataSource @Inject constructor(
         }
         auth.signOut()
     }
-
-    /**
-     * Permanently deletes the currently authenticated user account.
-     *
-     * @throws Exception if no user is logged in or deletion fails
-     * @throws IllegalStateException if called when no user is authenticated
-     */
-    suspend fun deleteAccount() {
-        try {
-            auth.currentUser?.delete()?.await()
-        } catch (e: Exception) {
-            throw Exception("Account deletion failed: ${e.message}")
-        }
-    }
 }

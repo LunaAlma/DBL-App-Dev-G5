@@ -61,4 +61,8 @@ class UserRepository @Inject constructor(
     suspend fun addProfileImage(imageUri: Uri): Result<String> {
         return firebaseDataSource.uploadProfileImage(imageUri)
     }
+
+    suspend fun deleteUserDetails(uid: String) {
+        firebaseDataSource.deleteUserDetails(uid)
+    }
 }

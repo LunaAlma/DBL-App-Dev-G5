@@ -38,15 +38,22 @@ fun Profile(
         modifier = modifier,
         viewModel = viewModel,
         user = viewModel.user.collectAsState().value,
-        onLogout = { viewModel.onLogout() }
+        onLogout = { viewModel.onLogout() },
+        navigateToMyBikes = { viewModel.navigateToMyBikes() },
+        navigateToPastRentals = { viewModel.navigateToPastRentals() },
+        navigateToDetails = { viewModel.navigateToDetails() }
     )
 }
 
 @Composable
-fun ProfileView(
-    modifier: Modifier = Modifier,
+private fun ProfileView(
+    modifier: Modifier,
+    user: User?,
     viewModel: ProfileViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    navigateToDetails: () -> Unit,
+    navigateToMyBikes: () -> Unit,
+    navigateToPastRentals: () -> Unit
 ) {
 //    val userState by viewModel.user.collectAsState()
 
@@ -62,11 +69,14 @@ fun ProfileView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            ProfileCard(user)
+            ProfileCard(navigateToDetails, user)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SettingsSection()
+            SettingsSection(
+                navigateToMyBikes = navigateToMyBikes,
+                navigateToPastRentals = navigateToPastRentals
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -76,9 +86,12 @@ fun ProfileView(
 }
 
 @Composable
-private fun ProfileCard(user: User?) {
+private fun ProfileCard(
+    navigateToDetails: () -> Unit = {},
+    user: User?
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { navigateToDetails() },
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -129,7 +142,10 @@ private fun ProfileCard(user: User?) {
 }
 
 @Composable
-private fun SettingsSection() {
+private fun SettingsSection(
+    navigateToMyBikes: () -> Unit = {},
+    navigateToPastRentals: () -> Unit = {}
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge
@@ -138,7 +154,7 @@ private fun SettingsSection() {
             ListItem(
                 headlineContent = { Text("My Bikes") },
                 trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
-                modifier = Modifier.clickable { /* Handle click */ }
+                modifier = Modifier.clickable { navigateToMyBikes() }
             )
             Divider(
                 thickness = 0.5.dp,

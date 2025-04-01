@@ -71,14 +71,4 @@ class AuthRepository @Inject constructor(
     fun logout() {
         authRemoteDataSource.signOut()
     }
-
-    /**
-     * Permanently deletes the currently authenticated user account.
-     *
-     * @throws IllegalStateException If no user is currently authenticated
-     * @throws Exception If account deletion fails due to permissions or network issues
-     */
-    suspend fun deleteAccount() {
-        authRemoteDataSource.deleteAccount()
-    }
 }

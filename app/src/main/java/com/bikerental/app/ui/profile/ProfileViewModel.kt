@@ -13,21 +13,23 @@ import com.bikerental.app.ui.navigation.Destination
 import com.bikerental.app.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     navigator: Navigator,
     private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
     private val bikeRepository: BikeRepository,
-    private val userRepository: UserRepository
+    private val auth: FirebaseAuth
 ) : BaseViewModel(navigator) {
 
     private val _user = MutableStateFlow<User?>(null)
@@ -36,30 +38,8 @@ class ProfileViewModel @Inject constructor(
     init {
        loadUserDetails()
     }
-companion object {
-    const val TAG = "ProfileViewModel"
-}
 
-/*    var userName by mutableStateOf("Firstname Lastname")
-    var userEmail by mutableStateOf("example@student.tue.nl")
-    var userProfilePicture by mutableStateOf("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png")*/
-
-//    private fun loadUserDetails() {
-//        viewModelScope.launch {
-//            userRepository.getUserDetails()
-//                .onStart { _isLoading.value = true }
-//                .catch { e ->
-//                    _error.value = e.message
-//                    _isLoading.value = false
-//                }
-//                .collect { user ->
-//                    _user.value = user
-//                    _isLoading.value = false
-//                }
-//        }
-//    }
-// ProfileViewModel.kt
-    private fun loadUserDetails() {
+    fun loadUserDetails() {
         viewModelScope.launch {
             authRepository.getCurrentUser?.uid?.let { uid ->
                 userRepository.getUserById(uid)
@@ -75,8 +55,17 @@ companion object {
             }
         }
     }
-        fun navigateToPastRentals() {
+
+    fun navigateToPastRentals() {
         navigator.navigateTo(Destination.Home.PastRentals.route)
+    }
+
+    fun navigateToMyBikes() {
+        navigator.navigateTo(Destination.Home.MyBikes.route)
+    }
+
+    fun navigateToDetails() {
+        navigator.navigateTo(Destination.Home.ProfileDetails.route)
     }
 
     fun onLogout() {
@@ -84,8 +73,17 @@ companion object {
         navigator.navigateTo(Destination.Login.route, true)
     }
 
-    fun deleteAccount() {
-        // TODO: Implement account deletion logic
+    fun onDeleteAccount() {
+        launchFirebase {
+            val user = auth.currentUser
+            val userId = user!!.uid
+
+            bikeRepository.deleteUsersBikes(userId)
+            userRepository.deleteUserDetails(userId)
+            user.delete().await()
+
+            navigator.navigateTo(Destination.SignUp.route, true)
+        }
     }
 }
 

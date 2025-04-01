@@ -29,6 +29,9 @@ import com.bikerental.app.ui.splash.Splash
 import com.bikerental.app.ui.splash.SplashViewModel
 import com.bikerental.app.ui.pastrentals.PastRentalsViewModel
 import com.bikerental.app.ui.pastrentals.PastRentalsScreen
+import com.bikerental.app.ui.profile.MyBikes
+import com.bikerental.app.ui.profile.MyBikesViewModel
+import com.bikerental.app.ui.profile.UserProfileDetails
 import com.bikerental.app.ui.search.Search
 
 @Composable
@@ -90,6 +93,18 @@ fun NavGraph(
             composable(Destination.Home.Profile.route) {
                 val viewModel: ProfileViewModel = hiltViewModel()
                 Profile(modifier, viewModel)
+            }
+
+            // Home.ProfileDetails
+            composable(Destination.Home.ProfileDetails.route) {
+                val viewModel: ProfileViewModel = hiltViewModel()
+                UserProfileDetails(modifier, viewModel)
+            }
+
+            // Home.MyBikes
+            composable(Destination.Home.MyBikes.route) {
+                val viewModel: MyBikesViewModel = hiltViewModel()
+                MyBikes(modifier, viewModel)
             }
 
             // Home.AddBike

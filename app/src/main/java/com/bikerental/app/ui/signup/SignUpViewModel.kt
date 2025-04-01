@@ -136,6 +136,7 @@ class SignUpViewModel @Inject constructor(
      */
     private fun validate(): Boolean {
         var error = false
+        if(_profileImageUri.value == null) _signUpError.tryEmit("Profile picture is required").run { error = true }
         if (name.value.isBlank()) _nameError.tryEmit("Name is required").run { error = true }
         if (!email.value.isValidEmail()) _emailError.tryEmit("Invalid Email").run { error = true }
         if (password.value.length < 6) {
