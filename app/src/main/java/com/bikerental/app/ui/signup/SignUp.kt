@@ -1,6 +1,11 @@
 package com.bikerental.app.ui.signup
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,9 +47,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.R
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Composable function for the Sign Up screen.
@@ -304,16 +315,42 @@ private fun ProfileImageSelector(
     onImageSelected: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { onImageSelected(it) }
+    val context = LocalContext.current
+    val file = remember { createImageFile(context) }
+    val uri = remember { FileProvider.getUriForFile(context, "${context.packageName}.provider", file) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            onImageSelected(uri)
+        }
     }
+
+    val cameraPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cameraLauncher.launch(uri)
+        } else {
+            Toast.makeText(context, "Camera permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Box(
         modifier = modifier
             .size(120.dp)
-            .clip(CircleShape)
-            .clickable { launcher.launch("image/*") }
+            .clickable {
+                val permissionCheckResult = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                )
+                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                    cameraLauncher.launch(uri)
+                } else {
+                    cameraPermission.launch(Manifest.permission.CAMERA)
+                }
+            }
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = CircleShape
@@ -330,10 +367,20 @@ private fun ProfileImageSelector(
         } else {
             Icon(
                 imageVector = Icons.Default.AddAPhoto,
-                contentDescription = "Select profile image",
+                contentDescription = "Take profile photo",
                 modifier = Modifier.size(40.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
+}
+
+private fun createImageFile(context: Context): File {
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    return File.createTempFile(
+        "JPEG_${timeStamp}_",
+        ".jpg",
+        storageDir
+    )
 }

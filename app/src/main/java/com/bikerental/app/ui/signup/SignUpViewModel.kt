@@ -105,12 +105,17 @@ class SignUpViewModel @Inject constructor(
                     // 1. Firebase Authentication
                     authRepository.firebaseSignUp(email.value, password.value)
 
+                    val imageUri = _profileImageUri.value ?: throw Exception("Profile image is required")
+                    val uploadResult = userRepository.addProfileImage(imageUri)
+                    val downloadUrl = uploadResult.getOrElse { throw Exception("Profile image upload failed") }
+
                     // 2. FireStore User document creation
                     auth.currentUser?.let { user ->
                         userRepository.createUserDocument(
                             uid = user.uid,
                             name = name.value,
-                            email = email.value
+                            email = email.value,
+                            profileImageUrl = downloadUrl,
                         )
 
                         // 3. Navigation to Home
@@ -145,9 +150,9 @@ class SignUpViewModel @Inject constructor(
      */
     fun String.isValidEmail(): Boolean {
         val isEmailValid = this.isNotEmpty() && PatternsCompat.EMAIL_ADDRESS.matcher(this).matches()
-        val hasStudentTueDomain = this.endsWith("@student.tue.nl", ignoreCase = true)
+        val hasStudentDomain = Regex("^[^@]+@student\\.[^.]+\\.nl$", RegexOption.IGNORE_CASE).matches(this)
 
-        return isEmailValid && hasStudentTueDomain
+        return isEmailValid && hasStudentDomain
     }
 
     /**

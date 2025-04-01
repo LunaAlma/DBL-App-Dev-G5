@@ -47,14 +47,16 @@ class FirebaseDataSource @Inject constructor(
      * @param uid Unique user ID from Firebase Auth
      * @param name User's full name
      * @param email User's email address
+     * @param profileImageUrl User's profile picture
      * @throws Exception if document creation fails
      */
-    suspend fun createUserDocument(uid: String, name: String, email: String) {
+    suspend fun createUserDocument(uid: String, name: String, email: String, profileImageUrl: String) {
         db.collection("users").document(uid).set(
             User(
                 uid = uid,
                 name = name,
-                email = email
+                email = email,
+                profileImageUrl = profileImageUrl
             )
         ).await()
     }

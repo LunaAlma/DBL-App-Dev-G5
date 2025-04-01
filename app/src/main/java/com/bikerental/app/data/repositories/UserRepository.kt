@@ -1,5 +1,6 @@
 package com.bikerental.app.data.repositories
 
+import android.net.Uri
 import com.bikerental.app.data.datasource.FirebaseDataSource
 import com.bikerental.app.data.model.Rental
 import com.bikerental.app.data.model.User
@@ -30,10 +31,11 @@ class UserRepository @Inject constructor(
      * @param uid Unique identifier for the user (from Firebase Auth)
      * @param name Full name of the user
      * @param email Email address of the user
+     * @param profileImageUrl Profile picture of the user
      * @throws Exception if document creation fails
      */
-    suspend fun createUserDocument(uid: String, name: String, email: String) =
-        firebaseDataSource.createUserDocument(uid, name, email)
+    suspend fun createUserDocument(uid: String, name: String, email: String, profileImageUrl: String) =
+        firebaseDataSource.createUserDocument(uid, name, email, profileImageUrl)
 
     /**
      * Gets a stream of all users in the database.
@@ -54,5 +56,9 @@ class UserRepository @Inject constructor(
 
     fun getUserRentals(userId: String): Flow<List<Rental>> {
         return firebaseDataSource.getUserRentals(userId)
+    }
+
+    suspend fun addProfileImage(imageUri: Uri): Result<String> {
+        return firebaseDataSource.uploadProfileImage(imageUri)
     }
 }

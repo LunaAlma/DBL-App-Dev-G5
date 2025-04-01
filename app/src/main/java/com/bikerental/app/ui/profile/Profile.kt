@@ -64,7 +64,7 @@ fun ProfileView(
                 ) {
                     // Profile Picture
                     AsyncImage(
-                        model = userState?.profilePicture ?: "https://example.com/default.jpg",
+                        model = userState?.profileImageUrl ?: "https://example.com/default.jpg",
                         contentDescription = "Profile Picture",
                         modifier = Modifier
                             .size(80.dp)
