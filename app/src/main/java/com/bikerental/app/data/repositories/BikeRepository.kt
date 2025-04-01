@@ -43,4 +43,8 @@ class BikeRepository @Inject constructor(
     fun getAvailableBikesByCity(city: String, startTime: Timestamp, endTime: Timestamp): Flow<List<Bike>> {
         return firebaseDataSource.fetchAvailableBikesByCity(city, startTime, endTime)
     }
+
+    suspend fun deleteUsersBikes(userId: String) {
+        firebaseDataSource.deleteUsersBikes(userId)
+    }
 }

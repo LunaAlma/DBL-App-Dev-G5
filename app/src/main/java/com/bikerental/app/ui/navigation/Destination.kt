@@ -20,6 +20,7 @@ object Destination {
         data object Inbox : Screen("home/inbox")
         data object Chat : DynamicScreen("home/chat", "userId")
         data object MyBikes : Screen("home/my-bikes")
+        data object ProfileDetails : Screen("home/profile-details")
     }
 }
 

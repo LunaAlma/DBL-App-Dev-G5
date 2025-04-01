@@ -40,7 +40,8 @@ fun Profile(
         user = viewModel.user.collectAsState().value,
         onLogout = { viewModel.onLogout() },
         navigateToMyBikes = { viewModel.navigateToMyBikes() },
-        navigateToPastRentals = { viewModel.navigateToPastRentals() }
+        navigateToPastRentals = { viewModel.navigateToPastRentals() },
+        navigateToDetails = { viewModel.navigateToDetails() }
     )
 }
 
@@ -50,6 +51,7 @@ private fun ProfileView(
     user: User?,
     viewModel: ProfileViewModel,
     onLogout: () -> Unit,
+    navigateToDetails: () -> Unit,
     navigateToMyBikes: () -> Unit,
     navigateToPastRentals: () -> Unit
 ) {
@@ -67,11 +69,14 @@ private fun ProfileView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            ProfileCard(user)
+            ProfileCard(navigateToDetails, user)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SettingsSection()
+            SettingsSection(
+                navigateToMyBikes = navigateToMyBikes,
+                navigateToPastRentals = navigateToPastRentals
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -81,9 +86,12 @@ private fun ProfileView(
 }
 
 @Composable
-private fun ProfileCard(user: User?) {
+private fun ProfileCard(
+    navigateToDetails: () -> Unit = {},
+    user: User?
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { navigateToDetails() },
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
