@@ -7,6 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.bikerental.app.ui.bike.BikeDetails
+import com.bikerental.app.ui.bike.BikeDetailsViewModel
 import com.bikerental.app.ui.create.AddBike
 import com.bikerental.app.ui.create.AddBikeViewModel
 import com.bikerental.app.ui.messaging.Inbox
@@ -22,12 +24,12 @@ import com.bikerental.app.ui.messaging.Chat
 import com.bikerental.app.ui.messaging.ChatViewModel
 import com.bikerental.app.ui.profile.Profile
 import com.bikerental.app.ui.profile.ProfileViewModel
-import com.bikerental.app.ui.search.BikeListScreen
 import com.bikerental.app.ui.search.SearchViewModel
 import com.bikerental.app.ui.splash.Splash
 import com.bikerental.app.ui.splash.SplashViewModel
 import com.bikerental.app.ui.pastrentals.PastRentalsViewModel
 import com.bikerental.app.ui.pastrentals.PastRentalsScreen
+import com.bikerental.app.ui.search.Search
 
 @Composable
 fun NavGraph(
@@ -114,8 +116,19 @@ fun NavGraph(
             // Home.Search
             composable(Destination.Home.Search.route) {
                 val viewModel: SearchViewModel = hiltViewModel()
-                BikeListScreen(navigator)
+                Search(modifier, viewModel)
             }
+
+            // Home.BikeDetails
+            composable(
+                route = Destination.Home.BikeDetails.route,
+                arguments = Destination.Home.BikeDetails.navArguments
+            ) {
+                val viewModel: BikeDetailsViewModel = hiltViewModel()
+                BikeDetails(modifier, viewModel)
+            }
+
+            // Home.PastRental
             composable(Destination.Home.PastRentals.route) {
                 val viewModel: PastRentalsViewModel = hiltViewModel()
                 PastRentalsScreen(

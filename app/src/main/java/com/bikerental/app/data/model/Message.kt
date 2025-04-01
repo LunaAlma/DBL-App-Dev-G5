@@ -1,7 +1,7 @@
 package com.bikerental.app.data.model
 
 data class Message(
-    val fromId: String,
+    val id: String,
 
     val toId: String,
 

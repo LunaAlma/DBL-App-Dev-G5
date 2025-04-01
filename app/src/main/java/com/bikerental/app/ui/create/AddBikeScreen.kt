@@ -98,11 +98,7 @@ fun AddBikeView(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .background(
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    shape = RoundedCornerShape(8.dp)
-                ),
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
             Row(
@@ -278,24 +274,6 @@ fun AddBikeView(
                         }
                     }
                 }
-            }
-            Row(
-                modifier = Modifier.padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 4.dp,
-                    bottom = 4.dp
-                )
-            ) {
-// Date picker field
-//                DatePickerField(
-//                    label = "Start Date",
-//                    selectedDate = selectedStartDate,
-//                    onDateSelected = { date ->
-//                        selectedStartDate = date
-//                        selectedStartDateError = ""
-//                    },
-//                )
             }
             if (firebaseError.isNotEmpty()) {
                 Row(

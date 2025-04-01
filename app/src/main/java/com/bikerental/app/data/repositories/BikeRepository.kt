@@ -6,13 +6,14 @@ import com.bikerental.app.data.model.Bike
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.Timestamp
 
 class BikeRepository @Inject constructor(
     private val firebaseDataSource: FirebaseDataSource
 ) {
     fun getBikes(): Flow<List<Bike>> = firebaseDataSource.getBikes()
 
-    fun getBikeDetailsById(bikeId: String): Flow<Bike> = firebaseDataSource.fetchBikeById(bikeId)
+    suspend fun getBikeDetailsById(bikeId: String): Bike = firebaseDataSource.fetchBikeById(bikeId)
 
     suspend fun addBike(uuid: String, ownerId: String, bikePrice: Double, bikeName: String, city: String, bikeImageUrl: String) =
         firebaseDataSource.createBikeDocument(uuid, ownerId, bikeName, bikePrice, city, bikeImageUrl)
@@ -25,5 +26,21 @@ class BikeRepository @Inject constructor(
 
     suspend fun addBikeImage(imageUri: Uri): Result<String> {
         return firebaseDataSource.uploadBikeImage(imageUri)
+    }
+
+    fun getBikeByCity(city: String): Flow<List<Bike>> {
+        return firebaseDataSource.fetchBikesByCity(city)
+    }
+
+    fun getBikeByOwner(ownerId: String): Flow<List<Bike>> {
+        return firebaseDataSource.fetchBikesByOwner(ownerId)
+    }
+
+    fun getAvailableBikes(startTime: Timestamp, endTime: Timestamp): Flow<List<Bike>> {
+        return firebaseDataSource.fetchAvailableBikes(startTime, endTime)
+    }
+
+    fun getAvailableBikesByCity(city: String, startTime: Timestamp, endTime: Timestamp): Flow<List<Bike>> {
+        return firebaseDataSource.fetchAvailableBikesByCity(city, startTime, endTime)
     }
 }
