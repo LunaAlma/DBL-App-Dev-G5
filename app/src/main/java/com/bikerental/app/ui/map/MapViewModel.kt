@@ -78,7 +78,25 @@ class MapViewModel @Inject constructor(
 
     fun updateBikeLocation(bikeId: String, newLocation: LatLng) {
         viewModelScope.launch {
-            bikeRepository.updateBikeLocation(bikeId, newLocation)
+            try {
+                bikeRepository.updateBikeLocation(bikeId, newLocation)
+                // Log success
+                Log.d("MapViewModel", "Location updated successfully")
+            } catch (e: Exception) {
+                Log.e("MapViewModel", "Update failed", e)
+                // Handle error (e.g., show snackbar)
+            }
+        }
+    }
+
+    fun goToMap() {
+        viewModelScope.launch {
+            try {
+                // Navigate back to Map screen
+                navigator.navigateTo(Destination.Home.Map.route)
+            } catch (e: Exception) {
+                Log.e("Navigation", "Could not go back to Map", e)
+            }
         }
     }
 
