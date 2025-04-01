@@ -122,7 +122,7 @@ fun MapAddBikeView(
 
         MarkerDataAddPin(
             location = LatLng(lat, lng),
-            ownerName = bike.bikeName,
+            bikeName = bike.bikeName,
             rating = owner?.let {
                 if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
             } ?: 0,
@@ -332,7 +332,7 @@ fun MapAddBikeView(
                 showConfirmationDialog = true
                 selectedMarker = MarkerDataAddPin( //IDK ABOUT THIS
                     location = latLng,
-                    ownerName = "New Location",
+                    bikeName = "New Location",
                     rating = 0,
                     bikeImgId = "",
                     bikePrice = 0.0,
@@ -354,7 +354,7 @@ fun MapAddBikeView(
                         } else {
                             selectedMarker = MarkerDataAddPin(
                                 location = position,
-                                ownerName = "New Location",
+                                bikeName = "New Location",
                                 rating = 0,
                                 bikeImgId = "",
                                 bikePrice = 0.0,
@@ -387,7 +387,7 @@ fun MapAddBikeView(
             BottomCardSetPin(
                 markerData = selectedMarker ?: MarkerDataAddPin(
                     location = markerPosition!!,
-                    ownerName = "New Location",
+                    bikeName = "New Location",
                     rating = 0,
                     bikeImgId = "",
                     bikePrice = 0.0,
@@ -401,6 +401,15 @@ fun MapAddBikeView(
                 onConfirm = {
                     if (bikeId.isNotBlank()) {
                         Log.e("MapViewModel", bikeId)
+                    }
+                    // Below if statement kills bug that didn't allow stting of pin at default live location
+                    if (!isPinManuallyMoved) {
+                        // If the pin hasn't been moved and coordinates haven't been assigned yet
+                        currentLocation?.let {
+                            // Assign the live location if it's available
+                            markerPosition = LatLng(it.latitude, it.longitude)
+                        }
+                        viewModel.updateBikeLocation(bikeId, markerPosition!!)
                     }
                     selectedMarker?.let {
                         viewModel.updateBikeLocation(bikeId, it.location)
@@ -418,7 +427,7 @@ fun MapAddBikeView(
 // Original MarkerData
 data class MarkerDataAddPin(
     val location: LatLng,
-    val ownerName: String,
+    val bikeName: String,
     val rating: Int,
     val bikeImgId: String, // Null option here? String? = null
     val bikePrice: Double,

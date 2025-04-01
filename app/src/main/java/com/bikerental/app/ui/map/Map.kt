@@ -69,11 +69,15 @@ import com.google.maps.android.compose.MarkerState
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
 import coil.compose.rememberAsyncImagePainter
 import com.bikerental.app.data.model.MarkerData
+import com.google.firebase.Timestamp
 import com.google.maps.android.compose.MapUiSettings
+import com.google.type.Date
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.Locale
 
 // Note that rememberMultiplePermissions is using an experimental API
@@ -104,8 +108,31 @@ fun Map(
 //        val isNotRented = bikeRentals.none { rental -> rental.bikeId == bike.bikeId }
 //        isNotStarted && isNotRented
 //    }
+
+    val startTime = Timestamp.now()  // Set this to your required start time
+    // Get current time in milliseconds
+    val currentTimeMillis = System.currentTimeMillis()
+
+// Calculate two weeks from now (14 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
+    val twoWeeksFromNowMillis = currentTimeMillis + (14L * 24 * 60 * 60 * 1000)
+
+// Create a Date object from the future time
+    val twoWeeksFromNowDate = java.util.Date(twoWeeksFromNowMillis)
+
+// Convert the Date to a Firebase Timestamp
+    val endTime = Timestamp(twoWeeksFromNowDate)
+
+
+    // Fetch available bikes
+    LaunchedEffect(Unit) {
+        viewModel.fetchAvailableBikes(startTime, endTime)
+    }
+
+    // Collect available bikes
+    val availableBikes by viewModel.availableBikes.collectAsState()
+
     // CHANGE bikes to availableBikes once debugging
-    val markersData = bikes.map { bike ->
+    val markersData = availableBikes.map { bike ->
         // bike.location is a GeoPoint from Firebase
         val lat = bike.location.latitude ?: 0.0
         val lng = bike.location.longitude ?: 0.0
@@ -121,7 +148,8 @@ fun Map(
             startTime = bike.startTime,
             endTime = bike.endTime,
             ownerId = bike.ownerId,
-            bikeId = bike.bikeId
+            bikeId = bike.bikeId,
+            bikeName = bike.bikeName
         )
     }
 
@@ -407,7 +435,9 @@ fun BottomCard(
                     // Column for text on the right of image
                     Column(modifier = Modifier.align(Alignment.CenterVertically)) {
                         Text(
-                            text = markerData.city, // Used to be owner name
+                            text = markerData.bikeName.take(20) + if (markerData.bikeName.length > 20) "..." else "",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),

@@ -21,7 +21,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.launch
+import java.util.Date
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.emitAll
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -54,6 +60,29 @@ class MapViewModel @Inject constructor(
     // Classify bikes as a StateFlow with an initial empty list
     val bikes: StateFlow<List<Bike>> = bikeRepository.getBikes()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    private val _availableBikes: MutableStateFlow<List<Bike>> = MutableStateFlow(emptyList())
+    val availableBikes: StateFlow<List<Bike>> = _availableBikes
+
+    // Assuming you are calling the method to fetch available bikes with these time parameters
+    var startTime: Timestamp = Timestamp.now()  // Set this to the required value
+    var endTime: Timestamp = Timestamp.now()    // Set this to the required value
+
+    fun fetchAvailableBikes(startTime: Timestamp, endTime: Timestamp) {
+        this.startTime = startTime
+        this.endTime = endTime
+
+        viewModelScope.launch {
+            bikeRepository.getAvailableBikes2(startTime, endTime)
+                .catch { e ->
+                    // Handle error
+                }
+                .collect { bikes ->
+                    _availableBikes.value = bikes
+                }
+        }
+    }
+
 
     // Mutable state to track selected ownerID
     private val _ownerID = MutableStateFlow<String?>(null)
