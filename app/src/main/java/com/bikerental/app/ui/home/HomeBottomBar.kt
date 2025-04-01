@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
@@ -122,7 +124,9 @@ private fun HomeBottomBarView(
     currentRoute: String,
     tabClick: (HomeTab) -> Unit
 ) {
-    NavigationBar {  // This was the missing opening brace
+    NavigationBar(
+        modifier = Modifier.height(60.dp)
+    ) {  // This was the missing opening brace
         tabs.forEach { tab ->
             val selected = currentRoute == tab.route
             NavigationBarItem(
@@ -148,7 +152,7 @@ private fun HomeNavigationRailView(
     tabClick: (HomeTab) -> Unit
 ) {
     NavigationRail(
-        modifier = Modifier.fillMaxHeight(),
+        modifier = Modifier.fillMaxHeight().width(65.dp),
     ) {
         Column(
             modifier = Modifier.fillMaxHeight(),
