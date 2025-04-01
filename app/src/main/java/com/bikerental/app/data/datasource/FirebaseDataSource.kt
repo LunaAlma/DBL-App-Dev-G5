@@ -143,7 +143,7 @@ class FirebaseDataSource @Inject constructor(
      * @return Flow<List<Bike>> emitting current bike collection
      */
     fun getBikes(): Flow<List<Bike>> = callbackFlow {
-        val subscription = db.collection("bike_rentals")
+        val subscription = db.collection("bikes")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
