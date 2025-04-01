@@ -243,12 +243,12 @@ fun BikeList(bikeList: List<Bike>, navigator: Navigator) {
 }
 
 @Composable
-fun BikeCard(bike: Bike, onClick: () -> Unit) {
+fun BikeCard(bike: Bike, goToDetails: (bikeId: String) -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .width(150.dp)
-            .clickable { onClick() },
+            .clickable { goToDetails(bike.bikeId)},
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
