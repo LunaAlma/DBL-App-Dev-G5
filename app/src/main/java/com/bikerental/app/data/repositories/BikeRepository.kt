@@ -15,7 +15,7 @@ class BikeRepository @Inject constructor(
 
     suspend fun getBikeDetailsById(bikeId: String): Bike = firebaseDataSource.fetchBikeById(bikeId)
 
-    suspend fun addBike(uuid: String, ownerId: String, bikePrice: Double, bikeName: String, city: String, bikeImageUrl: String) =
+    suspend fun addBike(uuid: String, ownerId: String, bikePrice: Double, bikeName: String, city: String, bikeImageUrl: String, startDate: Timestamp, endDate: Timestamp) =
         firebaseDataSource.createBikeDocument(uuid, ownerId, bikeName, bikePrice, city, bikeImageUrl)
 
     fun removeBike(bike: Bike) = firebaseDataSource.deleteBike(bike)

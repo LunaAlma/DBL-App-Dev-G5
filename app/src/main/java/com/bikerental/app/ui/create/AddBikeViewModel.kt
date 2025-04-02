@@ -12,7 +12,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.security.Timestamp
+import com.google.firebase.Timestamp
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.String
@@ -78,6 +81,17 @@ class AddBikeViewModel @Inject constructor(
         if (bikeCityError.value.isNotEmpty()) _bikeCityError.tryEmit("")
         _firebaseError.tryEmit("")
     }
+    fun onStartDateSelected(date: LocalDate) {
+        val instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        _selectedStartDate.value = Timestamp(Date.from(instant))
+        _selectedStartDateError.tryEmit("")
+    }
+
+    fun onEndDateSelected(date: LocalDate) {
+        val instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        _selectedEndDate.value = Timestamp(Date.from(instant))
+        _selectedEndDateError.tryEmit("")
+    }
 
     private fun validate(): Boolean {
         var error = false
@@ -85,6 +99,22 @@ class AddBikeViewModel @Inject constructor(
         if (!isPriceValid(bikePrice.value)) _bikePriceError.tryEmit("Not a valid price").run { error = true }
         if (city.value.isEmpty()) _bikeCityError.tryEmit("Please select a city").run { error = true }
         if(bikeImageUri.value == null) _bikeImageError.tryEmit("Bike image is required").run { error = true }
+        if (selectedStartDate.value == null) {
+            _selectedStartDateError.tryEmit("Start date required")
+            error = true
+        }
+        if (selectedEndDate.value == null) {
+            _selectedEndDateError.tryEmit("End date required")
+            error = true
+        }
+        if (selectedStartDate.value != null && selectedEndDate.value != null &&
+            selectedStartDate.value!!.toDate().after(selectedEndDate.value!!.toDate())
+        ) {
+            _selectedStartDateError.tryEmit("Must be before end date")
+            _selectedEndDateError.tryEmit("Must be after start date")
+            error = true
+        }
+
         return !error
     }
 
@@ -114,7 +144,9 @@ class AddBikeViewModel @Inject constructor(
                         bikeName = bikeName.value,
                         bikePrice = bikePrice.value.toDouble(),
                         city = city.value,
-                        bikeImageUrl = downloadUrl
+                        bikeImageUrl = downloadUrl,
+                        startDate = _selectedStartDate.value!!,
+                        endDate = _selectedEndDate.value!!
                         )
                 } catch (e: Exception) {
                     _firebaseError.tryEmit(e.message ?: "Adding bike failed")

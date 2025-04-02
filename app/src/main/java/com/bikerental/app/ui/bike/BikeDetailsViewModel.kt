@@ -1,28 +1,37 @@
 package com.bikerental.app.ui.bike
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bikerental.app.data.model.Bike
-import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.BikeRepository
-import com.bikerental.app.ui.base.BaseViewModel
-import com.bikerental.app.ui.navigation.Navigator
-import javax.inject.Inject
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class BikeDetailsViewModel  @Inject constructor(
-    navigator: Navigator,
-    private val bikeRepository: BikeRepository,
-    private val auth: AuthRepository
-) : BaseViewModel(navigator) {
-    private val _bike = MutableLiveData<Bike>()
-    val bike: LiveData<Bike> = _bike
+@HiltViewModel
+class BikeDetailsViewModel @Inject constructor(
+    private val bikeRepository: BikeRepository
+) : ViewModel() {
+    private val _bikeDetails = MutableStateFlow<Bike?>(null)
+    val bikeDetails: StateFlow<Bike?> = _bikeDetails.asStateFlow()
 
-    fun getBikeDetails(bikeId: String) {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    fun fetchBikeDetails(bikeId: String) {
         viewModelScope.launch {
-            val bike = bikeRepository.getBikeDetailsById(bikeId)
-            _bike.postValue(bike)
+            _isLoading.value = true
+            try {
+                _bikeDetails.value = bikeRepository.getBikeDetailsById(bikeId)
+            } catch (e: Exception) {
+                // Handle error
+                _bikeDetails.value = null
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 }

@@ -43,7 +43,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import java.io.File
-import java.security.Timestamp
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -77,7 +77,11 @@ fun AddBike(
         onBikeImageChange = { viewModel.onBikeImageChange(it) },
         onBikeNameChange = { viewModel.onBikeNameChange(it) },
         onBikePriceChange = { viewModel.onBikePriceChange(it) },
-        onBikeCityChange = { viewModel.onBikeCityChange(it) }
+        onBikeCityChange = { viewModel.onBikeCityChange(it) },
+        selectedEndDateError = viewModel.selectedEndDateError.collectAsStateWithLifecycle().value,
+        onStartDateChange = { viewModel.onStartDateSelected(it) },
+        onEndDateChange = { viewModel.onEndDateSelected(it) }
+
     )
 }
 
@@ -103,6 +107,9 @@ fun AddBikeView(
     onBikeCityChange: (String) -> Unit = {},
     onBikePriceChange: (String) -> Unit = {},
     addBike: () -> Unit = {},
+    selectedEndDateError: String,
+    onStartDateChange: (LocalDate) -> Unit,
+    onEndDateChange: (LocalDate) -> Unit,
 ) {
     Scaffold { padding ->
         Column(
@@ -286,6 +293,33 @@ fun AddBikeView(
                         }
                     }
                 }
+            }
+
+            Row(
+                modifier = Modifier.padding(16.dp, 4.dp)
+            ) {
+                DatePickerField(
+                    label = "Available From",
+                    selectedDate = selectedStartDate?.toDate()?.toInstant()
+                        ?.atZone(ZoneId.systemDefault())?.toLocalDate(),
+                    onDateSelected = onStartDateChange,
+                    isError = selectedStartDateError.isNotEmpty(),
+                    errorMessage = selectedStartDateError
+                )
+            }
+
+            // End Date
+            Row(
+                modifier = Modifier.padding(16.dp, 4.dp)
+            ) {
+                DatePickerField(
+                    label = "Available Until",
+                    selectedDate = selectedEndDate?.toDate()?.toInstant()
+                        ?.atZone(ZoneId.systemDefault())?.toLocalDate(),
+                    onDateSelected = onEndDateChange,
+                    isError = selectedEndDateError.isNotEmpty(),
+                    errorMessage = selectedEndDateError
+                )
             }
 
             if (firebaseError.isNotEmpty()) {
@@ -505,4 +539,7 @@ fun DatePickerField(
                 }
             }
     )
+    fun Timestamp.toDate(): Date = this.toDate()
+
+    fun Date.toInstant(): Instant = this.toInstant()
 }
