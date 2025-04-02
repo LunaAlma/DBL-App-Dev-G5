@@ -28,7 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.bikerental.app.data.model.Bike
-import com.bikerental.app.data.model.User
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +62,7 @@ fun MyBikesView(
         ) {
             items(
                 items = bikes,
-                key = { it.id }
+                key = { it.bikeId }
             ) {
                 MyBikeCard(
                     bike = it,

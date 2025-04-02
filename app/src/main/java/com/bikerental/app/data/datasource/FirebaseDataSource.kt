@@ -208,8 +208,10 @@ class FirebaseDataSource @Inject constructor(
                 .child("${UUID.randomUUID()}.jpg")
 
             imageRef.putFile(imageUri).await()
-            val downloadUrl = imageRef.downloadUrl
-            Result.success(downloadUrl.toString())
+
+            val downloadUrl = imageRef.downloadUrl.await().toString()
+
+            Result.success(downloadUrl)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -495,10 +497,82 @@ class FirebaseDataSource @Inject constructor(
     }
 
     suspend fun deleteUserDetails(uid: String) {
-        db.collection("users").document(uid).delete().await()
+        try {
+            Log.d("Deletion", "Starting deletion for user: $uid")
+
+            // 1. Get user document
+            val userDoc = db.collection("users").document(uid).get().await()
+            Log.d("Deletion", "Retrieved user document")
+
+            // 2. Delete profile image
+            val profileImageUrl = userDoc.getString("profileImageUrl")
+            profileImageUrl?.let { url ->
+                try {
+                    Log.d("Deletion", "Attempting to delete profile image: $url")
+                    val imageRef = storage.getReferenceFromUrl(url)
+                    imageRef.delete().await()
+                    Log.d("Deletion", "Successfully deleted profile image")
+                } catch (e: Exception) {
+                    Log.e("Deletion", "Profile image deletion failed", e)
+                }
+            }
+
+            // 3. Get all bikes
+            val bikesQuery = db.collection("bikes").whereEqualTo("ownerId", uid).get().await()
+            Log.d("Deletion", "Found ${bikesQuery.size()} bikes to delete")
+
+            // 4. Delete each bike and its image
+            bikesQuery.documents.forEach { bikeDoc ->
+                try {
+                    Log.d("Deletion", "Processing bike: ${bikeDoc.id}")
+
+                    val bikeImageUrl = bikeDoc.getString("imageUrl")
+                    bikeImageUrl?.let { url ->
+                        try {
+                            Log.d("Deletion", "Attempting to delete bike image: $url")
+                            val bikeImageRef = storage.getReferenceFromUrl(url)
+                            bikeImageRef.delete().await()
+                            Log.d("Deletion", "Successfully deleted bike image")
+                        } catch (e: Exception) {
+                            Log.e("Deletion", "Bike image deletion failed", e)
+                        }
+                    }
+
+                    bikeDoc.reference.delete().await()
+                    Log.d("Deletion", "Successfully deleted bike document")
+                } catch (e: Exception) {
+                    Log.e("Deletion", "Error processing bike ${bikeDoc.id}", e)
+                }
+            }
+
+            // 5. Delete user document
+            db.collection("users").document(uid).delete().await()
+            Log.d("Deletion", "Successfully deleted user document")
+
+        } catch (e: Exception) {
+            Log.e("Deletion", "Critical error in deleteUserDetails", e)
+            throw e
+        }
     }
 
     suspend fun updateUserImage(uid: String, imageUrl: String) {
+        val userDoc = db.collection("users").document(uid).get().await()
+
+        // Check if there's an existing profile image URL
+        val oldImageUrl = userDoc.getString("profileImageUrl")
+
+        // If there is an existing image, delete it from Storage
+        oldImageUrl?.let { url ->
+            try {
+                // Get reference to the old image in Storage
+                val oldImageRef = storage.getReferenceFromUrl(url)
+                // Delete the file
+                oldImageRef.delete().await()
+            } catch (e: Exception) {
+                // Log error but continue with the update
+                Log.e("UserRepository", "Failed to delete old profile image: ${e.message}")
+            }
+        }
         db.collection("users").document(uid).update("profileImageUrl", imageUrl).await()
     }
 

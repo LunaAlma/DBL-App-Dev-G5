@@ -36,9 +36,7 @@ fun Profile(
 ) {
     ProfileView(
         modifier = modifier,
-        viewModel = viewModel,
         user = viewModel.user.collectAsState().value,
-        onLogout = { viewModel.onLogout() },
         navigateToMyBikes = { viewModel.navigateToMyBikes() },
         navigateToPastRentals = { viewModel.navigateToPastRentals() },
         navigateToDetails = { viewModel.navigateToDetails() }
@@ -49,8 +47,6 @@ fun Profile(
 private fun ProfileView(
     modifier: Modifier,
     user: User?,
-    viewModel: ProfileViewModel,
-    onLogout: () -> Unit,
     navigateToDetails: () -> Unit,
     navigateToMyBikes: () -> Unit,
     navigateToPastRentals: () -> Unit
@@ -79,8 +75,6 @@ private fun ProfileView(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-
-            ActionButtons(onLogout)
         }
     }
 }
@@ -156,11 +150,7 @@ private fun SettingsSection(
                 trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
                 modifier = Modifier.clickable { navigateToMyBikes() }
             )
-            Divider(
-                thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
+
             ListItem(
                 headlineContent = { Text("Past Rentals") },
                 trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },

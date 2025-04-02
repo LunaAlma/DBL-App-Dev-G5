@@ -73,5 +73,4 @@ class UserRepository @Inject constructor(
     suspend fun updateUserName(uid: String, name: String) {
         firebaseDataSource.updateUserName(uid, name)
     }
-
 }

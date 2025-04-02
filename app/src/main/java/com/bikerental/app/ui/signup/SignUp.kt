@@ -31,6 +31,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -307,7 +309,6 @@ private fun SignUpView(
     }
 }
 
-
 @Composable
 private fun ProfileImageSelector(
     profileImageUri: Uri?,
@@ -338,7 +339,9 @@ private fun ProfileImageSelector(
 
     Box(
         modifier = modifier
-            .size(120.dp)
+            .size(150.dp)
+            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape)
+            .clip(CircleShape)
             .clickable {
                 val permissionCheckResult = ContextCompat.checkSelfPermission(
                     context,
