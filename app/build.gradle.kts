@@ -75,6 +75,8 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.datastore)
     implementation(libs.play.services.base)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
 
     //Firebase
     implementation(platform(libs.firebase.bom))

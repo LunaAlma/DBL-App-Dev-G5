@@ -1,8 +1,6 @@
 package com.bikerental.app.ui.create
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
@@ -10,13 +8,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,7 +39,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
@@ -54,6 +51,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+
 
 @Composable
 fun AddBike(
@@ -73,13 +71,13 @@ fun AddBike(
         bikeCityError = viewModel.bikeCityError.collectAsStateWithLifecycle().value,
         bikeImageError = viewModel.bikeImageError.collectAsStateWithLifecycle().value,
         selectedStartDateError = viewModel.selectedStartDateError.collectAsStateWithLifecycle().value,
+        firebaseError = viewModel.firebaseError.collectAsStateWithLifecycle().value,
+        isLoading = viewModel.isLoading.collectAsStateWithLifecycle().value,
+        addBike = { viewModel.addBike() },
         onBikeImageChange = { viewModel.onBikeImageChange(it) },
         onBikeNameChange = { viewModel.onBikeNameChange(it) },
         onBikePriceChange = { viewModel.onBikePriceChange(it) },
-        onBikeCityChange = { viewModel.onBikeCityChange(it) },
-        firebaseError = viewModel.firebaseError.collectAsStateWithLifecycle().value,
-        isLoading = viewModel.isLoading.collectAsStateWithLifecycle().value,
-        addBike = { viewModel.addBike() }
+        onBikeCityChange = { viewModel.onBikeCityChange(it) }
     )
 }
 
@@ -90,7 +88,7 @@ fun AddBikeView(
     bikeName: String,
     bikeCity: String,
     bikePrice: String,
-    selectedStartDate: Timestamp?,
+    selectedStartDate: Timestamp?, // or whatever type you are using
     selectedEndDate: Timestamp?,
     bikeNameError: String,
     bikeCityError: String,
@@ -105,14 +103,15 @@ fun AddBikeView(
     onBikeCityChange: (String) -> Unit = {},
     onBikePriceChange: (String) -> Unit = {},
     addBike: () -> Unit = {},
-    ) {
+) {
     Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
+            verticalArrangement = Arrangement.Center
+        ) {
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -130,9 +129,11 @@ fun AddBikeView(
                         .padding(vertical = 16.dp)
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.headlineSmall // Uses Material Design typography
+                    style = MaterialTheme.typography.headlineSmall
                 )
             }
+
+            // Bike Image Selector
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -141,13 +142,13 @@ fun AddBikeView(
                     bottom = 4.dp
                 )
             ) {
-                // Add profile image selector
                 BikeImageSelector(
                     bikeImageUri = bikeImageUri,
                     onImageSelected = onBikeImageChange,
                     modifier = Modifier.padding(16.dp),
                 )
             }
+
             if (bikeImageError.isNotEmpty()) {
                 Row(
                     modifier = Modifier.padding(
@@ -164,6 +165,8 @@ fun AddBikeView(
                     )
                 }
             }
+
+            // Bike Name
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -190,6 +193,8 @@ fun AddBikeView(
                     },
                 )
             }
+
+            // Bike Price
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -220,6 +225,8 @@ fun AddBikeView(
                     )
                 )
             }
+
+            // Bike City
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -236,57 +243,51 @@ fun AddBikeView(
                     onExpandedChange = { expanded = !expanded }
                 ) {
                     val cities = listOf("Eindhoven", "Amsterdam", "Utrecht", "Den Haag", "Rotterdam")
-                    var expanded by remember { mutableStateOf(false) }
 
-                    ExposedDropdownMenuBox(
-                        modifier = Modifier.fillMaxWidth(),
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        value = bikeCity,
+                        onValueChange = {},
+                        label = { Text("City") },
+                        singleLine = true,
+                        readOnly = true,
+                        leadingIcon = {
+                            Icon(
+                                Icons.Filled.LocationOn,
+                                contentDescription = "Location"
+                            )
+                        },
+                        trailingIcon = {
+                            Icon(
+                                if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                contentDescription = if (expanded) "Collapse" else "Expand"
+                            )
+                        },
+                        isError = bikeCityError.isNotEmpty(),
+                        supportingText = {
+                            Text(text = bikeCityError)
+                        },
+                    )
+
+                    ExposedDropdownMenu(
                         expanded = expanded,
-                        onExpandedChange = { expanded = !expanded }
+                        onDismissRequest = { expanded = false }
                     ) {
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(),
-                            value = bikeCity,
-                            onValueChange = {},
-                            label = { Text("City") },
-                            singleLine = true,
-                            readOnly = true,  // Disables keyboard input
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Filled.LocationOn,
-                                    contentDescription = "Location"
-                                )
-                            },
-                            trailingIcon = {
-                                Icon(
-                                    if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                                    contentDescription = if (expanded) "Collapse" else "Expand"
-                                )
-                            },
-                            isError = bikeCityError.isNotEmpty(),
-                            supportingText = {
-                                Text(text = bikeCityError)
-                            },
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            cities.forEach { city ->
-                                DropdownMenuItem(
-                                    text = { Text(city) },
-                                    onClick = {
-                                        onBikeCityChange(city)
-                                        expanded = false
-                                    }
-                                )
-                            }
+                        cities.forEach { city ->
+                            DropdownMenuItem(
+                                text = { Text(city) },
+                                onClick = {
+                                    onBikeCityChange(city)
+                                    expanded = false
+                                }
+                            )
                         }
                     }
                 }
             }
+
             if (firebaseError.isNotEmpty()) {
                 Row(
                     modifier = Modifier.padding(
@@ -303,6 +304,8 @@ fun AddBikeView(
                     )
                 }
             }
+
+            // Add Bike Button
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -340,17 +343,36 @@ private fun BikeImageSelector(
     onImageSelected: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val launcher = rememberLauncherForActivityResult(
+    val context = LocalContext.current
+
+    // State to store camera photo URI
+    var cameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Launcher for picking an image from gallery
+    val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let { onImageSelected(it) }
     }
 
+    // Launcher for taking a photo with the camera
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            cameraUri?.let { onImageSelected(it) }
+        } else {
+            Toast.makeText(context, "Camera capture failed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Request camera permission
     val cameraPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            cameraLauncher.launch(uri)
+            cameraUri = createImageFile(context).toUri(context)
+            cameraUri?.let { cameraLauncher.launch(it) }
         } else {
             Toast.makeText(context, "Camera permission denied", Toast.LENGTH_SHORT).show()
         }
@@ -361,7 +383,12 @@ private fun BikeImageSelector(
             .size(150.dp)
             .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape)
             .clip(CircleShape)
-            .clickable { launcher.launch("image/*") }
+            .clickable {
+                // You can show a dialog or menu here to let the user choose
+                // between picking from the gallery or taking a photo with the camera.
+                // For now, let's just open the gallery.
+                galleryLauncher.launch("image/*")
+            }
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = CircleShape
@@ -396,6 +423,16 @@ private fun createImageFile(context: Context): File {
     )
 }
 
+/**
+ * Helper extension to get a content:// Uri from a File using FileProvider.
+ * Make sure you define a <provider> in your AndroidManifest with the same authority
+ * you use here, e.g., "com.bikerental.app.fileprovider".
+ */
+private fun File.toUri(context: Context): Uri {
+    val authority = "${context.packageName}.fileprovider"
+    return FileProvider.getUriForFile(context, authority, this)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerField(
@@ -411,7 +448,10 @@ fun DatePickerField(
 
     if (showDatePicker.value) {
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+            initialSelectedDateMillis = selectedDate
+                ?.atStartOfDay(ZoneId.systemDefault())
+                ?.toInstant()
+                ?.toEpochMilli()
         )
 
         DatePickerDialog(

@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.bikerental.app.data.model.Bike
 import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.BikeRepository
-import com.bikerental.app.model.Bike
 import com.bikerental.app.ui.base.BaseViewModel
 import com.bikerental.app.ui.navigation.Navigator
 import javax.inject.Inject

@@ -1,4 +1,5 @@
 package com.bikerental.app.ui.bike
+
 import com.bikerental.app.R
 import android.annotation.SuppressLint
 import android.util.Log
@@ -34,26 +35,50 @@ import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.bikerental.app.ui.theme.AppTheme
-import com.bikerental.app.viewmodel.BikeDetailsViewModel
+import com.bikerental.app.ui.bike.BikeDetailsViewModel
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-
-
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun BikeRentalCard(bikeId: String){
+fun BikeDetails(bikeId: String) {
     val bikeViewModel: BikeDetailsViewModel = viewModel()
-    val bikeData = bikeViewModel.bikeDetails.value
+    val bikeData = bikeViewModel.bike.value
 
     Log.d("BikeDetails", "bikeId: $bikeId")
     LaunchedEffect(bikeId) {
-        bikeViewModel.fetchBikeDetails(bikeId)
+        bikeViewModel.getBikeDetails(bikeId)
     }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-
+    // Handle image loading using imageUrl instead of imageRef
+    var imageUrl by remember { mutableStateOf(bikeData?.imageUrl ?: "") }
+    var imageLoaded by remember { mutableStateOf(false) }
+    if (bikeData?.imageUrl?.isNotEmpty() == true && !imageLoaded) {
+        val storageRef = Firebase.storage.reference.child(bikeData.imageUrl)
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            imageUrl = uri.toString()
+            imageLoaded = true
+        }.addOnFailureListener { exception ->
+            Log.e("BikeRentalCard", "Failed to load image: ${exception.message}")
+        }
     }
+
+    // Safely derive painter in composable scope
+    val painter: Painter = if (imageUrl.isNotEmpty()) {
+        rememberAsyncImagePainter(model = imageUrl)
+    } else {
+        painterResource(id = R.drawable.bike)
+    }
+
+    // Format start and end time using SimpleDateFormat
+    val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val startTimeText = bikeData?.startTime?.toDate()?.let { sdf.format(it) } ?: "Unknown"
+    val endTimeText = bikeData?.endTime?.toDate()?.let { sdf.format(it) } ?: "Unknown"
+
+    Surface(modifier = Modifier.fillMaxSize()) { }
+
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
@@ -61,37 +86,16 @@ fun BikeRentalCard(bikeId: String){
             .fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
-            val context = LocalContext.current
-            var painter: Painter = painterResource(id = R.drawable.bike)
-            var imageLoaded by remember { mutableStateOf(false) }
-
-            if (bikeData?.imageRef != null && !imageLoaded) {
-                val storageRef = Firebase.storage.reference.child(bikeData.imageRef)
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    val request = ImageRequest.Builder(context)
-                        .data(uri)
-                        .build()
-                    painter = rememberAsyncImagePainter(model = request)
-                    imageLoaded = true
-                }.addOnFailureListener { exception ->
-                    Log.e("BikeRentalCard", "Failed to load image: ${exception.message}")
-                }
-            }
-
-                Image(
-                    painter = painter,
-                    contentDescription = "Bike Image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-
+            Image(
+                painter = painter,
+                contentDescription = "Bike Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
             Spacer(modifier = Modifier.height(8.dp))
-
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -108,23 +112,19 @@ fun BikeRentalCard(bikeId: String){
                 }
                 Text(text = "${bikeData?.price}", style = MaterialTheme.typography.bodyMedium)
             }
-
             Spacer(modifier = Modifier.height(4.dp))
-
-
-            Text(text = "${bikeData?.startTime} - ${bikeData?.endTime}", style = MaterialTheme.typography.bodySmall)
-
+            Text(text = "$startTimeText - $endTimeText", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.height(8.dp))
-
-
             Text(
                 text = bikeData?.bikeName ?: "No name found",
                 style = MaterialTheme.typography.bodyMedium
             )
-            Text(text = bikeData?.ownerName ?: "no owner",style = MaterialTheme.typography.bodyMedium)
+            // Replace ownerName with ownerId
+            Text(
+                text = bikeData?.ownerId ?: "no owner",
+                style = MaterialTheme.typography.bodyMedium
+            )
             Spacer(modifier = Modifier.height(8.dp))
-
-
             Button(
                 onClick = { /* TODO: Handle rent action */ },
                 modifier = Modifier.fillMaxWidth(),
@@ -140,6 +140,6 @@ fun BikeRentalCard(bikeId: String){
 @Composable
 fun BikeRentalCardPreview() {
     AppTheme {
-        BikeRentalCard("bike_1")
+        BikeDetails("bike_1")
     }
 }
