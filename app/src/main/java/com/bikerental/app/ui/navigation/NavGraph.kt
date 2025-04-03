@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.bikerental.app.ui.bike.BikeDetails
 import com.bikerental.app.ui.bike.BikeDetailsViewModel
@@ -136,12 +138,12 @@ fun NavGraph(
 
             // Home.BikeDetails
             composable(
-                route = Destination.Home.BikeDetails.route,
-                arguments = Destination.Home.BikeDetails.navArguments
-            ) {
-                val viewModel: BikeDetailsViewModel = hiltViewModel()
-                BikeDetails(modifier, viewModel)
+                route = "bike_details/{bikeId}",
+                arguments = listOf(navArgument("bikeId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                BikeDetails()
             }
+
 
             // Home.PastRental
             composable(Destination.Home.PastRentals.route) {

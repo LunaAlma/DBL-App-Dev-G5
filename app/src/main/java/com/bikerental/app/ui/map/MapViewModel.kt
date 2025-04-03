@@ -126,7 +126,11 @@ class MapViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("Navigation", "Could not go back to Map", e)
             }
+
         }
+    }
+    fun goToBikeDetails(bikeId: String){
+        navigator.navigateTo("bike_details/$bikeId")
     }
 
 }

@@ -10,10 +10,13 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,118 +31,46 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.bikerental.app.ui.navigation.Destination
 import com.bikerental.app.ui.theme.AppTheme
-import com.bikerental.app.viewmodel.BikeDetailsViewModel
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 
-
-
-@SuppressLint("StateFlowValueCalledInComposition")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BikeRentalCard(bikeId: String){
-    val bikeViewModel: BikeDetailsViewModel = viewModel()
-    val bikeData = bikeViewModel.bikeDetails.value
+fun BikeDetails(
+    modifier: Modifier = Modifier,
+    viewModel: BikeDetailsViewModel = hiltViewModel()
+) {
+    // Retrieve the bikeId from the viewmodel
+    val bikeId = viewModel.bikeId
 
-    Log.d("BikeDetails", "bikeId: $bikeId")
-    LaunchedEffect(bikeId) {
-        bikeViewModel.fetchBikeDetails(bikeId)
-    }
-
-    Surface(modifier = Modifier.fillMaxSize()) {
-
-    }
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
-            val context = LocalContext.current
-            var painter: Painter = painterResource(id = R.drawable.bike)
-            var imageLoaded by remember { mutableStateOf(false) }
-
-            if (bikeData?.imageRef != null && !imageLoaded) {
-                val storageRef = Firebase.storage.reference.child(bikeData.imageRef)
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    val request = ImageRequest.Builder(context)
-                        .data(uri)
-                        .build()
-                    painter = rememberAsyncImagePainter(model = request)
-                    imageLoaded = true
-                }.addOnFailureListener { exception ->
-                    Log.e("BikeRentalCard", "Failed to load image: ${exception.message}")
-                }
-            }
-
-                Image(
-                    painter = painter,
-                    contentDescription = "Bike Image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Star",
-                        tint = Color(0xFFFFC107)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "5.0", style = MaterialTheme.typography.bodyMedium)
-                }
-                Text(text = "${bikeData?.price}", style = MaterialTheme.typography.bodyMedium)
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-
-            Text(text = "${bikeData?.startTime} - ${bikeData?.endTime}", style = MaterialTheme.typography.bodySmall)
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-
-            Text(
-                text = bikeData?.bikeName ?: "No name found",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(text = bikeData?.ownerName ?: "no owner",style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.height(8.dp))
-
-
-            Button(
-                onClick = { /* TODO: Handle rent action */ },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB2E59C))
-            ) {
-                Text("Rent")
-            }
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Bike Details") })
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun BikeRentalCardPreview() {
-    AppTheme {
-        BikeRentalCard("bike_1")
+    ) { padding ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Bike ID: $bikeId",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
