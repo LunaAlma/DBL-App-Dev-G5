@@ -93,7 +93,7 @@ class AddBikeViewModel @Inject constructor(
         _selectedEndDate.value = Timestamp(instant.epochSecond, instant.nano)
     }
 
-    private fun validate(): Boolean {
+    fun validate(): Boolean {
         var error = false
         if (bikeName.value.length < 6) _bikeNameError.tryEmit("Bike Name length should be at least 6").run { error = true }
         if (!isPriceValid(bikePrice.value)) _bikePriceError.tryEmit("Not a valid price").run { error = true }
