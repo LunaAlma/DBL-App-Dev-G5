@@ -77,7 +77,7 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.play.services.base)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.ch.logback.classic)
+//    implementation(libs.ch.logback.classic)
 
 
     //Firebase
@@ -96,21 +96,21 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    testImplementation(libs.mockk.mockk.v1135)
-    testImplementation(libs.mockk.android)
-    testImplementation(libs.junit.jupiter.api)
-    testImplementation(libs.junit.jupiter.engine)
-    testImplementation(libs.kotlinx.coroutines.test.v173)
-    testImplementation(libs.byte.buddy)
-    testImplementation(libs.mockk)
+//    testImplementation(libs.mockk.mockk.v1135)
+//    testImplementation(libs.mockk.android)
+//    testImplementation(libs.junit.jupiter.api)
+//    testImplementation(libs.junit.jupiter.engine)
+//    testImplementation(libs.kotlinx.coroutines.test.v173)
+//    testImplementation(libs.byte.buddy)
+//    testImplementation(libs.mockk)
 
 }
 
-sonarqube {
-    properties {
-        property("sonar.projectKey", "appdev")
-        property("sonar.projectName", "appdev")
-        property("sonar.host.url", "http://localhost:9000")
-        property("sonar.token", "sqp_06120c3ac36b915823fb399f97852c9e3f1dae10")
-    }
-}
+//sonarqube {
+//    properties {
+//        property("sonar.projectKey", "appdev")
+//        property("sonar.projectName", "appdev")
+//        property("sonar.host.url", "http://localhost:9000")
+//        property("sonar.token", "sqp_06120c3ac36b915823fb399f97852c9e3f1dae10")
+//    }
+//}

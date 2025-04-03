@@ -373,7 +373,8 @@ fun Map(
 
             BottomCard(
                 markerData = marker.copy(rating = rating), // markerData = marker,
-                onDismiss = { selectedMarker = null }
+                onDismiss = { selectedMarker = null },
+                viewModel = viewModel
             )
         }
     }
@@ -386,7 +387,8 @@ fun Map(
 @Composable
 fun BottomCard(
     markerData: MarkerData,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: MapViewModel
 ) {
     // Box that takes the entire screen
     Box(
@@ -407,7 +409,9 @@ fun BottomCard(
                 .heightIn(min = 200.dp, max = 300.dp)
                 // TODO: Clicking the card takes you to individual bike page
                 .clickable(
-                    onClick = { /*  TODO: ADD LOGIC HERE (LUKA pg) */ },
+                    onClick = {
+                        viewModel.goToBikeDetails(markerData.bikeId)
+                    },
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 )

@@ -5,8 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bikerental.app.ui.bike.BikeDetails
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.bikerental.app.ui.bike.BikeDetailsViewModel
 import com.bikerental.app.ui.create.AddBike
@@ -134,17 +136,16 @@ fun NavGraph(
             // Home.Search
             composable(Destination.Home.Search.route) {
                 //val navController = rememberNavController()
-                val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
-                BikeListScreen(navController, modifier, viewModel)
+                //val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
+                BikeListScreen(navController, modifier)
             }
 
             // Home.BikeDetails
             composable(
-                route = Destination.Home.BikeDetails.route,
-                arguments = Destination.Home.BikeDetails.navArguments
+                route = "bike_details/{bikeId}",
+                arguments = listOf(navArgument("bikeId") { type = NavType.StringType })
             ) { backStackEntry ->
-                val bikeId = backStackEntry.arguments?.getString("bikeId") ?: "default_bike_id"
-                BikeDetails(bikeId)
+                BikeDetails()
             }
 
             // Home.PastRental

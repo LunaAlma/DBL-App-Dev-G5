@@ -1,37 +1,47 @@
 package com.bikerental.app.ui.bike
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bikerental.app.data.model.Bike
+import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.BikeRepository
+import com.bikerental.app.ui.navigation.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class BikeDetailsViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val bikeRepository: BikeRepository
 ) : ViewModel() {
-    private val _bikeDetails = MutableStateFlow<Bike?>(null)
-    val bikeDetails: StateFlow<Bike?> = _bikeDetails.asStateFlow()
+    val bikeId: String = savedStateHandle.get<String>("bikeId") ?: "Unknown"
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
-
-    fun fetchBikeDetails(bikeId: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                _bikeDetails.value = bikeRepository.getBikeDetailsById(bikeId)
-            } catch (e: Exception) {
-                // Handle error
-                _bikeDetails.value = null
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
+    // Optionally, you can load further details based on bikeId here.
 }
+
+//class BikeDetailsViewModel  @Inject constructor(
+//    private val savedStateHandle: SavedStateHandle,
+//    navigator: Navigator,
+//    private val bikeRepository: BikeRepository,
+//    private val auth: AuthRepository
+//) : BaseViewModel(navigator) {
+//    val bikeId: String = savedStateHandle.get<String>("bikeId") ?: ""
+//    val otherBike = MutableStateFlow<Bike?>(null)
+//
+//    init {
+//        loadBikeData()
+//    }
+//    private fun loadBikeData() {
+//        launchFirebase {
+//            bikeRepository.getBikes().collect { bikes ->
+//                otherBike.value = bikes.firstOrNull { it.bid == bikeId }
+//            }
+//        }
+//
+//    }
+//}

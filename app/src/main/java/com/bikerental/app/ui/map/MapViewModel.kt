@@ -128,5 +128,8 @@ class MapViewModel @Inject constructor(
             }
         }
     }
+    fun goToBikeDetails(bikeId: String){
+        navigator.navigateTo("bike_details/$bikeId")
+    }
 
 }

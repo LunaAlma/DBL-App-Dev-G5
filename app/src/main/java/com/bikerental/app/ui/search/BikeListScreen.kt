@@ -15,11 +15,14 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bikerental.app.data.model.Bike
 import coil.compose.rememberAsyncImagePainter
+import com.bikerental.app.ui.map.MapViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 import java.text.SimpleDateFormat
@@ -30,7 +33,6 @@ import java.util.Locale
 fun BikeListScreen(
     navController: NavController,
     modifier: Modifier,
-    viewModel: SearchViewModel
 ) {
     var bikeList by remember { mutableStateOf(listOf<Bike>()) }
     var selectedCity by remember { mutableStateOf("Select City") }
@@ -91,7 +93,7 @@ fun BikeListScreen(
             modifier = Modifier.padding(16.dp)
         )
 
-        BikeList(bikeList, navController)
+        BikeList(bikeList, navController, viewModel = viewModel())
     }
 }
 
@@ -196,22 +198,37 @@ fun RentalPeriodSelector(
 }
 
 @Composable
-fun BikeList(bikeList: List<Bike>, navController: NavController) {
+fun BikeList(
+    bikeList: List<Bike>,
+    navController: NavController,
+    viewModel: BikeListScreenViewModel
+) {
+    fun onBikeSelected(bikeId: String) {
+        viewModel.setBikeId(bikeId)
+    }
     LazyRow(modifier = Modifier.padding(start = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         items(bikeList) { bike ->
-            BikeCard(bike) { navController.navigate("bikeDetails/${bike.bikeId}") }
+            BikeCard(
+                bike,
+                onClick = { onBikeSelected(bike.bikeId) },
+                viewModel = viewModel
+            )
         }
     }
 }
 
 @Composable
-fun BikeCard(bike: Bike, onClick: () -> Unit) {
+fun BikeCard(bike: Bike,onClick: () -> Unit,viewModel: BikeListScreenViewModel) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .width(150.dp)
-            .clickable { onClick() },
+            .clickable {
+                onClick(
+                    //viewModel.goToBikeDetails(bike.bikeId)
+                )
+                       },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
