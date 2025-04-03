@@ -28,6 +28,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.bikerental.app.data.model.Bike
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +43,7 @@ fun MyBikes(
         modifier = modifier,
         bikes = viewModel.bikes.collectAsState().value,
         isLoading = viewModel.isLoading.collectAsState().value,
-        onDeleteBike = { }
+        onDeleteBike = { bike -> viewModel.deleteBike(bike) }
     )
 }
 
@@ -50,7 +53,7 @@ fun MyBikesView(
     modifier: Modifier,
     bikes: List<Bike>,
     isLoading: Boolean,
-    onDeleteBike: (String) -> Unit
+    onDeleteBike: (Bike) -> Unit
 ) {
 
     if (isLoading) {
@@ -66,9 +69,7 @@ fun MyBikesView(
             ) {
                 MyBikeCard(
                     bike = it,
-                    onDelete = {
-                        //onDeleteBike(bike.bikeId)
-                    }
+                    onDelete = { onDeleteBike(it) }
                 )
             }
         }
@@ -106,7 +107,7 @@ fun MyBikeCard(
 
             // Bike Image
             AsyncImage(
-                model = bike.bikeName,
+                model = bike.imageUrl,
                 contentDescription = "Bike image",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -122,11 +123,11 @@ fun MyBikeCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = bike.bikeName,
+                    text = "€${bike.price}/hour",
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = bike.bikeName,
+                    text = bike.city,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -136,11 +137,11 @@ fun MyBikeCard(
 //             Dates
             Column {
                 Text(
-                    text = "Available from: ${bike.bikeName}",
+                    text = "Available from: ${formatTimestamp(bike.startTime)}",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "Available until: ${bike.bikeName}",
+                    text =  "Available until: ${formatTimestamp(bike.endTime)}",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -149,9 +150,17 @@ fun MyBikeCard(
 
             // Coordinates
             Text(
-                text = bike.bikeName,
+                text = "Location: %.4f, %.4f".format(
+                    bike.location.latitude,
+                    bike.location.longitude
+                ),
                 style = MaterialTheme.typography.bodySmall
             )
         }
     }
+
+}
+fun formatTimestamp(timestamp: Timestamp): String {
+    val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    return dateFormat.format(timestamp.toDate())
 }

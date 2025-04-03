@@ -1,5 +1,6 @@
 package com.bikerental.app.ui.profile
 
+import android.util.Log
 import com.bikerental.app.data.model.Bike
 import com.bikerental.app.data.model.User
 import com.bikerental.app.data.repositories.BikeRepository
@@ -11,7 +12,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import javax.inject.Inject
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
 
 @HiltViewModel
 class MyBikesViewModel @Inject constructor(
@@ -21,6 +27,12 @@ class MyBikesViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val auth: FirebaseAuth
 ) : BaseViewModel(navigator) {
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    private val _bikes = MutableStateFlow<List<Bike>>(emptyList())
+    val bikes: StateFlow<List<Bike>> = _bikes
 
 //    private val _users = MutableStateFlow<List<User>>(emptyList())
 //    val users = _users.asStateFlow()
@@ -52,24 +64,39 @@ class MyBikesViewModel @Inject constructor(
         loadBikes()
     }
 
-    private val _bikes = MutableStateFlow<List<Bike>>(emptyList())
-    val bikes = _bikes.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
-
     private fun loadBikes() {
-        launchFirebase {
+        viewModelScope.launch {
+            // Retrieve current user id or log an error and exit if not logged in.
+            val userId = auth.currentUser?.uid ?: run {
+                Log.e("MyBikesViewModel", "User not logged in")
+                return@launch
+            }
+            Log.d("MyBikesViewModel", "Loading bikes for user: $userId")
             _isLoading.value = true
-            try {
-                bikeRepository.getBikeByOwner(ownerId = auth.currentUser?.uid ?: "").collect { bikes ->
-                    _bikes.value = bikes.filter { true }
+
+            bikeRepository.getBikeByOwner(userId)
+                .catch { e ->
                     _isLoading.value = false
+                    Log.e("MyBikesViewModel", "Error loading bikes: ${e.message}", e)
                 }
+                .collect { bikes ->
+                    // Update the bikes state (no filtering is applied here).
+                    _bikes.value = bikes
+                    _isLoading.value = false
+                    Log.d("MyBikesViewModel", "Fetched ${bikes.size} bikes for user: $userId")
+                }
+        }
+    }
+
+    fun deleteBike(bike: Bike) {
+        viewModelScope.launch {
+            try {
+                bikeRepository.removeBike(bike)
+                // No need to update _bikes manually - Flow will auto-refresh
             } catch (e: Exception) {
-                _isLoading.value = false
-                // Handle error
+                Log.e("MyBikesViewModel", "Delete failed", e)
             }
         }
     }
+
 }

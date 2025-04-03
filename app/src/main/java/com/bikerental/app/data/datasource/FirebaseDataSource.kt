@@ -304,18 +304,31 @@ class FirebaseDataSource @Inject constructor(
      * @return Flow<List<Bike>> emitting bikes owned by the specified user
      */
     fun fetchBikesByOwner(ownerId: String): Flow<List<Bike>> = callbackFlow {
+        Log.d("FirebaseDebug", "Querying bikes for ownerId: $ownerId")
+
         val subscription = db.collection("bikes")
-            .whereEqualTo("ownerId", ownerId)
+            .whereEqualTo("ownerId", ownerId) // Ensure this matches Firestore
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
+                    Log.e("FirebaseDebug", "Error: ${error.message}")
                     close(error)
                     return@addSnapshotListener
                 }
-                val bikes = snapshot?.toObjects(Bike::class.java) ?: emptyList()
+
+                if (snapshot == null || snapshot.isEmpty) {
+                    Log.d("FirebaseDebug", "No bikes found for ownerId: $ownerId")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+
+                val bikes = snapshot.toObjects(Bike::class.java)
+                Log.d("FirebaseDebug", "Fetched bikes: ${bikes.size}")
                 trySend(bikes)
             }
+
         awaitClose { subscription.remove() }
     }
+
 
     /**
      * Gets bikes available in a date range (not rented during the specified period).
