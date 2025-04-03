@@ -82,15 +82,15 @@ class AddBikeViewModel @Inject constructor(
         _firebaseError.tryEmit("")
     }
     fun onStartDateSelected(date: LocalDate) {
+        println("DEBUG - Selected start date: $date")
         val instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
-        _selectedStartDate.value = Timestamp(Date.from(instant))
-        _selectedStartDateError.tryEmit("")
+        _selectedStartDate.value = Timestamp(instant.epochSecond, instant.nano)
     }
 
     fun onEndDateSelected(date: LocalDate) {
+        println("DEBUG - Selected end date: $date")
         val instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
-        _selectedEndDate.value = Timestamp(Date.from(instant))
-        _selectedEndDateError.tryEmit("")
+        _selectedEndDate.value = Timestamp(instant.epochSecond, instant.nano)
     }
 
     private fun validate(): Boolean {
@@ -126,7 +126,10 @@ class AddBikeViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun addBike() {
+        println("DEBUG - Attempting to add bike...")
+        println("DEBUG - Selected Dates: ${_selectedStartDate.value} to ${_selectedEndDate.value}")
         if(validate()) {
+            println("DEBUG - Validation passed")
             _isLoading.tryEmit(true)
             _firebaseError.tryEmit("")
 

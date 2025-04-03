@@ -77,7 +77,9 @@ class FirebaseDataSource @Inject constructor(
         bikeName: String,
         bikePrice: Double,
         city: String,
-        bikeImageUrl: String
+        bikeImageUrl: String,
+        startTime: Timestamp,
+        endTime: Timestamp
         ) {
         db.collection("bikes").document(uuid).set(
             Bike(
@@ -88,8 +90,8 @@ class FirebaseDataSource @Inject constructor(
                 city = city,
                 imageUrl = bikeImageUrl,
                 location = GeoPoint(0.0, 0.0),
-                startTime = Timestamp.now(),
-                endTime = Timestamp.now(),
+                startTime = startTime,  // Use the provided startTime
+                endTime = endTime
             )
         ).await()
     }
