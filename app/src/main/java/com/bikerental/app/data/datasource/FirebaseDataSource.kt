@@ -130,13 +130,16 @@ class FirebaseDataSource @Inject constructor(
                     close(error)
                     return@addSnapshotListener
                 }
+
                 val user = snapshot?.toObject(User::class.java)
-                if(user != null) {
+                if (user != null) {
                     trySend(user)
                 } else {
-                    close(IllegalStateException("User document not found"))
+                    // Instead of closing the flow, send empty values
+                    Log.w("Firebase", "User document $uid not found")
                 }
             }
+
         awaitClose { subscription.remove() }
     }
 
