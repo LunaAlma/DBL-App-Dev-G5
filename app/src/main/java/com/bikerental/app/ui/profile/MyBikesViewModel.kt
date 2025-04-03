@@ -62,7 +62,7 @@ class MyBikesViewModel @Inject constructor(
         launchFirebase {
             _isLoading.value = true
             try {
-                bikeRepository.getBikes().collect { bikes ->
+                bikeRepository.getBikeByOwner(ownerId = auth.currentUser?.uid ?: "").collect { bikes ->
                     _bikes.value = bikes.filter { true }
                     _isLoading.value = false
                 }

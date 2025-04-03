@@ -99,6 +99,9 @@ class ProfileViewModel @Inject constructor(
     fun navigateToDetails() {
         navigator.navigateTo(Destination.Home.ProfileDetails.route)
     }
+    fun navigateToCurrentRentals() {
+        navigator.navigateTo(Destination.Home.CurrentRentals.route)
+    }
 
     fun onLogout() {
         authRepository.logout()

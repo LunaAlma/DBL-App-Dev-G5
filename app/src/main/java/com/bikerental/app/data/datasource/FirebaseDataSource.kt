@@ -175,6 +175,22 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
+    suspend fun fetchBikesByUser(userId: String): List<Bike> {
+        return try {
+            // Query the "bikes" collection where the "owner" field matches the given userId.
+            val querySnapshot = db.collection("bikes")
+                .whereEqualTo("owner", userId)
+                .get()
+                .await()
+
+            // Map each document to a Bike object, filtering out any that cannot be converted.
+            querySnapshot.documents.mapNotNull { it.toObject(Bike::class.java) }
+        } catch (e: Exception) {
+            throw Exception("Failed to fetch bikes: ${e.message}")
+        }
+    }
+
+
     /**
      * Deletes a bike document from Firestore.
      *
