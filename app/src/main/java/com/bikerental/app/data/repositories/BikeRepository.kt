@@ -33,8 +33,8 @@ class BikeRepository @Inject constructor(
         bikePrice = bikePrice,
         city = city,
         bikeImageUrl = bikeImageUrl,
-        startTime = startDate,  // Add this
-        endTime = endDate       // Add this
+        startTime = startDate,
+        endTime = endDate
     )
 
     fun removeBike(bike: Bike) = firebaseDataSource.deleteBike(bike)
