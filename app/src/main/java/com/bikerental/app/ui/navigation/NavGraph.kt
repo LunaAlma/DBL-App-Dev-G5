@@ -32,6 +32,7 @@ import com.bikerental.app.ui.pastrentals.PastRentalsScreen
 import com.bikerental.app.ui.profile.MyBikes
 import com.bikerental.app.ui.profile.MyBikesViewModel
 import com.bikerental.app.ui.profile.UserProfileDetails
+import com.bikerental.app.ui.search.BikeListScreen
 import com.bikerental.app.ui.search.Search
 
 @Composable
@@ -130,8 +131,9 @@ fun NavGraph(
 
             // Home.Search
             composable(Destination.Home.Search.route) {
-                val viewModel: SearchViewModel = hiltViewModel()
-                Search(modifier, viewModel)
+                //val navController = rememberNavController()
+                val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
+                BikeListScreen(navController, modifier, viewModel)
             }
 
             // Home.BikeDetails
