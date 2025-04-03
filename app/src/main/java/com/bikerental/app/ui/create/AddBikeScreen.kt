@@ -133,7 +133,7 @@ fun AddBikeView(
                     fontWeight = FontWeight.Bold,
                     fontStyle = FontStyle.Normal,
                     modifier = Modifier
-                        .padding(vertical = 16.dp)
+                        .padding(vertical = 4.dp)
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.headlineSmall
@@ -152,7 +152,7 @@ fun AddBikeView(
                 BikeImageSelector(
                     bikeImageUri = bikeImageUri,
                     onImageSelected = onBikeImageChange,
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(4.dp),
                 )
             }
 
@@ -296,7 +296,7 @@ fun AddBikeView(
             }
 
             Row(
-                modifier = Modifier.padding(16.dp, 4.dp)
+                modifier = Modifier.padding(8.dp, 4.dp)
             ) {
                 DatePickerField(
                     label = "Available From",
@@ -310,7 +310,7 @@ fun AddBikeView(
 
             // End Date
             Row(
-                modifier = Modifier.padding(16.dp, 4.dp)
+                modifier = Modifier.padding(8.dp, 4.dp)
             ) {
                 DatePickerField(
                     label = "Available Until",
