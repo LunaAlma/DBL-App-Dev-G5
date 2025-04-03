@@ -71,6 +71,13 @@ maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets"
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "play-services-base" }
+ch-logback-classic = { module = "ch.qos.logback:logback-classic", version = "1.2.6" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version = "5.8.2" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.8.2" }
+kotlinx-coroutines-test-v173 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.10.1" }
+mockk = { module = "io.mockk:mockk", version = "1.13.5" }
+byte-buddy = { module = "net.bytebuddy:byte-buddy", version = "1.14.5" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
