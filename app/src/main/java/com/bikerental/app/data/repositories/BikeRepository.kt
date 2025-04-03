@@ -15,6 +15,8 @@ class BikeRepository @Inject constructor(
 
     suspend fun getBikeDetailsById(bikeId: String): Bike = firebaseDataSource.fetchBikeById(bikeId)
 
+//    fun getBikesByUser(userId: String): Flow<List<Bike>> = firebaseDataSource.fetchBikesByUser(userId)
+
     suspend fun addBike(
         uuid: String,
         ownerId: String,
@@ -31,8 +33,8 @@ class BikeRepository @Inject constructor(
         bikePrice = bikePrice,
         city = city,
         bikeImageUrl = bikeImageUrl,
-        startTime = startDate,  // Add this
-        endTime = endDate       // Add this
+        startTime = startDate,
+        endTime = endDate
     )
 
     fun removeBike(bike: Bike) = firebaseDataSource.deleteBike(bike)

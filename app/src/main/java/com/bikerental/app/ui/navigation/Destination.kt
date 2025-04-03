@@ -11,6 +11,7 @@ object Destination {
 
     data object Home : Screen("home") {
         data object PastRentals : Screen("home/past_rentals")
+        data object CurrentRentals : Screen("home/current_rentals")
         data object Map : Screen("home/map")
         data object MapAddBike : DynamicScreen("home/map-add-bike", "bikeId")
         data object AddBike : Screen("home/add-bike")

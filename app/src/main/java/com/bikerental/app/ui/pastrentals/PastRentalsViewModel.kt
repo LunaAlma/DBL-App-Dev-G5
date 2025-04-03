@@ -28,9 +28,9 @@ class PastRentalsViewModel @Inject constructor(
     private val _pastRentalDisplays = MutableStateFlow<List<PastRentalDisplay>>(emptyList())
     val pastRentalDisplays: StateFlow<List<PastRentalDisplay>> = _pastRentalDisplays
 
-//    init {
-//        loadPastRentals()
-//    }
+    init {
+        loadPastRentals()
+    }
 
 //    private fun loadPastRentals() {
 //        viewModelScope.launch { // Now using proper coroutine scope
@@ -43,32 +43,32 @@ class PastRentalsViewModel @Inject constructor(
 //                }
 //        }
 //    }
-//private fun loadPastRentals() {
-//    viewModelScope.launch {
-//        val userId = authRepository.getCurrentUser?.uid ?: run {
-//            Log.e("PastRentals", "User not logged in")
-//            return@launch
-//        }
-//        Log.d("PastRentals", "Loading rentals for user: $userId")
-//
-//        userRepository.getUserRentals(userId)
-//            .catch { e -> Log.e("PastRentals", "Error: ${e.message}") }
-//            .collect { rentals ->
-//                val completedRentals = rentals.filter { it.status == "completed" }
-//                // For each rental, fetch the bike details and create a display model
-//                val displays = completedRentals.map { rental ->
-//                    // Collect the first (and only) Bike value from the Flow
-//                    val bike = bikeRepository.getBikeDetailsById(rental.bikeId).first()
-//                    PastRentalDisplay(
-//                        bikeName = bike.bikeName,
-//                        bikeCity = bike.city,
-//                        startTime = rental.startTime,
-//                        endTime = rental.endTime,
-//                        status = rental.status
-//                    )
-//                }
-//                _pastRentalDisplays.value = displays
-//            }
-//    }
-//}
+private fun loadPastRentals() {
+    viewModelScope.launch {
+        val userId = authRepository.getCurrentUser?.uid ?: run {
+            Log.e("PastRentals", "User not logged in")
+            return@launch
+        }
+        Log.d("PastRentals", "Loading rentals for user: $userId")
+
+        userRepository.getUserRentals(userId)
+            .catch { e -> Log.e("PastRentals", "Error: ${e.message}") }
+            .collect { rentals ->
+                val completedRentals = rentals.filter { it.status == "completed" }
+                // For each rental, fetch the bike details and create a display model
+                val displays = completedRentals.map { rental ->
+                    // Collect the first (and only) Bike value from the Flow
+                    val bike = bikeRepository.getBikeDetailsById(rental.bikeId)
+                    PastRentalDisplay(
+                        bikeName = bike.bikeName,
+                        bikeCity = bike.city,
+                        startTime = rental.startTime,
+                        endTime = rental.endTime,
+                        status = rental.status
+                    )
+                }
+                _pastRentalDisplays.value = displays
+            }
+    }
+}
 }

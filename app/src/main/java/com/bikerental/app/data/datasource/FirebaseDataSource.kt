@@ -175,6 +175,22 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
+    suspend fun fetchBikesByUser(userId: String): List<Bike> {
+        return try {
+            // Query the "bikes" collection where the "owner" field matches the given userId.
+            val querySnapshot = db.collection("bikes")
+                .whereEqualTo("owner", userId)
+                .get()
+                .await()
+
+            // Map each document to a Bike object, filtering out any that cannot be converted.
+            querySnapshot.documents.mapNotNull { it.toObject(Bike::class.java) }
+        } catch (e: Exception) {
+            throw Exception("Failed to fetch bikes: ${e.message}")
+        }
+    }
+
+
     /**
      * Deletes a bike document from Firestore.
      *
@@ -288,18 +304,31 @@ class FirebaseDataSource @Inject constructor(
      * @return Flow<List<Bike>> emitting bikes owned by the specified user
      */
     fun fetchBikesByOwner(ownerId: String): Flow<List<Bike>> = callbackFlow {
+        Log.d("FirebaseDebug", "Querying bikes for ownerId: $ownerId")
+
         val subscription = db.collection("bikes")
-            .whereEqualTo("ownerId", ownerId)
+            .whereEqualTo("ownerId", ownerId) // Ensure this matches Firestore
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
+                    Log.e("FirebaseDebug", "Error: ${error.message}")
                     close(error)
                     return@addSnapshotListener
                 }
-                val bikes = snapshot?.toObjects(Bike::class.java) ?: emptyList()
+
+                if (snapshot == null || snapshot.isEmpty) {
+                    Log.d("FirebaseDebug", "No bikes found for ownerId: $ownerId")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+
+                val bikes = snapshot.toObjects(Bike::class.java)
+                Log.d("FirebaseDebug", "Fetched bikes: ${bikes.size}")
                 trySend(bikes)
             }
+
         awaitClose { subscription.remove() }
     }
+
 
     /**
      * Gets bikes available in a date range (not rented during the specified period).

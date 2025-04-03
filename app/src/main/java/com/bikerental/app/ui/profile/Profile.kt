@@ -39,7 +39,8 @@ fun Profile(
         user = viewModel.user.collectAsState().value,
         navigateToMyBikes = { viewModel.navigateToMyBikes() },
         navigateToPastRentals = { viewModel.navigateToPastRentals() },
-        navigateToDetails = { viewModel.navigateToDetails() }
+        navigateToDetails = { viewModel.navigateToDetails() },
+        navigateToCurrentRentals = { viewModel.navigateToCurrentRentals() }
     )
 }
 
@@ -49,7 +50,8 @@ private fun ProfileView(
     user: User?,
     navigateToDetails: () -> Unit,
     navigateToMyBikes: () -> Unit,
-    navigateToPastRentals: () -> Unit
+    navigateToPastRentals: () -> Unit,
+    navigateToCurrentRentals: () -> Unit
 ) {
 //    val userState by viewModel.user.collectAsState()
 
@@ -71,7 +73,8 @@ private fun ProfileView(
 
             SettingsSection(
                 navigateToMyBikes = navigateToMyBikes,
-                navigateToPastRentals = navigateToPastRentals
+                navigateToPastRentals = navigateToPastRentals,
+                navigateToCurrentRentals = navigateToCurrentRentals
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -138,7 +141,8 @@ private fun ProfileCard(
 @Composable
 private fun SettingsSection(
     navigateToMyBikes: () -> Unit = {},
-    navigateToPastRentals: () -> Unit = {}
+    navigateToPastRentals: () -> Unit = {},
+    navigateToCurrentRentals: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -154,7 +158,14 @@ private fun SettingsSection(
             ListItem(
                 headlineContent = { Text("Past Rentals") },
                 trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
-                modifier = Modifier.clickable { /* Handle click */ }
+                modifier = Modifier.clickable { navigateToPastRentals() }
+            )
+
+            // New ListItem for Current Rentals
+            ListItem(
+                headlineContent = { Text("Current Rentals") },
+                trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
+                modifier = Modifier.clickable { navigateToCurrentRentals() }
             )
         }
     }

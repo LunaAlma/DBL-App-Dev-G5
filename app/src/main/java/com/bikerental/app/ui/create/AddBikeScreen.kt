@@ -1,6 +1,7 @@
 package com.bikerental.app.ui.create
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
@@ -39,9 +40,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
+import android.Manifest
 import java.io.File
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -379,8 +382,15 @@ private fun BikeImageSelector(
 ) {
     val context = LocalContext.current
 
+    // State to control showing the options dialog
+    var showOptionsDialog by remember { mutableStateOf(false) }
+
     // State to store camera photo URI
-    var cameraUri by remember { mutableStateOf<Uri?>(null) }
+    //var cameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Prepare a file and corresponding URI for the camera option
+    val file = remember { createImageFile(context) }
+    val cameraUri = remember { FileProvider.getUriForFile(context, "${context.packageName}.provider", file) }
 
     // Launcher for picking an image from gallery
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -401,17 +411,47 @@ private fun BikeImageSelector(
     }
 
     // Request camera permission
-    val cameraPermission = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
+    // Launcher for requesting camera permission
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            cameraUri = createImageFile(context).toUri(context)
-            cameraUri?.let { cameraLauncher.launch(it) }
+            cameraLauncher.launch(cameraUri)
         } else {
             Toast.makeText(context, "Camera permission denied", Toast.LENGTH_SHORT).show()
-        }
+            }
     }
-
+    if (showOptionsDialog) {
+        AlertDialog(
+            onDismissRequest = { showOptionsDialog = false },
+            title = { Text("Select Image") },
+            text = { Text("Choose an option") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showOptionsDialog = false
+                    // Option: Take Photo
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                        == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        cameraLauncher.launch(cameraUri)
+                    } else {
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                }) {
+                    Text("Take Photo")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showOptionsDialog = false
+                    // Option: Choose from Gallery
+                    galleryLauncher.launch("image/*")
+                }) {
+                    Text("Choose from Gallery")
+                }
+            }
+        )
+    }
     Box(
         modifier = modifier
             .size(150.dp)
@@ -421,7 +461,7 @@ private fun BikeImageSelector(
                 // You can show a dialog or menu here to let the user choose
                 // between picking from the gallery or taking a photo with the camera.
                 // For now, let's just open the gallery.
-                galleryLauncher.launch("image/*")
+                showOptionsDialog = true
             }
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant,

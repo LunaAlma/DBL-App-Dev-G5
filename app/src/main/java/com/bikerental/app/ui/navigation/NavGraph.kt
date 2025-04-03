@@ -11,6 +11,8 @@ import androidx.navigation.navigation
 import com.bikerental.app.ui.bike.BikeDetailsViewModel
 import com.bikerental.app.ui.create.AddBike
 import com.bikerental.app.ui.create.AddBikeViewModel
+import com.bikerental.app.ui.currentrentals.CurrentRentals
+import com.bikerental.app.ui.currentrentals.CurrentRentalsViewModel
 import com.bikerental.app.ui.messaging.Inbox
 import com.bikerental.app.ui.messaging.InboxViewModel
 import com.bikerental.app.ui.login.Login
@@ -149,6 +151,13 @@ fun NavGraph(
             composable(Destination.Home.PastRentals.route) {
                 val viewModel: PastRentalsViewModel = hiltViewModel()
                 PastRentalsScreen(
+                    navigator = viewModel.navigator,
+                    viewModel = viewModel
+                )
+            }
+            composable(Destination.Home.CurrentRentals.route) {
+                val viewModel: CurrentRentalsViewModel = hiltViewModel()
+                CurrentRentals(
                     navigator = viewModel.navigator,
                     viewModel = viewModel
                 )
