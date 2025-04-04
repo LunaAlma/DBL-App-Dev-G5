@@ -213,31 +213,4 @@ class AddBikeViewModelTest {
             )
         }
     }
-
-
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    @Test
-//    fun `test addBike with error calls firebaseError`() = runTest {
-//        // Setup valid inputs
-//        viewModel.onBikeNameChange("Unittestbike")
-//        viewModel.onBikePriceChange("7.00")
-//        viewModel.onBikeCityChange("Eindhoven")
-//        viewModel.onStartDateSelected(LocalDate.of(2025, 4, 1))
-//        viewModel.onEndDateSelected(LocalDate.of(2025, 4, 10))
-//
-//        // Mocking Uri
-//        val imageUri = mockk<Uri>(relaxed = true)
-//        viewModel.onBikeImageChange(imageUri)
-//
-//        // Simulate a failure
-//        coEvery { bikeRepository.addBikeImage(any()) } returns Result.failure(Exception("Upload failed"))
-//
-//        // Run the function
-//        viewModel.addBike()
-//
-//        // Assert the firebaseError is set correctly
-//        assertEquals("Profile image upload failed", viewModel.firebaseError.value)
-//    }
-
-
 }

@@ -77,22 +77,6 @@ class BaseUnitTest {
         // No assertions since the error should be suppressed
     }
 
-//    // Test that viewModelScope.launch is called
-//    @Test
-//    fun `test viewModelScopelaunch is called`() = runTest {
-//        // Create a mock block
-//        val block: suspend CoroutineScope.() -> Unit = mockk(relaxed = true)
-//
-//        // Mock viewModelScope.launch
-//        val viewModelScopeMock = mockk<CoroutineScope>(relaxed = true)
-//        viewModelScopeMock.launch(block = any()) // Capture this call
-//
-//        // Call launchFirebase
-//        viewModel.testLaunchFirebase(silent = false, block = block)
-//
-//        // Verify that viewModelScope.launch is called
-//        coVerify { viewModelScopeMock.launch(any()) }
-//    }
 
     // Test that CancellationException is handled correctly
     @Test

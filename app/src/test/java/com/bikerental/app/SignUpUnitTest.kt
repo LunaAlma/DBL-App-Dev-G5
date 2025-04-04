@@ -16,6 +16,9 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for the [SignUpViewModel] class.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SignUpViewModelTest {
 
@@ -29,6 +32,9 @@ class SignUpViewModelTest {
 
     private lateinit var viewModel: SignUpViewModel
 
+    /**
+     * Sets up the mocks and initializes the ViewModel before each test.
+     */
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -50,11 +56,17 @@ class SignUpViewModelTest {
         )
     }
 
+    /**
+     * Resets the dispatcher after each test.
+     */
     @After
     fun tearDown() {
         Dispatchers.resetMain()
     }
 
+    /**
+     * Tests that name input updates the state and clears any error message.
+     */
     @Test
     fun `onNameChange updates state and clears error`() = runTest {
         viewModel.onNameChange("Jane Doe")
@@ -62,6 +74,9 @@ class SignUpViewModelTest {
         assertEquals("", viewModel.nameError.value)
     }
 
+    /**
+     * Tests that email input updates the state and clears any error message.
+     */
     @Test
     fun `onEmailChange updates state and clears error`() = runTest {
         viewModel.onEmailChange("test@student.tudelft.nl")
@@ -69,6 +84,9 @@ class SignUpViewModelTest {
         assertEquals("", viewModel.emailError.value)
     }
 
+    /**
+     * Tests that password input updates the state and clears any error message.
+     */
     @Test
     fun `onPasswordChange updates state and clears error`() = runTest {
         viewModel.onPasswordChange("securepass")
@@ -76,6 +94,9 @@ class SignUpViewModelTest {
         assertEquals("", viewModel.passwordError.value)
     }
 
+    /**
+     * Tests that signup fails and sets appropriate error messages when input is invalid.
+     */
     @Test
     fun `basicSignUp fails with invalid input`() = runTest {
         viewModel.onEmailChange("invalid_email")
@@ -86,6 +107,9 @@ class SignUpViewModelTest {
         assertNotEquals("", viewModel.passwordError.value)
     }
 
+    /**
+     * Tests the full signup process including profile upload, user creation, and navigation.
+     */
     @Test
     fun `basicSignUp uploads profile, creates user and navigates`() = runTest {
         val fakeUri = mockk<Uri>()
@@ -127,6 +151,9 @@ class SignUpViewModelTest {
         assertEquals("", viewModel.signUpError.value)
     }
 
+    /**
+     * Tests that signup fails with an appropriate error message if image upload fails.
+     */
     @Test
     fun `basicSignUp fails if image upload fails`() = runTest {
         val fakeUri = mockk<Uri>()
@@ -145,6 +172,9 @@ class SignUpViewModelTest {
         assertEquals("Profile image upload failed", viewModel.signUpError.value)
     }
 
+    /**
+     * Tests that switching to the login screen triggers navigation.
+     */
     @Test
     fun `switchLogin triggers navigation`() = runTest {
         every { mockNavigator.navigateTo(any(), any()) } just Runs

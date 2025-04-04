@@ -80,25 +80,6 @@ class LoginUnitTest {
         assertTrue(!isValid)
     }
 
-//    // Test: basicLogin performs login and navigates on success
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    @Test
-//    fun `test basicLogin navigates on success`() = runTest {
-//        // Mock successful login
-//        coEvery { authRepository.firebaseLogin(any(), any()) } returns Unit
-//        every { firebaseAuth.currentUser } returns mockk()
-//
-//        // Set valid email and password
-//        viewModel.onEmailChange("test@example.com")
-//        viewModel.onPasswordChange("password123")
-//
-//        // Call basicLogin
-//        viewModel.basicLogin()
-//
-//        // Verify navigation occurred
-//        coVerify { navigator.navigateTo(Destination.Home.route, true) }
-//    }
-
     // Test: basicLogin shows error on failure
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test

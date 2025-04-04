@@ -1,6 +1,5 @@
 package com.bikerental.app
 
-import android.net.Uri
 import com.bikerental.app.data.model.User
 import com.bikerental.app.data.repositories.AuthRepository
 import com.bikerental.app.data.repositories.BikeRepository
@@ -11,17 +10,17 @@ import com.bikerental.app.ui.profile.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import io.mockk.*
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for the [ProfileViewModel] class.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
 
@@ -36,6 +35,9 @@ class ProfileViewModelTest {
     private val mockFirebaseAuth: FirebaseAuth = mockk()
     private val mockFirebaseUser: FirebaseUser = mockk()
 
+    /**
+     * Sets up the test environment and initializes the [ProfileViewModel] before each test.
+     */
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
@@ -59,12 +61,17 @@ class ProfileViewModelTest {
         runTest { testDispatcher.scheduler.advanceUntilIdle() }
     }
 
+    /**
+     * Cleans up the dispatcher after each test.
+     */
     @After
     fun tearDown() {
         Dispatchers.resetMain()
     }
 
-
+    /**
+     * Tests that the logout operation is performed and user is navigated to the login screen.
+     */
     @Test
     fun `onLogout should logout and navigate to login`() = runTest {
         every { mockAuthRepository.logout() } just Runs
@@ -75,10 +82,12 @@ class ProfileViewModelTest {
         verify { mockNavigator.navigateTo(Destination.Login.route, true) }
     }
 
+    /**
+     * Tests that navigation to the past rentals screen is triggered correctly.
+     */
     @Test
     fun `navigateToPastRentals should trigger navigation`() = runTest {
         viewModel.navigateToPastRentals()
         verify { mockNavigator.navigateTo(Destination.Home.PastRentals.route) }
     }
-
 }
