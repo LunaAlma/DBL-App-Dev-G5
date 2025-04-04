@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,12 +22,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.bikerental.app.R
 import com.bikerental.app.data.model.Bike
 import com.bikerental.app.ui.theme.AppTheme
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Composable function that displays the details of a specific bike.
+ * It fetches the bike details, owner information, and displays them in a structured layout.
+ * If the bike details are being loaded, a loading indicator is shown.
+ * If the details are fetched successfully, bike details including image, location, availability,
+ * and owner information are displayed.
+ * Additionally, an option to confirm renting the bike is provided.
+ *
+ * @param bikeId The unique identifier of the bike whose details are to be displayed.
+ * @param viewModel The view model that holds the logic and data for this screen, using Hilt for dependency injection.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -182,6 +191,14 @@ fun BikeDetails(
     }
 }
 
+/**
+ * Composable function that represents a card for displaying bike rental information.
+ * The card includes an image, the bike's rating, price, and name, as well as a button to rent the bike.
+ *
+ * @param bike The [Bike] object containing information such as name, price, and image URL.
+ * @param modifier The [Modifier] for customizing the layout and appearance of the card.
+ * @param onClick Lambda function to handle when the card is clicked.
+ */
 @Composable
 fun BikeRentalCard(
     bike: Bike,
@@ -244,6 +261,9 @@ fun BikeRentalCard(
     }
 }
 
+/**
+ * Preview function for the [BikeRentalCard] composable to display a sample card with bike details.
+ */
 @Preview(showBackground = true)
 @Composable
 fun BikeRentalCardPreview() {

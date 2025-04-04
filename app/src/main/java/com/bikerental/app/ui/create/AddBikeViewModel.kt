@@ -19,7 +19,12 @@ import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.String
-
+/**
+ * ViewModel for managing the addition of a new bike.
+ *
+ * This ViewModel is responsible for handling the logic related to bike creation, such as
+ * validating inputs, handling state, and interacting with repositories for adding the bike to the system.
+ */
 @HiltViewModel
 class AddBikeViewModel @Inject constructor(
     navigator: Navigator,
@@ -58,41 +63,77 @@ class AddBikeViewModel @Inject constructor(
     val isLoading = _isLoading.asStateFlow()
     val bikeImageUri = _bikeImageUri.asStateFlow()
 
+    /**
+     * Updates the bike image URI.
+     *
+     * @param uri The URI of the selected bike image.
+     */
     fun onBikeImageChange(uri: Uri) {
         _bikeImageUri.value = uri
         if (bikeImageUri.value != null) _bikeImageError.tryEmit("")
         _firebaseError.tryEmit("")
     }
 
+    /**
+     * Updates the bike name.
+     *
+     * @param input The new bike name.
+     */
     fun onBikeNameChange(input: String) {
         _bikeName.tryEmit(input)
         if (bikeNameError.value.isNotEmpty()) _bikeNameError.tryEmit("")
         _firebaseError.tryEmit("")
     }
 
+    /**
+     * Updates the bike price.
+     *
+     * @param input The new bike price.
+     */
     fun onBikePriceChange(input: String) {
         _bikePrice.tryEmit(input)
         if (bikePrice.value.isNotEmpty()) _bikePriceError.tryEmit("")
         _firebaseError.tryEmit("")
     }
 
+    /**
+     * Updates the city for the bike.
+     *
+     * @param input The new city for the bike.
+     */
     fun onBikeCityChange(input: String) {
         _city.tryEmit(input)
         if (bikeCityError.value.isNotEmpty()) _bikeCityError.tryEmit("")
         _firebaseError.tryEmit("")
     }
+
+    /**
+     * Handles the selection of the start date.
+     *
+     * @param date The selected start date.
+     */
     fun onStartDateSelected(date: LocalDate) {
         println("DEBUG - Selected start date: $date")
         val instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
         _selectedStartDate.value = Timestamp(instant.epochSecond, instant.nano)
     }
 
+    /**
+     * Handles the selection of the end date.
+     *
+     * @param date The selected end date.
+     */
     fun onEndDateSelected(date: LocalDate) {
         println("DEBUG - Selected end date: $date")
         val instant = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
         _selectedEndDate.value = Timestamp(instant.epochSecond, instant.nano)
     }
 
+    /**
+     * Validates all inputs for the bike creation.
+     *
+     * @return True if all validations pass, false otherwise.
+     */
     fun validate(): Boolean {
         var error = false
         if (bikeName.value.length < 6) _bikeNameError.tryEmit("Bike Name length should be at least 6").run { error = true }
@@ -118,12 +159,24 @@ class AddBikeViewModel @Inject constructor(
         return !error
     }
 
+    /**
+     * Checks if the price is valid.
+     *
+     * @param finalPrice The price to validate.
+     * @return True if the price is valid, false otherwise.
+     */
     fun isPriceValid(finalPrice: String): Boolean {
         return finalPrice.isNotEmpty() &&
                 finalPrice.toDoubleOrNull() != null &&
                 finalPrice.matches(Regex("^\\d+\\.\\d{2}$"))
     }
 
+    /**
+     * Attempts to add a bike to the system.
+     *
+     * This function performs validation, uploads the bike image, and calls the repository
+     * to save the bike data if validation is successful.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun addBike() {
         println("DEBUG - Attempting to add bike...")
@@ -160,6 +213,12 @@ class AddBikeViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Navigates to the map screen for adding a bike.
+     *
+     * @param uid The unique ID of the bike.
+     */
     fun goToMapAddBike(uid: String) {
         navigator.navigateTo(Destination.Home.MapAddBike.route + uid)
     }

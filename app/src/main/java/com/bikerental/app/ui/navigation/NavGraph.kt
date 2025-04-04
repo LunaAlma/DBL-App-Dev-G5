@@ -39,6 +39,16 @@ import com.bikerental.app.ui.profile.UserProfileDetails
 import com.bikerental.app.ui.search.BikeListScreen
 import com.bikerental.app.ui.search.Search
 
+/**
+ * Sets up the navigation graph for the app using Jetpack Compose's NavHost.
+ * The navigation graph defines the structure of all screens and the routes used to navigate between them.
+ *
+ * @param modifier The modifier for the navigation graph.
+ * @param navController The NavController that handles navigation.
+ * @param startDestination The route to navigate to first (default is Splash screen).
+ * @param navigator The navigator that manages the app's navigation.
+ * @param finish A lambda that can be invoked to perform finishing tasks after navigation (optional).
+ */
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -91,7 +101,7 @@ fun NavGraph(
                 route = Destination.Home.MapAddBike.route,
                 arguments = Destination.Home.MapAddBike.navArguments) {
                 val viewModel: MapViewModel = hiltViewModel()
-                    MapAddBike(modifier, viewModel)
+                MapAddBike(modifier, viewModel)
             }
 
             // Home.Profile
@@ -157,6 +167,8 @@ fun NavGraph(
                     viewModel = viewModel
                 )
             }
+
+            // Home.CurrentRentals
             composable(Destination.Home.CurrentRentals.route) {
                 val viewModel: CurrentRentalsViewModel = hiltViewModel()
                 CurrentRentals(
@@ -164,6 +176,8 @@ fun NavGraph(
                     viewModel = viewModel
                 )
             }
+
+            // Another BikeDetails
             composable(
                 route = Destination.Home.BikeDetails.route,
                 arguments = Destination.Home.BikeDetails.navArguments
@@ -175,6 +189,8 @@ fun NavGraph(
                     viewModel = viewModel
                 )
             }
+
+            // BikeDetails Dynamic Route
             composable(
                 route = "bikeDetails/{bikeId}",
                 arguments = listOf(navArgument("bikeId") { type = NavType.StringType })

@@ -18,7 +18,19 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-
+/**
+ * ViewModel responsible for managing the user's bikes.
+ *
+ * This ViewModel handles the logic for fetching, displaying, and deleting the bikes owned by the current user.
+ * It communicates with the BikeRepository to fetch and delete bikes from the database and manages loading states.
+ * It also exposes state flows for observing the bikes and loading indicators.
+ *
+ * @param navigator The navigator to handle navigation-related tasks.
+ * @param bikeRepository The repository responsible for fetching and managing bike data.
+ * @param db The Firestore database instance.
+ * @param userRepository The repository responsible for managing user data.
+ * @param auth The FirebaseAuth instance for handling authentication.
+ */
 @HiltViewModel
 class MyBikesViewModel @Inject constructor(
     navigator: Navigator,
@@ -28,42 +40,39 @@ class MyBikesViewModel @Inject constructor(
     private val auth: FirebaseAuth
 ) : BaseViewModel(navigator) {
 
+    /**
+     * Mutable state flow to track the loading state.
+     */
     private val _isLoading = MutableStateFlow(false)
+
+    /**
+     * Exposed state flow for observing the loading state.
+     */
     val isLoading = _isLoading.asStateFlow()
 
+    /**
+     * Mutable state flow to hold the list of bikes for the current user.
+     */
     private val _bikes = MutableStateFlow<List<Bike>>(emptyList())
+
+    /**
+     * Exposed state flow for observing the list of bikes owned by the current user.
+     */
     val bikes: StateFlow<List<Bike>> = _bikes
 
-//    private val _users = MutableStateFlow<List<User>>(emptyList())
-//    val users = _users.asStateFlow()
-//
-//    private val _isLoading = MutableStateFlow(false)
-//    val isLoading = _isLoading.asStateFlow()
-//
-//    init {
-//        loadUsers()
-//    }
-//
-//    private fun loadUsers() {
-//        launchFirebase {
-//            _isLoading.value = true
-//            try {
-//                userRepository.getUsers().collect { users ->
-//                    _users.value = users.filter { it.uid == auth.currentUser?.uid }
-//                    _isLoading.value = false
-//                }
-//            } catch (e: Exception) {
-//                _isLoading.value = false
-//                // Handle error
-//            }
-//        }
-//    }
-
-
+    /**
+     * Initializes the ViewModel by loading the bikes for the current user.
+     */
     init {
         loadBikes()
     }
 
+    /**
+     * Fetches the bikes for the current user.
+     *
+     * This function checks if the user is authenticated and fetches the bikes owned by the current user
+     * using the BikeRepository. It updates the loading state during the fetching process.
+     */
     private fun loadBikes() {
         viewModelScope.launch {
             // Retrieve current user id or log an error and exit if not logged in.
@@ -88,6 +97,14 @@ class MyBikesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Deletes a bike from the database.
+     *
+     * This function calls the BikeRepository to remove the specified bike from the database.
+     * It doesn't need to manually update the bikes list as the Flow will automatically refresh.
+     *
+     * @param bike The bike to delete.
+     */
     fun deleteBike(bike: Bike) {
         viewModelScope.launch {
             try {
@@ -98,5 +115,4 @@ class MyBikesViewModel @Inject constructor(
             }
         }
     }
-
 }

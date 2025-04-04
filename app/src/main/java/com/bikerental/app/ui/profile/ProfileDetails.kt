@@ -57,6 +57,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Composable function to display the user profile details.
+ *
+ * @param modifier Modifier to be applied to the profile details view.
+ * @param viewModel The ViewModel containing the user data and actions for the profile.
+ */
 @Composable
 fun UserProfileDetails(
     modifier: Modifier,
@@ -72,6 +78,17 @@ fun UserProfileDetails(
     )
 }
 
+/**
+ * Composable function to render the user profile details, including profile picture, name, email, and ratings.
+ * Provides functionality to edit the name and change the profile image.
+ *
+ * @param modifier Modifier to be applied to the profile details view.
+ * @param user The current user data.
+ * @param onLogout Callback for logging out.
+ * @param onDeleteAccount Callback for deleting the account.
+ * @param onProfileImageChange Callback for updating the profile image.
+ * @param onNameChanged Callback for updating the user's name.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileDetailsView(
@@ -121,6 +138,7 @@ fun UserProfileDetailsView(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Profile Image Selector
                 ProfileImageSelector(
                     user = user,
                     onImageSelected = onProfileImageChange,
@@ -140,7 +158,7 @@ fun UserProfileDetailsView(
                             onValueChange = {
                                 newName = it
                                 validateName()
-                             },
+                            },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
                             isError = nameError.isNotEmpty(),
@@ -164,7 +182,6 @@ fun UserProfileDetailsView(
                         onClick = {
                             if (isEditingName) {
                                 if (validateName()) {
-                                    // Here you would call your update function
                                     onNameChanged(newName)
                                     isEditingName = false
                                 }
@@ -172,13 +189,11 @@ fun UserProfileDetailsView(
                                 isEditingName = true
                             }
                         },
-                        // Disable the button if validation fails and user is in edit mode
                         enabled = !isEditingName || isNameValid
                     ) {
                         Icon(
                             imageVector = if (isEditingName) Icons.Default.Check else Icons.Default.Edit,
                             contentDescription = if (isEditingName) "Save Name" else "Edit Name",
-                            // Apply alpha to visually indicate disabled state
                             tint = if (isEditingName && !isNameValid)
                                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             else MaterialTheme.colorScheme.onSurface
@@ -188,7 +203,7 @@ fun UserProfileDetailsView(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // User Details
+                // User Details Section
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -229,7 +244,7 @@ fun UserProfileDetailsView(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Action Buttons
+                // Action Buttons Section
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -259,6 +274,13 @@ fun UserProfileDetailsView(
     )
 }
 
+/**
+ * Composable function for selecting or updating the profile image.
+ *
+ * @param user The current user data, including the profile image URL.
+ * @param onImageSelected Callback function when a new profile image is selected.
+ * @param modifier Modifier to be applied to the profile image selector.
+ */
 @Composable
 private fun ProfileImageSelector(
     user: User?,
@@ -318,6 +340,12 @@ private fun ProfileImageSelector(
     }
 }
 
+/**
+ * Helper function to create an image file for profile picture storage.
+ *
+ * @param context The context to access the external storage directory.
+ * @return A temporary image file.
+ */
 private fun createImageFile(context: Context): File {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
     val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)

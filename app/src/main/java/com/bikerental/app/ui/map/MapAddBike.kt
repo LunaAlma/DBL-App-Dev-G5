@@ -81,19 +81,32 @@ import androidx.compose.runtime.collectAsState
 import com.google.firebase.Timestamp
 import com.google.maps.android.compose.MapUiSettings
 
+/**
+ * Composable function for adding a bike on the map.
+ * It sets up the necessary state, handles permissions, and interacts with the viewModel.
+ *
+ * @param modifier Modifier for layout styling.
+ * @param viewModel The ViewModel containing bike and owner data.
+ */
 @Composable
 fun MapAddBike(
     modifier: Modifier,
     viewModel: MapViewModel
 ) {
     MapAddBikeView(
-        bikeId = viewModel.bikeId.removePrefix("{bikeId}"), //Gets rid of {bikeId} from  bikeId passed in
+        bikeId = viewModel.bikeId.removePrefix("{bikeId}"), // Removes "{bikeId}" from bikeId passed in
         modifier = modifier,
         viewModel = viewModel
     )
 }
-// Note that rememberMultiplePermissions is using an experimental API
-// Regularly check if it is working (this is easier code than alternative though)
+
+/**
+ * The main composable that sets up the map view and handles permissions, location updates, and interactions.
+ *
+ * @param bikeId The ID of the bike being added to the map.
+ * @param modifier Modifier for layout styling.
+ * @param viewModel The ViewModel for managing bike and owner data.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -106,9 +119,7 @@ fun MapAddBikeView(
 
     val owner by viewModel.ownerDetails.collectAsState()
 
-    // Start with a default marker location (you might want to default to live location) (NEW)
     var markerPosition by remember { mutableStateOf<LatLng?>(null) }
-    // State for showing confirmation dialog (NEW)
     var showConfirmationDialog by remember { mutableStateOf(false) }
 
     fun onBikeSelected(ownerId: String) {
@@ -116,7 +127,6 @@ fun MapAddBikeView(
     }
 
     val markersData = bikes.map { bike ->
-        // bike.location is a GeoPoint from Firebase
         val lat = bike.location.latitude
         val lng = bike.location.longitude
 
@@ -126,7 +136,7 @@ fun MapAddBikeView(
             rating = owner?.let {
                 if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
             } ?: 0,
-            bikeImgId = bike.imageUrl,  // uses Coil to load this image
+            bikeImgId = bike.imageUrl,
             bikePrice = bike.price,
             city = bike.city,
             startTime = bike.startTime,
@@ -136,7 +146,7 @@ fun MapAddBikeView(
     }
 
     var currentLocation by remember { mutableStateOf<Location?>(null) }
-    var isPinManuallyMoved by remember { mutableStateOf(false) }  // Tracks manual movement
+    var isPinManuallyMoved by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
     val mapStyleResId = if (isDarkTheme) R.raw.map_style_night else R.raw.map_style
@@ -153,13 +163,12 @@ fun MapAddBikeView(
 
     val coroutineScope = rememberCoroutineScope()
 
-    // If not granted, request permission immediately (NEW)
     LaunchedEffect(locationsPermissions.allPermissionsGranted) {
         if (locationsPermissions.allPermissionsGranted) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
                     markerPosition = LatLng(it.latitude, it.longitude)
-                    showConfirmationDialog = true  // Show confirmation immediately
+                    showConfirmationDialog = true
                     coroutineScope.launch {
                         cameraPositionState.animate(
                             update = CameraUpdateFactory.newLatLngZoom(
@@ -193,9 +202,8 @@ fun MapAddBikeView(
         }
     }
 
-    // When we get a live location update, update the marker if not already set (NEW)
     LaunchedEffect(currentLocation) {
-        if (!isPinManuallyMoved) {  // Only update if the user hasn't moved the pin
+        if (!isPinManuallyMoved) {
             currentLocation?.let {
                 markerPosition = LatLng(it.latitude, it.longitude)
                 showConfirmationDialog = true
@@ -203,10 +211,8 @@ fun MapAddBikeView(
         }
     }
 
-    // Track which marker is currently selected
     var selectedMarker by remember { mutableStateOf<MarkerDataAddPin?>(null) }
 
-    // Location activation code
     val myLocationSource = object : LocationSource {
         var listener: LocationSource.OnLocationChangedListener? = null
 
@@ -241,17 +247,11 @@ fun MapAddBikeView(
     }
 
     fun startListeningToLocations() {
-        if ( // replaced "this" with "context"
-            ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(context, ACCESS_COARSE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            // If permissions are not granted, just return (or request permissions here)
+        if (ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(context, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return
         }
 
-        // Start listening for location updates
         fusedLocationClient.requestLocationUpdates(
             LocationRequest.Builder(1000L).build(),
             locationCallback,
@@ -259,14 +259,13 @@ fun MapAddBikeView(
         )
     }
 
-    Scaffold( // Removed search bar for moment
+    Scaffold(
         modifier = Modifier.fillMaxSize().systemBarsPadding().padding(bottom = 60.dp),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     if (locationsPermissions.allPermissionsGranted) {
                         startListeningToLocations()
-                        // Navigate to live location now
                         currentLocation?.let { location ->
                             coroutineScope.launch {
                                 cameraPositionState.animate(
@@ -291,7 +290,6 @@ fun MapAddBikeView(
                     Color.Gray
                 }
             ) {
-                // Icon here
                 Icon(
                     modifier = Modifier.size(24.dp),
                     painter = painterResource(id = R.drawable.target),
@@ -300,25 +298,15 @@ fun MapAddBikeView(
             }
         }
     ) {
-        // Gives error when empty
         val mapProperties = MapProperties(
             mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, mapStyleResId),
-            // Zoom limitations
             maxZoomPreference = 18f,
             minZoomPreference = 3f,
-//         Restrict map bounds to Europe?
-//            latLngBoundsForCameraTarget = LatLngBounds(
-//                LatLng(55.0,-3.0),
-//                LatLng(57.0,-6.0),
-//            ),
             isMyLocationEnabled = locationsPermissions.allPermissionsGranted
-            // Map Type (without additional customization)
-//        mapType = MapType.NORMAL
         )
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            // Customizable map properties
             properties = mapProperties,
             locationSource = myLocationSource,
             uiSettings = MapUiSettings(
@@ -328,9 +316,9 @@ fun MapAddBikeView(
             ),
             onMapClick = { latLng ->
                 markerPosition = latLng
-                isPinManuallyMoved = true  // The user moved the pin manually
+                isPinManuallyMoved = true
                 showConfirmationDialog = true
-                selectedMarker = MarkerDataAddPin( //IDK ABOUT THIS
+                selectedMarker = MarkerDataAddPin(
                     location = latLng,
                     bikeName = "New Location",
                     rating = 0,
@@ -345,11 +333,10 @@ fun MapAddBikeView(
                 Marker(
                     state = MarkerState(position = position),
                     onClick = {
-                        // You might also update markerPosition here if you allow dragging
                         val existingMarkerData = markersData.find { it.location == position }
 
                         if (existingMarkerData != null) {
-                            selectedMarker = existingMarkerData.copy(location = position) // Keep all other fields intact
+                            selectedMarker = existingMarkerData.copy(location = position)
                             showConfirmationDialog = true
                         } else {
                             selectedMarker = MarkerDataAddPin(
@@ -366,21 +353,6 @@ fun MapAddBikeView(
                     }
                 )
             }
-//            for (data in markersData) {
-//                val markerState = remember { MarkerState(position = data.location) }
-//                Marker(
-//                    state = markerState,
-////                    title = data.ownerName,
-////                    snippet = data.rating,
-//                    onClick = {
-//                        // Update the selected marker
-//                        onBikeSelected(data.ownerId)
-//                        selectedMarker = data
-//                        // Return true to consume click
-//                        true
-//                    }
-//                )
-//            }
         }
 
         if (showConfirmationDialog && markerPosition != null) {
@@ -402,11 +374,8 @@ fun MapAddBikeView(
                     if (bikeId.isNotBlank()) {
                         Log.e("MapViewModel", bikeId)
                     }
-                    // Below if statement kills bug that didn't allow stting of pin at default live location
                     if (!isPinManuallyMoved) {
-                        // If the pin hasn't been moved and coordinates haven't been assigned yet
                         currentLocation?.let {
-                            // Assign the live location if it's available
                             markerPosition = LatLng(it.latitude, it.longitude)
                         }
                         viewModel.updateBikeLocation(bikeId, markerPosition!!)
@@ -421,15 +390,16 @@ fun MapAddBikeView(
             )
         }
     }
-
 }
 
-// Original MarkerData
+/**
+ * Data class representing the marker information for adding a bike pin.
+ */
 data class MarkerDataAddPin(
     val location: LatLng,
     val bikeName: String,
     val rating: Int,
-    val bikeImgId: String, // Null option here? String? = null
+    val bikeImgId: String,
     val bikePrice: Double,
     val city: String,
     val startTime: Timestamp? = null,
@@ -437,9 +407,12 @@ data class MarkerDataAddPin(
     val ownerId: String,
 )
 
-
 /**
- * Bottom card pop up when pin clicked
+ * Composable function for showing the bottom card popup when a pin is clicked.
+ *
+ * @param markerData The marker data containing information to show in the popup.
+ * @param onDismiss Callback to dismiss the popup.
+ * @param onConfirm Callback to confirm the action in the popup.
  */
 @Composable
 fun BottomCardSetPin(
@@ -447,12 +420,9 @@ fun BottomCardSetPin(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    // Box that takes the entire screen
     Box(
         modifier = Modifier
             .fillMaxSize()
-//            .background(Color.Transparent)
-            // If user taps outside the card, we dismiss it
             .clickable(
                 onClick = { onDismiss() },
                 indication = null,
@@ -460,7 +430,6 @@ fun BottomCardSetPin(
             ),
         contentAlignment = Alignment.BottomCenter
     ) {
-        // The pop-up at the bottom
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -539,8 +508,7 @@ fun BottomCardSetPin(
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
-            } // Closure of box added to close out when clicking X button
-
+            }
         }
     }
 }

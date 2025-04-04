@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import com.bikerental.app.ui.theme.AppTheme
-import kotlin.getValue
 
 
 /**

@@ -7,7 +7,6 @@ import com.bikerental.app.data.model.Message
 import com.bikerental.app.data.model.User
 import com.bikerental.app.data.repositories.UserRepository
 import com.bikerental.app.ui.base.BaseViewModel
-import dagger.assisted.Assisted
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import com.bikerental.app.ui.navigation.Navigator
@@ -19,6 +18,10 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 
+/**
+ * ViewModel class that handles the business logic for the chat interface.
+ * It manages fetching user data, listening to real-time messages, and sending messages (text and images).
+ */
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
@@ -27,36 +30,43 @@ class ChatViewModel @Inject constructor(
     private val auth: FirebaseAuth
 ) : BaseViewModel(navigator) {
 
-//    val userId: String = savedStateHandle.get<String>("userId") ?: ""
-//
-//    val otherUser = MutableStateFlow<User?>(null)
-//
-//    init {
-//        loadUserData()
-//    }
-//
-//    private fun loadUserData() {
-//        launchFirebase {
-//            userRepository.getUsers().collect { users ->
-//                otherUser.value = users.firstOrNull { it.uid == userId }
-//            }
-//        }
-//    }
-
+    /**
+     * The ID of the user to chat with, fetched from SavedStateHandle.
+     */
     val userId: String = savedStateHandle.get<String>("userId") ?: ""
+
+    /**
+     * The ID of the currently authenticated user.
+     */
     val currentUserId = auth.currentUser?.uid ?: ""
 
+    /**
+     * Mutable state to store the other user's data.
+     */
     val otherUser = MutableStateFlow<User?>(null)
+
+    /**
+     * Mutable state to store the list of messages.
+     */
     val messages = MutableStateFlow<List<Message>>(emptyList())
 
+    /**
+     * Firebase Storage instance used to upload images.
+     */
     private val storage = FirebaseStorage.getInstance()
 
+    /**
+     * Initializes the ViewModel by loading user data and starting to listen for new messages.
+     */
     init {
         loadUserData()
         // Optionally, subscribe to messages in real time
         listenToMessages()
     }
 
+    /**
+     * Loads data for the other user from the user repository.
+     */
     fun loadUserData() {
         launchFirebase {
             userRepository.getUsers().collect { users ->
@@ -65,6 +75,10 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Listens to real-time updates of messages between the current user and the other user.
+     * This creates a chat ID by comparing user IDs to ensure the chat is bi-directional.
+     */
     fun listenToMessages() {
         val chatId = if (currentUserId < userId) "$currentUserId-$userId" else "$userId-$currentUserId"
         Firebase.firestore.collection("chats")
@@ -84,6 +98,11 @@ class ChatViewModel @Inject constructor(
             }
     }
 
+    /**
+     * Sends an image message by uploading the image to Firebase Storage and saving the message to Firestore.
+     *
+     * @param imageUri The URI of the image to be sent.
+     */
     suspend fun sendImageMessage(imageUri: Uri) {
         // Upload image to Firebase Storage
         val storageRef = storage.reference.child("chat_images/${System.currentTimeMillis()}.jpg")

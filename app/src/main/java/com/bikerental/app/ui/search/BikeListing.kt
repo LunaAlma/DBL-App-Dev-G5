@@ -1,4 +1,5 @@
 package com.bikerental.app.ui.search
+
 import com.bikerental.app.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.bikerental.app.ui.theme.AppTheme
 
+/**
+ * Preview composable for displaying the BikeRentalCard.
+ * This will allow the card to be previewed in the UI toolkit.
+ */
 @Preview(showBackground = true)
 @Composable
 fun BikeRentalCardPreview() {
@@ -30,10 +35,15 @@ fun BikeRentalCardPreview() {
         BikeRentalCard()
     }
 }
+
+/**
+ * A composable that displays a rental bike card with details.
+ * It includes the bike image, rating, price, rental duration, description, and a rent button.
+ */
 @Composable
 fun BikeRentalCard() {
     Surface(modifier = Modifier.fillMaxSize()) {
-
+        // Card displaying bike rental details
     }
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -43,7 +53,10 @@ fun BikeRentalCard() {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
-
+            /**
+             * Display the image of the bike in the card.
+             * The image is clipped to a rounded corner shape for a more polished appearance.
+             */
             Image(
                 painter = painterResource(id = R.drawable.bike),
                 contentDescription = "Bike Image",
@@ -56,7 +69,10 @@ fun BikeRentalCard() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-
+            /**
+             * Display the bike's rating (stars) and price in a row.
+             * Rating is shown with a star icon and the price is displayed beside it.
+             */
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -76,12 +92,17 @@ fun BikeRentalCard() {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-
+            /**
+             * Display the rental duration (e.g., 5-10 days) below the price.
+             */
             Text(text = "5-10 days", style = MaterialTheme.typography.bodySmall)
 
             Spacer(modifier = Modifier.height(8.dp))
 
-
+            /**
+             * Display a short description about the bike rental.
+             * Describes the purpose of the bike rental, which is to enjoy the city with a reliable bike.
+             */
             Text(
                 text = "Enjoy the city with a reliable bike. Perfect for short or long rides.",
                 style = MaterialTheme.typography.bodyMedium
@@ -89,9 +110,11 @@ fun BikeRentalCard() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
+            /**
+             * A button that allows the user to rent the bike.
+             */
             Button(
-                onClick = { /* TODO: Handle rent action */ },
+                onClick = { },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB2E59C))
             ) {
@@ -100,4 +123,3 @@ fun BikeRentalCard() {
         }
     }
 }
-

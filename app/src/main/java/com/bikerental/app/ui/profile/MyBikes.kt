@@ -32,13 +32,21 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Composable function to display the user's bikes.
+ *
+ * This function serves as the entry point to render a list of bikes owned by the user.
+ * It also handles the loading state while the bikes are being fetched and allows the user to delete bikes.
+ *
+ * @param modifier The modifier to be applied to the component.
+ * @param viewModel The view model that holds the state of the bikes and the loading indicator.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyBikes(
     modifier: Modifier = Modifier,
     viewModel: MyBikesViewModel
 ) {
-
     MyBikesView(
         modifier = modifier,
         bikes = viewModel.bikes.collectAsState().value,
@@ -47,6 +55,17 @@ fun MyBikes(
     )
 }
 
+/**
+ * Composable function to render a list of bikes.
+ *
+ * This function renders a list of bikes, showing a loading indicator while the bikes are being fetched.
+ * Each bike is displayed in a card, and the user can delete bikes from the list.
+ *
+ * @param modifier The modifier to be applied to the component.
+ * @param bikes A list of bikes to display.
+ * @param isLoading A boolean indicating whether the data is loading.
+ * @param onDeleteBike A function that gets called when the user deletes a bike.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyBikesView(
@@ -55,7 +74,6 @@ fun MyBikesView(
     isLoading: Boolean,
     onDeleteBike: (Bike) -> Unit
 ) {
-
     if (isLoading) {
         CircularProgressIndicator(modifier = Modifier.fillMaxSize())
     } else {
@@ -76,6 +94,15 @@ fun MyBikesView(
     }
 }
 
+/**
+ * Composable function to render a single bike in a card.
+ *
+ * This function displays detailed information about a bike, including the bike's name, image, pricing,
+ * location, and availability. The user can delete the bike by clicking the delete icon.
+ *
+ * @param bike The bike to display.
+ * @param onDelete A function to call when the user deletes the bike.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyBikeCard(
@@ -134,14 +161,14 @@ fun MyBikeCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-//             Dates
+            // Dates
             Column {
                 Text(
                     text = "Available from: ${formatTimestamp(bike.startTime)}",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text =  "Available until: ${formatTimestamp(bike.endTime)}",
+                    text = "Available until: ${formatTimestamp(bike.endTime)}",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -158,8 +185,17 @@ fun MyBikeCard(
             )
         }
     }
-
 }
+
+/**
+ * Formats a Firebase timestamp into a human-readable string.
+ *
+ * This function converts a Firebase Timestamp object into a formatted string representing
+ * the date in the format: "dd MMM yyyy".
+ *
+ * @param timestamp The Firebase timestamp to format.
+ * @return A string representation of the formatted date.
+ */
 fun formatTimestamp(timestamp: Timestamp): String {
     val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     return dateFormat.format(timestamp.toDate())

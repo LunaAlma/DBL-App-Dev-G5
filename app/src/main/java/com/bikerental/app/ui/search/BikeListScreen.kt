@@ -25,7 +25,14 @@ import java.util.Calendar
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-
+/**
+ * Displays a screen containing a list of available bikes for rent based on selected city
+ * and rental period.
+ *
+ * @param navController Used to navigate to other screens.
+ * @param modifier Modifier for customizing the layout.
+ * @param viewModel The view model used to manage data for this screen.
+ */
 @Composable
 fun BikeListScreen(
     navController: NavController,
@@ -95,6 +102,16 @@ fun BikeListScreen(
     }
 }
 
+/**
+ * A composable for selecting the rental period, including city and date range.
+ * Displays dropdown menus for city selection and date pickers for start and end dates.
+ *
+ * @param selectedCity The currently selected city.
+ * @param onCitySelected Callback to handle city selection.
+ * @param selectedStartDate The selected start date for the rental period.
+ * @param selectedEndDate The selected end date for the rental period.
+ * @param onDateSelected Callback to handle date range selection.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RentalPeriodSelector(

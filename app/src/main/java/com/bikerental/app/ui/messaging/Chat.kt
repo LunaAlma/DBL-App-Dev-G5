@@ -8,7 +8,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-//
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -43,20 +42,28 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-
+/**
+ * Composable function representing the chat interface.
+ * It allows users to send text and images, and display messages.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Chat(
     modifier: Modifier,
     viewModel: ChatViewModel
 ) {
-
+    // This composable is responsible for showing the chat view with messages and sending new messages.
     ChatView(
         userId = viewModel.userId,
     )
-
 }
 
+/**
+ * Composable function that displays the chat interface and handles message interactions.
+ *
+ * @param userId The user ID of the current user to be displayed in the chat.
+ * @param viewModel The [ChatViewModel] that manages the chat's data.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,15 +71,7 @@ fun ChatView(
     userId: String,
     viewModel: ChatViewModel = hiltViewModel()
 ) {
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = { Text(userId) },
-//            )
-//        }
-//    ) {
-//
-//    }
+    // State to hold messages and the context for showing Toasts
     val messages by viewModel.messages.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -97,7 +96,7 @@ fun ChatView(
         }
     }
 
-    // Request camera permission
+    // Request camera permission launcher
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -108,27 +107,30 @@ fun ChatView(
         }
     }
 
+    // Scaffold to hold the main UI structure
     Scaffold(
         topBar = {
-//            TopAppBar(title = { Text(text = "Chat with $userId") })
+            // Set the top app bar with the user ID as title
             TopAppBar(title = { Text(text = "Chat") })
         },
         floatingActionButton = {
             Box(modifier = Modifier.padding(bottom = 55.dp, end = 165.dp)) {
-            FloatingActionButton(
-                onClick = {
-                    showOptionsDialog = true
-                },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.CameraAlt,
-                    contentDescription = "Send Image"
-                )
-            }
+                // Floating action button to show options for sending an image
+                FloatingActionButton(
+                    onClick = {
+                        showOptionsDialog = true
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CameraAlt,
+                        contentDescription = "Send Image"
+                    )
+                }
             }
         }
     ) { padding ->
+        // Display messages in a lazy column
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -148,6 +150,7 @@ fun ChatView(
         }
     }
 
+    // Show dialog options for sending an image
     if (showOptionsDialog) {
         AlertDialog(
             onDismissRequest = { showOptionsDialog = false },
@@ -156,6 +159,7 @@ fun ChatView(
             confirmButton = {
                 TextButton(onClick = {
                     showOptionsDialog = false
+                    // Check for camera permission and launch the camera
                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
                         == PackageManager.PERMISSION_GRANTED
                     ) {
@@ -176,6 +180,12 @@ fun ChatView(
     }
 }
 
+/**
+ * Creates an image file to store the captured image.
+ *
+ * @param context The context used to access the file system.
+ * @return A temporary image file to store the captured photo.
+ */
 private fun createImageFile(context: Context): File {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
     val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)

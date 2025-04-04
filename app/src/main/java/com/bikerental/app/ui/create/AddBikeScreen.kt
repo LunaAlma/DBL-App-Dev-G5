@@ -55,7 +55,12 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-
+/**
+ * Composable function to add a new bike listing.
+ *
+ * @param modifier Modifier to apply to the root layout.
+ * @param viewModel ViewModel instance used for handling the bike addition logic.
+ */
 @Composable
 fun AddBike(
     modifier: Modifier,
@@ -88,6 +93,32 @@ fun AddBike(
     )
 }
 
+/**
+ * View for adding a new bike listing.
+ *
+ * @param modifier Modifier to apply to the root layout.
+ * @param bikeName The bike name.
+ * @param bikeCity The bike city.
+ * @param bikePrice The bike price.
+ * @param selectedStartDate The selected start date.
+ * @param selectedEndDate The selected end date.
+ * @param bikeNameError Error message for bike name.
+ * @param bikeCityError Error message for bike city.
+ * @param bikePriceError Error message for bike price.
+ * @param bikeImageError Error message for bike image.
+ * @param selectedStartDateError Error message for start date.
+ * @param firebaseError Error message related to Firebase.
+ * @param isLoading Boolean to indicate if the form is loading.
+ * @param bikeImageUri URI of the selected bike image.
+ * @param onBikeImageChange Callback function for changing bike image.
+ * @param onBikeNameChange Callback function for changing bike name.
+ * @param onBikeCityChange Callback function for changing bike city.
+ * @param onBikePriceChange Callback function for changing bike price.
+ * @param addBike Callback function to add bike listing.
+ * @param selectedEndDateError Error message for end date.
+ * @param onStartDateChange Callback function for changing start date.
+ * @param onEndDateChange Callback function for changing end date.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBikeView(
@@ -374,6 +405,13 @@ fun AddBikeView(
     }
 }
 
+/**
+ * Composable function that displays a dialog for selecting an image for the bike.
+ *
+ * @param bikeImageUri The current image URI of the bike.
+ * @param onImageSelected Callback function to handle image selection.
+ * @param modifier Modifier to apply to the layout.
+ */
 @Composable
 private fun BikeImageSelector(
     bikeImageUri: Uri?,

@@ -26,12 +26,6 @@ import java.util.UUID
 /**
  * Firebase Data Source implementation handling all Firestore and Storage operations.
  *
- * Responsibilities:
- * - Manages CRUD operations for Users and Bikes in Firestore
- * - Handles bike image uploads to Firebase Storage
- * - Provides real-time data streams using Flow
- * - Abstracts all Firebase-specific implementations
- *
  * @property db Firestore database instance
  * @property auth Firebase Authentication instance
  * @property storage Firebase Storage instance
@@ -193,7 +187,6 @@ class FirebaseDataSource @Inject constructor(
         }
     }
 
-
     /**
      * Deletes a bike document from Firestore.
      *
@@ -279,7 +272,6 @@ class FirebaseDataSource @Inject constructor(
         }
         emit(rentals)
     }.flowOn(Dispatchers.IO)
-
 
     /**
      * Gets bikes filtered by city.
@@ -367,7 +359,6 @@ class FirebaseDataSource @Inject constructor(
         }.addOnFailureListener { error ->
             close(error)
         }
-
         awaitClose { /* No subscription to cancel in this implementation */ }
     }
 

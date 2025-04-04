@@ -14,12 +14,30 @@ import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Formats a Firebase timestamp into a human-readable string.
+ *
+ * This function converts a Firebase Timestamp object into a formatted string representing
+ * the date and time in the format: "dd MMM yyyy, HH:mm".
+ *
+ * @param timestamp The Firebase timestamp to format.
+ * @return A string representation of the formatted date and time.
+ */
 fun formatTimestamp(timestamp: com.google.firebase.Timestamp): String {
     val date = timestamp.toDate()
     val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
     return sdf.format(date)
 }
 
+/**
+ * Composable function to display a rental item in a card.
+ *
+ * This composable function displays the details of a past rental, including the bike name,
+ * bike city, and the rental period (from start time to end time). The rental information
+ * is displayed inside a MaterialCard for a structured and styled UI presentation.
+ *
+ * @param rentalDisplay The rental data to display. It includes bike details and rental period.
+ */
 @Composable
 fun RentalItem(rentalDisplay: PastRentalDisplay) {
     Card(
