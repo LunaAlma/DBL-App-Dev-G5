@@ -197,10 +197,18 @@ fun RentalPeriodSelector(
 
 @Composable
 fun BikeList(bikeList: List<Bike>, navController: NavController) {
-    LazyRow(modifier = Modifier.padding(start = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    LazyRow(
+        modifier = Modifier.padding(start = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         items(bikeList) { bike ->
-            BikeCard(bike) { navController.navigate("bikeDetails/${bike.bikeId}") }
+            BikeCard(
+                bike = bike,
+                onClick = {
+                    // Proper navigation with encoded bikeId
+                    navController.navigate("bikeDetails/${bike.bikeId}")
+                }
+            )
         }
     }
 }
