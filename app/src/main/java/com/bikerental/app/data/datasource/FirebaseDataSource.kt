@@ -130,13 +130,16 @@ class FirebaseDataSource @Inject constructor(
                     close(error)
                     return@addSnapshotListener
                 }
+
                 val user = snapshot?.toObject(User::class.java)
-                if(user != null) {
+                if (user != null) {
                     trySend(user)
                 } else {
-                    close(IllegalStateException("User document not found"))
+                    // Instead of closing the flow, send empty values
+                    Log.w("Firebase", "User document $uid not found")
                 }
             }
+
         awaitClose { subscription.remove() }
     }
 
@@ -276,6 +279,7 @@ class FirebaseDataSource @Inject constructor(
         }
         emit(rentals)
     }.flowOn(Dispatchers.IO)
+
 
     /**
      * Gets bikes filtered by city.
@@ -609,5 +613,24 @@ class FirebaseDataSource @Inject constructor(
 
     suspend fun updateUserName(uid: String, name: String) {
         db.collection("users").document(uid).update("name", name).await()
+    }
+    suspend fun createRental(bikeId: String, startTime: Timestamp, endTime: Timestamp) {
+        val user = auth.currentUser ?: throw Exception("User not authenticated")
+        val bike = fetchBikeById(bikeId)
+        val rentalId = UUID.randomUUID().toString()
+
+        val rental = Rental(
+            id = rentalId,
+            bikeId = bikeId,
+            renterId = user.uid,
+            ownerId = bike.ownerId,
+            status = "active",
+            startTime = startTime,
+            endTime = endTime
+        )
+
+        db.collection("rentals")
+            .add(rental)
+            .await()
     }
 }

@@ -70,4 +70,7 @@ class BikeRepository @Inject constructor(
     suspend fun deleteUsersBikes(userId: String) {
         firebaseDataSource.deleteUsersBikes(userId)
     }
+    suspend fun rentBike(bikeId: String, startTime: Timestamp, endTime: Timestamp) {
+        firebaseDataSource.createRental(bikeId, startTime, endTime)
+    }
 }

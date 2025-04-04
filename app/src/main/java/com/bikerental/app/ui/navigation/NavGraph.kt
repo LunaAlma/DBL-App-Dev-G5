@@ -5,8 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bikerental.app.ui.bike.BikeDetails
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.bikerental.app.ui.bike.BikeDetailsViewModel
 import com.bikerental.app.ui.create.AddBike
@@ -160,6 +162,25 @@ fun NavGraph(
                 CurrentRentals(
                     navigator = viewModel.navigator,
                     viewModel = viewModel
+                )
+            }
+            composable(
+                route = Destination.Home.BikeDetails.route,
+                arguments = Destination.Home.BikeDetails.navArguments
+            ) { backStackEntry ->
+                val bikeId = backStackEntry.arguments?.getString("bikeId") ?: ""
+                val viewModel: BikeDetailsViewModel = hiltViewModel()
+                BikeDetails(
+                    bikeId = bikeId,
+                    viewModel = viewModel
+                )
+            }
+            composable(
+                route = "bikeDetails/{bikeId}",
+                arguments = listOf(navArgument("bikeId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                BikeDetails(
+                    bikeId = backStackEntry.arguments?.getString("bikeId") ?: ""
                 )
             }
         }
