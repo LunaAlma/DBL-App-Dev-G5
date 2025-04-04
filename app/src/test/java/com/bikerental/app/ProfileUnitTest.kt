@@ -64,43 +64,6 @@ class ProfileViewModelTest {
         Dispatchers.resetMain()
     }
 
-//    @Test
-//    fun `loadUserDetails should emit user`() = runTest {
-//        viewModel.user.test {
-//            val user = awaitItem()
-//            assertNotNull(user)
-//            assertEquals("John Doe", user?.name)
-//            cancelAndIgnoreRemainingEvents()
-//        }
-//    }
-
-//    @Test
-//    fun `onNameChanged should update user name`() = runTest {
-//        val mockFirebaseUser: FirebaseUser = mockk()
-//        every { mockFirebaseAuth.currentUser } returns mockFirebaseUser
-//        every { mockFirebaseUser.uid } returns "user123"
-//        coEvery { mockUserRepository.updateUserName("user123", "New Name") } just Runs
-//
-//        viewModel.onNameChanged("New Name")
-//
-//        coVerify { mockUserRepository.updateUserName("user123", "New Name") }
-//    }
-//
-//    @Test
-//    fun `onProfileImageChange uploads and sets image`() = runTest {
-//        val fakeUri: Uri = mockk()
-//        val fakeUrl = "https://example.com/profile.jpg"
-//        every { mockAuthRepository.getCurrentUser?.uid } returns "user123"
-//        coEvery { mockUserRepository.addProfileImage(fakeUri) } returns Result.success(fakeUrl)
-//        coEvery { mockUserRepository.updateUserImage("user123", fakeUrl) } just Runs
-//
-//        viewModel.onProfileImageChange(fakeUri)
-//
-//        coVerifySequence {
-//            mockUserRepository.addProfileImage(fakeUri)
-//            mockUserRepository.updateUserImage("user123", fakeUrl)
-//        }
-//    }
 
     @Test
     fun `onLogout should logout and navigate to login`() = runTest {
@@ -118,21 +81,4 @@ class ProfileViewModelTest {
         verify { mockNavigator.navigateTo(Destination.Home.PastRentals.route) }
     }
 
-//    @Test
-//    fun `onDeleteAccount should delete user and navigate`() = runTest {
-//        coEvery { mockFirebaseUser.uid } returns "user123"
-//        coEvery { mockBikeRepository.deleteUsersBikes("user123") } just Runs
-//        coEvery { mockUserRepository.deleteUserDetails("user123") } just Runs
-//        coEvery { mockFirebaseUser.delete() } returns mockk()
-//        coEvery { mockFirebaseUser.delete().await() } returns Unit
-//
-//        viewModel.onDeleteAccount()
-//
-//        coVerifySequence {
-//            mockBikeRepository.deleteUsersBikes("user123")
-//            mockUserRepository.deleteUserDetails("user123")
-//            mockFirebaseUser.delete()
-//            mockNavigator.navigateTo(Destination.SignUp.route, true)
-//        }
-//    }
 }
