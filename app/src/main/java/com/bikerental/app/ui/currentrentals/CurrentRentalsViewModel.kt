@@ -32,7 +32,7 @@ class CurrentRentalsViewModel @Inject constructor(
         loadCurrentRentals()
     }
 
-    private fun loadCurrentRentals() {
+    fun loadCurrentRentals() {
         viewModelScope.launch {
             val userId = authRepository.getCurrentUser?.uid ?: run {
                 Log.e("CurrentRentals", "User not logged in")

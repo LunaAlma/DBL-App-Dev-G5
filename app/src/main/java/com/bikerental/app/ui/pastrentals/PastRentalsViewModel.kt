@@ -43,7 +43,7 @@ class PastRentalsViewModel @Inject constructor(
 //                }
 //        }
 //    }
-private fun loadPastRentals() {
+fun loadPastRentals() {
     viewModelScope.launch {
         val userId = authRepository.getCurrentUser?.uid ?: run {
             Log.e("PastRentals", "User not logged in")

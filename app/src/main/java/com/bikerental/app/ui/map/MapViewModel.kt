@@ -47,7 +47,7 @@ class MapViewModel @Inject constructor(
         loadBikeData()
     }
 
-    private fun loadBikeData() {
+    fun loadBikeData() {
         Log.d("MapViewModel", "Loading bike data for bikeId: $bikeId")
         launchFirebase {
             bikeRepository.getBikes().collect { bikes ->

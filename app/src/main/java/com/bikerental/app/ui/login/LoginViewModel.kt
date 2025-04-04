@@ -84,7 +84,7 @@ class LoginViewModel @Inject constructor(
         navigator.navigateTo(Destination.SignUp.route, true)
     }
 
-    private fun validate(): Boolean {
+    fun validate(): Boolean {
         var error = false
         if (!email.value.isValidEmail()) _emailError.tryEmit("Invalid Email").run { error = true }
         if (password.value.length < 6) {
