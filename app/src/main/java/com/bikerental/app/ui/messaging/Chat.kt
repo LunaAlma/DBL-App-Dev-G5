@@ -111,7 +111,7 @@ fun ChatView(
     Scaffold(
         topBar = {
 //            TopAppBar(title = { Text(text = "Chat with $userId") })
-            TopAppBar(title = { Text(text = "Chat with $") })
+            TopAppBar(title = { Text(text = "Chat") })
         },
         floatingActionButton = {
             Box(modifier = Modifier.padding(bottom = 55.dp, end = 165.dp)) {
