@@ -159,7 +159,7 @@ fun RentalPeriodSelector(
             // SearchBar as a Dropdown
             Column(modifier = Modifier.weight(1f)) {
                 OutlinedButton(onClick = { expanded = !expanded }) {
-                    Text(selectedCity)
+                    Text(selectedCity, fontSize = 12.sp, maxLines = 1, softWrap = false)
                 }
 
                 DropdownMenu(
@@ -169,7 +169,7 @@ fun RentalPeriodSelector(
                 ) {
                     listOf("Amsterdam", "Eindhoven", "Utrecht", "Den Haag", "Rotterdam").forEach { city ->
                         DropdownMenuItem(
-                            text = { Text(city) },
+                            text = { Text(city, fontSize = 14.sp)},
                             onClick = {
                                 onCitySelected(city)
                                 expanded = false
@@ -183,13 +183,13 @@ fun RentalPeriodSelector(
 
             // Date Buttons
             Button(onClick = { showStartDatePicker = true }, modifier = Modifier.weight(1f)) {
-                Text(startDateText, maxLines = 1)
+                Text(startDateText, fontSize = 12.sp, maxLines = 1, softWrap = false)
             }
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Button(onClick = { showEndDatePicker = true }, modifier = Modifier.weight(1f)) {
-                Text(endDateText, maxLines = 1)
+                Text(endDateText, fontSize = 12.sp, maxLines = 1, softWrap = false)
             }
         }
     }
