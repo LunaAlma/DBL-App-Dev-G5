@@ -36,12 +36,34 @@ fun BikeDetails(
     bikeId: String,
     viewModel: BikeDetailsViewModel = hiltViewModel()
 ) {
-    val bike by viewModel.bikeDetails.collectAsState() // This is a nullable Bike (Bike?)
+    val bike by viewModel.bikeDetails.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val owner by viewModel.ownerDetails.collectAsState()
+    val showDialog by viewModel.showConfirmationDialog.collectAsState()
 
     val dateFormatter = remember {
         SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    }
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.cancelRentBike() },
+            title = { Text("Confirm Rental") },
+            text = { Text("Are you sure you want to rent this bike?") },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.rentBikeConfirmed() }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { viewModel.cancelRentBike() }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -142,7 +164,7 @@ fun BikeDetails(
 
                             // Rental Button
                             Button(
-                                onClick = { /* Handle rental */ },
+                                onClick = { viewModel.confirmRentBike() },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 16.dp)

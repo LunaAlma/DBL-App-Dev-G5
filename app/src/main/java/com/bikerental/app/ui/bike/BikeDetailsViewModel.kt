@@ -1,5 +1,6 @@
 package com.bikerental.app.ui.bike
 
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,7 +22,7 @@ class BikeDetailsViewModel @Inject constructor(
     private val bikeRepository: BikeRepository,
     private val userRepository: UserRepository,
     val navigator: Navigator,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val bikeId = savedStateHandle.get<String>("bikeId") ?: ""
@@ -34,6 +35,25 @@ class BikeDetailsViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _showConfirmationDialog = MutableStateFlow(false)
+    val showConfirmationDialog: StateFlow<Boolean> = _showConfirmationDialog.asStateFlow()
+
+    fun confirmRentBike() {
+        _showConfirmationDialog.value = true
+    }
+
+    fun rentBikeConfirmed() {
+        _showConfirmationDialog.value = false
+        rentBike() // Call your existing rentBike function
+    }
+
+    fun cancelRentBike() {
+        _showConfirmationDialog.value = false
+    }
 
     init {
         fetchBikeDetails()
@@ -66,4 +86,27 @@ class BikeDetailsViewModel @Inject constructor(
     fun navigateBack() {
         navigator.navigateBack()
     }
+    fun rentBike() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val bike = _bikeDetails.value
+                if (bike != null) {
+                    bikeRepository.rentBike(
+                        bikeId = bikeId,
+                        startTime = bike.startTime,
+                        endTime = bike.endTime
+                    )
+                    navigator.navigateBack()
+                } else {
+                    _errorMessage.value = "Bike information not available"
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Rental failed: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }
+
