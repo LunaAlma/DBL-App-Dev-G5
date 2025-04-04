@@ -1,127 +1,142 @@
-package com.bikerental.app
-//
-//import android.util.Log
-//import com.bikerental.app.data.model.Bike
-//import com.bikerental.app.data.model.PastRentalDisplay
-//import com.bikerental.app.data.model.Rental
-//import com.bikerental.app.data.repositories.UserRepository
-//import com.bikerental.app.data.repositories.AuthRepository
-//import com.bikerental.app.data.repositories.BikeRepository
-//import com.bikerental.app.ui.currentrentals.CurrentRentalsViewModel
-//import com.bikerental.app.ui.navigation.Navigator
-//import com.google.firebase.Timestamp
-//import io.mockk.*
-//import kotlinx.coroutines.ExperimentalCoroutinesApi
-//import kotlinx.coroutines.flow.first
-//import kotlinx.coroutines.flow.flow
-//import kotlinx.coroutines.flow.flowOf
-//import kotlinx.coroutines.test.runTest
-//import org.junit.After
-//import org.junit.Before
-//import org.junit.Test
-//
-//@OptIn(ExperimentalCoroutinesApi::class)
-//class CurrentRentalsViewModelTest {
-//
-//    private lateinit var viewModel: CurrentRentalsViewModel
-//    private val userRepository: UserRepository = mockk()
-//    private val authRepository: AuthRepository = mockk()
-//    private val bikeRepository: BikeRepository = mockk()
-//    private val navigator: Navigator = mockk(relaxed = true)
-//
-//    @Before
-//    fun setup() {
-//        mockkStatic(Log::class)
-//        every { Log.e(any(), any()) } returns 0
-//
-//        viewModel = CurrentRentalsViewModel(userRepository, authRepository, bikeRepository, navigator)
-//    }
-//
-//    @After
-//    fun tearDown() {
-//        unmockkStatic(Log::class)
-//    }
-//
-//    @Test
-//    fun `loadCurrentRentals logs error if user not logged in`() = runTest {
-//        coEvery { authRepository.getCurrentUser?.uid } returns null
-//
-//        viewModel.loadCurrentRentals()
-//
-//        coVerify { Log.e("CurrentRentals", "User not logged in") }
-//    }
-//
-//    @Test
-//    fun `loadCurrentRentals handles exception from repository`() = runTest {
-//        val userId = "user123"
-//        coEvery { authRepository.getCurrentUser?.uid } returns userId
-//        coEvery { userRepository.getUserRentals(userId) } returns flow { throw Exception("Some error") }
-//
-//        viewModel.loadCurrentRentals()
-//
-//        coVerify { Log.e("CurrentRentals", "Error: Some error") }
-//    }
-//
-//    @Test
-//    fun `loadCurrentRentals returns empty list when no active rentals`() = runTest {
-//        val userId = "user123"
-//        coEvery { authRepository.getCurrentUser?.uid } returns userId
-//        coEvery { userRepository.getUserRentals(userId) } returns flowOf(
-//            listOf(
-//                Rental("bike1", Timestamp(0, 0), Timestamp(0, 0), "completed"),
-//                Rental("bike2", Timestamp(0, 0), Timestamp(0, 0), "completed")
-//            )
-//        )
-//
-//        viewModel.loadCurrentRentals()
-//
-//        val result = viewModel.currentRentalDisplays.first()
-//        assertTrue(result.isEmpty())
-//    }
-//
-//    @Test
-//    fun `loadCurrentRentals returns correct display items for active rentals`() = runTest {
-//        val userId = "user123"
-//        coEvery { authRepository.getCurrentUser?.uid } returns userId
-//
-//        val rental1 = Rental("bike1", Timestamp(100, 0), Timestamp(200, 0), "active")
-//        val rental2 = Rental("bike2", Timestamp(300, 0), Timestamp(400, 0), "active")
-//        coEvery { userRepository.getUserRentals(userId) } returns flowOf(listOf(rental1, rental2))
-//
-//        coEvery { bikeRepository.getBikeDetailsById("bike1") } returns Bike("Bike One", "City A")
-//        coEvery { bikeRepository.getBikeDetailsById("bike2") } returns Bike("Bike Two", "City B")
-//
-//        viewModel.loadCurrentRentals()
-//        val result = viewModel.currentRentalDisplays.first()
-//
-//        assertEquals(2, result.size)
-//        assertEquals("Bike One", result[0].bikeName)
-//        assertEquals("City A", result[0].bikeCity)
-//        assertEquals("Bike Two", result[1].bikeName)
-//        assertEquals("City B", result[1].bikeCity)
-//    }
-//
-//    @Test
-//    fun `loadCurrentRentals handles multiple rentals with correct data`() = runTest {
-//        val userId = "user456"
-//        coEvery { authRepository.getCurrentUser?.uid } returns userId
-//
-//        val rental1 = Rental("bike1", Timestamp(123456, 0), Timestamp(123999, 0), "active")
-//        val rental2 = Rental("bike2", Timestamp(124000, 0), Timestamp(124999, 0), "active")
-//
-//        coEvery { userRepository.getUserRentals(userId) } returns flowOf(listOf(rental1, rental2))
-//        coEvery { bikeRepository.getBikeDetailsById("bike1") } returns Bike("Roadster", "Amsterdam")
-//        coEvery { bikeRepository.getBikeDetailsById("bike2") } returns Bike("Mountain King", "Rotterdam")
-//
-//        viewModel.loadCurrentRentals()
-//
-//        val displays = viewModel.currentRentalDisplays.first()
-//        assertEquals(2, displays.size)
-//
-//        assertEquals("Roadster", displays[0].bikeName)
-//        assertEquals("Amsterdam", displays[0].bikeCity)
-//
-//        assertEquals("Mountain King", displays[1].bikeName)
-//        assertEquals("Rotterdam", displays[1].bikeCity)
-//    }
-//}
+package com.bikerental.app.ui.currentrentals
+
+import com.bikerental.app.data.model.Bike
+import com.bikerental.app.data.model.Rental
+import com.bikerental.app.data.repositories.AuthRepository
+import com.bikerental.app.data.repositories.BikeRepository
+import com.bikerental.app.data.repositories.UserRepository
+import com.bikerental.app.ui.navigation.Navigator
+import com.google.firebase.Timestamp
+import io.mockk.*
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import java.util.Date
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class CurrentRentalsViewModelTest {
+
+    private lateinit var viewModel: CurrentRentalsViewModel
+    private val testDispatcher = StandardTestDispatcher()
+    private val mockUserRepo: UserRepository = mockk(relaxUnitFun = true)
+    private val mockAuthRepo: AuthRepository = mockk()
+    private val mockBikeRepo: BikeRepository = mockk()
+    private val mockNavigator: Navigator = mockk(relaxed = true)
+
+    @Before
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+        coEvery { mockBikeRepo.getBikeDetailsById(any()) } returns Bike(
+            bikeId = "testBike",
+            bikeName = "Test Bike",
+            city = "Amsterdam",
+            ownerId = "owner123",
+            price = 15.0,
+            imageUrl = "",
+            startTime = Timestamp.now(),
+            endTime = Timestamp.now()
+        )
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `loadCurrentRentals should populate active rentals`() = runTest {
+        // Arrange
+        val testRentals = listOf(
+            Rental(
+                id = "1",
+                bikeId = "bike1",
+                renterId = "user123",
+                ownerId = "owner123",
+                status = "active",
+                startTime = Timestamp.now(),
+                endTime = Timestamp(Date().apply { time += 3600000 })
+            )
+        )
+
+        coEvery { mockAuthRepo.getCurrentUser?.uid } returns "user123"
+        every { mockUserRepo.getUserRentals(any()) } returns flowOf(testRentals)
+
+        // Act
+        viewModel = CurrentRentalsViewModel(mockUserRepo, mockAuthRepo, mockBikeRepo, mockNavigator)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Assert
+        assertEquals(1, viewModel.currentRentalDisplays.value.size)
+        assertEquals("Test Bike", viewModel.currentRentalDisplays.value.first().bikeName)
+    }
+
+    @Test
+    fun `should filter out non-active rentals`() = runTest {
+        // Arrange
+        val testRentals = listOf(
+            Rental(
+                id = "1",
+                bikeId = "bike1",
+                renterId = "user123",
+                ownerId = "owner123",
+                status = "active",
+                startTime = Timestamp.now(),
+                endTime = Timestamp.now()
+            ),
+            Rental(
+                id = "2",
+                bikeId = "bike2",
+                renterId = "user123",
+                ownerId = "owner123",
+                status = "completed",
+                startTime = Timestamp.now(),
+                endTime = Timestamp.now()
+            )
+        )
+
+        coEvery { mockAuthRepo.getCurrentUser?.uid } returns "user123"
+        every { mockUserRepo.getUserRentals(any()) } returns flowOf(testRentals)
+
+        // Act
+        viewModel = CurrentRentalsViewModel(mockUserRepo, mockAuthRepo, mockBikeRepo, mockNavigator)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Assert
+        assertEquals(1, viewModel.currentRentalDisplays.value.size)
+        assertEquals("active", viewModel.currentRentalDisplays.value.first().status)
+    }
+
+    @Test
+    fun `should handle unauthenticated user`() = runTest {
+        // Arrange
+        coEvery { mockAuthRepo.getCurrentUser } returns null
+
+        // Act
+        viewModel = CurrentRentalsViewModel(mockUserRepo, mockAuthRepo, mockBikeRepo, mockNavigator)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Assert
+        assertTrue(viewModel.currentRentalDisplays.value.isEmpty())
+    }
+
+    @Test
+    fun `should handle repository errors`() = runTest {
+        // Arrange
+        coEvery { mockAuthRepo.getCurrentUser?.uid } returns "user123"
+        every { mockUserRepo.getUserRentals(any()) } returns flow { throw Exception("Test error") }
+
+        // Act
+        viewModel = CurrentRentalsViewModel(mockUserRepo, mockAuthRepo, mockBikeRepo, mockNavigator)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Assert
+        assertTrue(viewModel.currentRentalDisplays.value.isEmpty())
+    }
+}
