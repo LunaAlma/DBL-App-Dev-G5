@@ -162,6 +162,17 @@ fun NavGraph(
                     viewModel = viewModel
                 )
             }
+            composable(
+                route = Destination.Home.BikeDetails.route,
+                arguments = Destination.Home.BikeDetails.navArguments
+            ) { backStackEntry ->
+                val bikeId = backStackEntry.arguments?.getString("bikeId") ?: ""
+                val viewModel: BikeDetailsViewModel = hiltViewModel()
+                BikeDetails(
+                    bikeId = bikeId,
+                    viewModel = viewModel
+                )
+            }
         }
     }
 }

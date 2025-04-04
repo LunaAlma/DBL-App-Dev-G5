@@ -128,5 +128,10 @@ class MapViewModel @Inject constructor(
             }
         }
     }
+    fun navigateToBikeDetails(bikeId: String) {
+        val route = Destination.Home.BikeDetails.route
+            .replace("{bikeId}", bikeId)
+        navigator.navigateTo(route)
+    }
 
 }
