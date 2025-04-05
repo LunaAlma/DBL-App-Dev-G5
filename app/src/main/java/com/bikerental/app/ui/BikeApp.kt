@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -25,6 +23,15 @@ import com.bikerental.app.ui.navigation.NavGraph
 import com.bikerental.app.ui.navigation.Navigator
 import com.bikerental.app.ui.theme.AppTheme
 
+/**
+ * Entry point composable for the Bike Rental app.
+ * It sets up the app's theme and manages the layout based on device orientation (portrait or landscape).
+ * In landscape mode, it displays a side navigation with a navigation rail, while in portrait mode,
+ * it uses a scaffold with a bottom navigation bar.
+ *
+ * @param navigator The Navigator that helps with navigating between screens.
+ * @param finish A lambda function to handle the app finishing, used for cleanup or closing the app.
+ */
 @Composable
 fun BikeApp(
     navigator: Navigator,
@@ -70,6 +77,14 @@ fun BikeApp(
     }
 }
 
+/**
+ * Composable that sets up the navigation graph for the app, based on the current navigation controller.
+ *
+ * @param navController The NavController that manages app navigation.
+ * @param navigator The Navigator instance used to navigate between screens.
+ * @param finish A lambda function that handles the app finish event.
+ * @param modifier Modifier to be applied to the NavGraph.
+ */
 @Composable
 private fun NavContent(
     navController: NavHostController,

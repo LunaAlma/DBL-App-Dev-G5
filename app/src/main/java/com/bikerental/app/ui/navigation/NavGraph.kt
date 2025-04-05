@@ -3,14 +3,18 @@ package com.bikerental.app.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bikerental.app.ui.bike.BikeDetails
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.bikerental.app.ui.bike.BikeDetails
 import com.bikerental.app.ui.bike.BikeDetailsViewModel
 import com.bikerental.app.ui.create.AddBike
 import com.bikerental.app.ui.create.AddBikeViewModel
+import com.bikerental.app.ui.currentrentals.CurrentRentals
+import com.bikerental.app.ui.currentrentals.CurrentRentalsViewModel
 import com.bikerental.app.ui.messaging.Inbox
 import com.bikerental.app.ui.messaging.InboxViewModel
 import com.bikerental.app.ui.login.Login
@@ -32,8 +36,19 @@ import com.bikerental.app.ui.pastrentals.PastRentalsScreen
 import com.bikerental.app.ui.profile.MyBikes
 import com.bikerental.app.ui.profile.MyBikesViewModel
 import com.bikerental.app.ui.profile.UserProfileDetails
+import com.bikerental.app.ui.search.BikeListScreen
 import com.bikerental.app.ui.search.Search
 
+/**
+ * Sets up the navigation graph for the app using Jetpack Compose's NavHost.
+ * The navigation graph defines the structure of all screens and the routes used to navigate between them.
+ *
+ * @param modifier The modifier for the navigation graph.
+ * @param navController The NavController that handles navigation.
+ * @param startDestination The route to navigate to first (default is Splash screen).
+ * @param navigator The navigator that manages the app's navigation.
+ * @param finish A lambda that can be invoked to perform finishing tasks after navigation (optional).
+ */
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -86,7 +101,7 @@ fun NavGraph(
                 route = Destination.Home.MapAddBike.route,
                 arguments = Destination.Home.MapAddBike.navArguments) {
                 val viewModel: MapViewModel = hiltViewModel()
-                    MapAddBike(modifier, viewModel)
+                MapAddBike(modifier, viewModel)
             }
 
             // Home.Profile
@@ -130,17 +145,18 @@ fun NavGraph(
 
             // Home.Search
             composable(Destination.Home.Search.route) {
-                val viewModel: SearchViewModel = hiltViewModel()
-                Search(modifier, viewModel)
+                //val navController = rememberNavController()
+                val viewModel: SearchViewModel = hiltViewModel(key = SearchViewModel.TAG)
+                BikeListScreen(navController, modifier, viewModel)
             }
 
             // Home.BikeDetails
             composable(
                 route = Destination.Home.BikeDetails.route,
                 arguments = Destination.Home.BikeDetails.navArguments
-            ) {
-                val viewModel: BikeDetailsViewModel = hiltViewModel()
-                BikeDetails(modifier, viewModel)
+            ) { backStackEntry ->
+                val bikeId = backStackEntry.arguments?.getString("bikeId") ?: "default_bike_id"
+                BikeDetails(bikeId)
             }
 
             // Home.PastRental
@@ -149,6 +165,38 @@ fun NavGraph(
                 PastRentalsScreen(
                     navigator = viewModel.navigator,
                     viewModel = viewModel
+                )
+            }
+
+            // Home.CurrentRentals
+            composable(Destination.Home.CurrentRentals.route) {
+                val viewModel: CurrentRentalsViewModel = hiltViewModel()
+                CurrentRentals(
+                    navigator = viewModel.navigator,
+                    viewModel = viewModel
+                )
+            }
+
+            // Another BikeDetails
+            composable(
+                route = Destination.Home.BikeDetails.route,
+                arguments = Destination.Home.BikeDetails.navArguments
+            ) { backStackEntry ->
+                val bikeId = backStackEntry.arguments?.getString("bikeId") ?: ""
+                val viewModel: BikeDetailsViewModel = hiltViewModel()
+                BikeDetails(
+                    bikeId = bikeId,
+                    viewModel = viewModel
+                )
+            }
+
+            // BikeDetails Dynamic Route
+            composable(
+                route = "bikeDetails/{bikeId}",
+                arguments = listOf(navArgument("bikeId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                BikeDetails(
+                    bikeId = backStackEntry.arguments?.getString("bikeId") ?: ""
                 )
             }
         }

@@ -1,96 +1,228 @@
 package com.bikerental.app.ui.bike
-import com.bikerental.app.R
+
 import android.annotation.SuppressLint
-import android.util.Log
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.tooling.preview.Preview
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.bikerental.app.data.model.Bike
 import com.bikerental.app.ui.theme.AppTheme
-import com.bikerental.app.viewmodel.BikeDetailsViewModel
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import java.text.SimpleDateFormat
+import java.util.Locale
 
-
-
+/**
+ * Composable function that displays the details of a specific bike.
+ * It fetches the bike details, owner information, and displays them in a structured layout.
+ * If the bike details are being loaded, a loading indicator is shown.
+ * If the details are fetched successfully, bike details including image, location, availability,
+ * and owner information are displayed.
+ * Additionally, an option to confirm renting the bike is provided.
+ *
+ * @param bikeId The unique identifier of the bike whose details are to be displayed.
+ * @param viewModel The view model that holds the logic and data for this screen, using Hilt for dependency injection.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun BikeRentalCard(bikeId: String){
-    val bikeViewModel: BikeDetailsViewModel = viewModel()
-    val bikeData = bikeViewModel.bikeDetails.value
+fun BikeDetails(
+    bikeId: String,
+    viewModel: BikeDetailsViewModel = hiltViewModel()
+) {
+    val bike by viewModel.bikeDetails.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val owner by viewModel.ownerDetails.collectAsState()
+    val showDialog by viewModel.showConfirmationDialog.collectAsState()
 
-    Log.d("BikeDetails", "bikeId: $bikeId")
-    LaunchedEffect(bikeId) {
-        bikeViewModel.fetchBikeDetails(bikeId)
+    val dateFormatter = remember {
+        SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     }
-
-    Surface(modifier = Modifier.fillMaxSize()) {
-
-    }
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
-            val context = LocalContext.current
-            var painter: Painter = painterResource(id = R.drawable.bike)
-            var imageLoaded by remember { mutableStateOf(false) }
-
-            if (bikeData?.imageRef != null && !imageLoaded) {
-                val storageRef = Firebase.storage.reference.child(bikeData.imageRef)
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    val request = ImageRequest.Builder(context)
-                        .data(uri)
-                        .build()
-                    painter = rememberAsyncImagePainter(model = request)
-                    imageLoaded = true
-                }.addOnFailureListener { exception ->
-                    Log.e("BikeRentalCard", "Failed to load image: ${exception.message}")
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.cancelRentBike() },
+            title = { Text("Confirm Rental") },
+            text = { Text("Are you sure you want to rent this bike?") },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.rentBikeConfirmed() }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { viewModel.cancelRentBike() }
+                ) {
+                    Text("Cancel")
                 }
             }
+        )
+    }
 
-                Image(
-                    painter = painter,
-                    contentDescription = "Bike Image",
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Bike Details") },
+                navigationIcon = {
+                    IconButton(onClick = { viewModel.navigateBack() }) {
+                        Icon(Icons.Default.ArrowBack, "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            )
+        } else {
+            // Handle bike being null explicitly
+            bike?.let { bikeData ->
+                LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
+                        .padding(padding)
+                        .fillMaxSize()
+                ) {
+                    item {
+                        AsyncImage(
+                            model = bikeData.imageUrl,
+                            contentDescription = "Bike image",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    item {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = bikeData.bikeName,
+                                style = MaterialTheme.typography.headlineLarge,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+
+                            // Price and Rating
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "€${bikeData.price}/day",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                owner?.let {
+                                    Text(
+                                        text = "Owner: ${it.name}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+
+                            // Location
+                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+                            Text(
+                                text = "Location Details",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "City: ${bikeData.city}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "Coordinates: ${"%.4f".format(bikeData.location.latitude)}, " +
+                                        "${"%.4f".format(bikeData.location.longitude)}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+
+                            // Availability
+                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+                            Text(
+                                text = "Availability",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "From: ${dateFormatter.format(bikeData.startTime.toDate())}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "To: ${dateFormatter.format(bikeData.endTime.toDate())}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+
+                            // Rental Button
+                            Button(
+                                onClick = { viewModel.confirmRentBike() },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp)
+                            ) {
+                                Text("Rent This Bike")
+                            }
+                        }
+                    }
+                }
+            } ?: Text(
+                "Bike not found",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+/**
+ * Composable function that represents a card for displaying bike rental information.
+ * The card includes an image, the bike's rating, price, and name, as well as a button to rent the bike.
+ *
+ * @param bike The [Bike] object containing information such as name, price, and image URL.
+ * @param modifier The [Modifier] for customizing the layout and appearance of the card.
+ * @param onClick Lambda function to handle when the card is clicked.
+ */
+@Composable
+fun BikeRentalCard(
+    bike: Bike,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .clickable(onClick = onClick) // Add clickable modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            AsyncImage(
+                model = bike.imageUrl,
+                contentDescription = "Bike Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
-
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -106,40 +238,46 @@ fun BikeRentalCard(bikeId: String){
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(text = "5.0", style = MaterialTheme.typography.bodyMedium)
                 }
-                Text(text = "${bikeData?.price}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "€${bike.price}/day", style = MaterialTheme.typography.bodyMedium)
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-
-            Text(text = "${bikeData?.startTime} - ${bikeData?.endTime}", style = MaterialTheme.typography.bodySmall)
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = bikeData?.bikeName ?: "No name found",
-                style = MaterialTheme.typography.bodyMedium
+                text = bike.bikeName,
+                style = MaterialTheme.typography.titleLarge
             )
-            Text(text = bikeData?.ownerName ?: "no owner",style = MaterialTheme.typography.bodyMedium)
+
             Spacer(modifier = Modifier.height(8.dp))
 
-
             Button(
-                onClick = { /* TODO: Handle rent action */ },
+                onClick = { /* Handle rent action */ },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB2E59C))
             ) {
-                Text("Rent")
+                Text("Rent Now")
             }
         }
     }
 }
 
+/**
+ * Preview function for the [BikeRentalCard] composable to display a sample card with bike details.
+ */
 @Preview(showBackground = true)
 @Composable
 fun BikeRentalCardPreview() {
     AppTheme {
-        BikeRentalCard("bike_1")
+        BikeRentalCard(
+            bike = Bike(
+                bikeId = "1",
+                bikeName = "Mountain Bike Pro",
+                price = 29.99,
+                imageUrl = "",
+                ownerId = "owner123",
+                city = "Amsterdam"
+            ),
+            onClick = {}
+        )
     }
 }

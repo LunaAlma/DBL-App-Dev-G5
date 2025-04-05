@@ -30,20 +30,14 @@ abstract class BaseViewModel(
         silent: Boolean = false,
         block: suspend CoroutineScope.() -> Unit
     ) {
-        if (!silent) {
-            viewModelScope.launch {
-                try {
-                    block()
-                } catch (e: Throwable) {
-                    if (e is CancellationException) return@launch
-                }
-            }
-        } else {
-            viewModelScope.launch {
-                try {
-                    block()
-                } catch (e: Throwable) {
-                    if (e is CancellationException) return@launch
+        viewModelScope.launch {
+            try {
+                block()
+            } catch (e: Throwable) {
+                if (e is CancellationException) return@launch
+                if (!silent) {
+                    // Optionally log or rethrow, based on your needs
+                    // e.g., Log.e("launchFirebase", "Unhandled error", e)
                 }
             }
         }

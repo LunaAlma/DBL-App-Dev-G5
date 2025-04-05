@@ -34,6 +34,15 @@ import com.bikerental.app.ui.navigation.Destination
 import com.bikerental.app.ui.theme.AppTheme
 import com.bikerental.app.R
 
+/**
+ * Enum representing the tabs available in the Home screen.
+ *
+ * @param title The resource ID of the title string for the tab.
+ * @param unselectedIcon The icon to display when the tab is not selected.
+ * @param selectedIcon The icon to display when the tab is selected.
+ * @param route The route associated with this tab for navigation.
+ * @param destRoute The destination route for this tab.
+ */
 @Keep
 enum class HomeTab(
     @StringRes val title: Int,
@@ -79,6 +88,14 @@ enum class HomeTab(
     )
 }
 
+/**
+ * Composable function to handle the Home navigation UI.
+ *
+ * This function decides whether to show the HomeBottomBarView or HomeNavigationRailView
+ * depending on the screen orientation (portrait or landscape).
+ *
+ * @param navController The navigation controller to handle screen navigation.
+ */
 @Composable
 fun HomeNavigation(navController: NavController) {
     val tabs = remember { HomeTab.entries }
@@ -118,6 +135,16 @@ fun HomeNavigation(navController: NavController) {
     }
 }
 
+/**
+ * Composable function to show the Home Bottom Navigation Bar.
+ *
+ * Displays a bottom bar with navigation items for each tab in `tabs`. The selected tab
+ * will have its icon highlighted.
+ *
+ * @param tabs The list of `HomeTab` items that represent the tabs in the navigation.
+ * @param currentRoute The current route to determine which tab is selected.
+ * @param tabClick A lambda function to handle tab selection.
+ */
 @Composable
 private fun HomeBottomBarView(
     tabs: List<HomeTab>,
@@ -145,6 +172,16 @@ private fun HomeBottomBarView(
     }
 }
 
+/**
+ * Composable function to show the Home Navigation Rail.
+ *
+ * Displays a vertical navigation rail with items for each tab in `tabs`. The selected
+ * tab will have its icon highlighted.
+ *
+ * @param tabs The list of `HomeTab` items that represent the tabs in the navigation.
+ * @param currentRoute The current route to determine which tab is selected.
+ * @param tabClick A lambda function to handle tab selection.
+ */
 @Composable
 private fun HomeNavigationRailView(
     tabs: List<HomeTab>,
@@ -178,6 +215,9 @@ private fun HomeNavigationRailView(
     }
 }
 
+/**
+ * Preview of the Home Bottom Bar in Light mode.
+ */
 @Preview("Light")
 @Composable
 private fun HomeBottomBarLightPreview() {
@@ -190,6 +230,9 @@ private fun HomeBottomBarLightPreview() {
     }
 }
 
+/**
+ * Preview of the Home Bottom Bar in Dark mode.
+ */
 @Preview("Dark")
 @Composable
 private fun HomeBottomBarDarkPreview() {
@@ -202,6 +245,9 @@ private fun HomeBottomBarDarkPreview() {
     }
 }
 
+/**
+ * Preview of the Home Navigation Rail in Light mode.
+ */
 @Preview("Rail Light")
 @Composable
 private fun HomeRailLightPreview() {

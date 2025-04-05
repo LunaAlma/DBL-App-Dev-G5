@@ -40,12 +40,24 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bikerental.app.R
 
+/**
+ * Composable function that displays the login screen.
+ *
+ * Handles the UI elements for login, including email, password input fields,
+ * and login-related actions (like basic login, switching to sign-up, and password reset).
+ *
+ * @param modifier The modifier to be applied to the root view.
+ * @param viewModel The ViewModel responsible for managing the login data and actions.
+ */
 @Composable
 fun Login(
     modifier: Modifier,
     viewModel: LoginViewModel
 ) {
+    // Handles back press to navigate away from login screen
     BackHandler { viewModel.navigator.finish() }
+
+    // Displays the login view with current data from the ViewModel
     LoginView(
         modifier,
         email = viewModel.email.collectAsStateWithLifecycle().value,
@@ -62,6 +74,25 @@ fun Login(
     )
 }
 
+/**
+ * Composable function that renders the UI components of the login screen.
+ *
+ * Displays input fields for email and password, error messages, and buttons for login,
+ * sign-up switch, and password reset.
+ *
+ * @param modifier The modifier to be applied to the root view.
+ * @param email The current email entered by the user.
+ * @param password The current password entered by the user.
+ * @param emailError Error message related to the email input field.
+ * @param passwordError Error message related to the password input field.
+ * @param loginError Error message for login-related issues.
+ * @param isLoading Boolean indicating if the login request is in progress.
+ * @param onEmailChange Function to handle email input changes.
+ * @param onPasswordChange Function to handle password input changes.
+ * @param basicLogin Function to trigger the login action.
+ * @param switchSignUp Function to trigger switching to the sign-up screen.
+ * @param resetPassword Function to trigger the password reset screen.
+ */
 @Composable
 private fun LoginView(
     modifier: Modifier,
@@ -93,6 +124,7 @@ private fun LoginView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Display the logo at the top
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -108,6 +140,8 @@ private fun LoginView(
                     modifier = Modifier.size(80.dp)
                 )
             }
+
+            // Email input field
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -138,6 +172,8 @@ private fun LoginView(
                     ),
                 )
             }
+
+            // Password input field
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -169,6 +205,8 @@ private fun LoginView(
                     visualTransformation = PasswordVisualTransformation(),
                 )
             }
+
+            // Display login error message
             if (loginError.isNotEmpty()) {
                 Row(
                     modifier = Modifier.padding(
@@ -185,6 +223,8 @@ private fun LoginView(
                     )
                 }
             }
+
+            // Login button
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -212,6 +252,8 @@ private fun LoginView(
                     }
                 }
             }
+
+            // Switch to sign-up text
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -229,6 +271,8 @@ private fun LoginView(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+
+            // Reset password text
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,

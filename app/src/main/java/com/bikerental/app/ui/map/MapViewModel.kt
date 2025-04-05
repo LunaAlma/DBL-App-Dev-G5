@@ -29,25 +29,38 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.emitAll
 
+/**
+ * ViewModel for the Map screen, responsible for managing data and business logic
+ * related to bike rentals and user interactions with the map.
+ */
 @HiltViewModel
 class MapViewModel @Inject constructor(
     navigator: Navigator,
     private val savedStateHandle: SavedStateHandle,
     private val authRepository: AuthRepository,
-    private val bikeRepository: BikeRepository, // Added private val!
+    private val bikeRepository: BikeRepository,
     private val userRepository: UserRepository,
 ) : BaseViewModel(navigator) {
 
-
+    /**
+     * The unique identifier of the bike.
+     */
     val bikeId: String = savedStateHandle.get<String>("bikeId") ?: ""
 
+    /**
+     * Mutable state flow holding bike data for the selected bike.
+     */
     val addedBike = MutableStateFlow<Bike?>(null)
 
     init {
         loadBikeData()
     }
 
-    private fun loadBikeData() {
+    /**
+     * Loads the bike data for the selected bike using the bikeId.
+     * Sets the addedBike state with the first bike that matches the bikeId.
+     */
+    fun loadBikeData() {
         Log.d("MapViewModel", "Loading bike data for bikeId: $bikeId")
         launchFirebase {
             bikeRepository.getBikes().collect { bikes ->
@@ -57,17 +70,38 @@ class MapViewModel @Inject constructor(
         Log.d("MapViewModel", "Bike data loaded: $addedBike")
     }
 
-    // Classify bikes as a StateFlow with an initial empty list
+    /**
+     * A flow that emits a list of all bikes.
+     */
     val bikes: StateFlow<List<Bike>> = bikeRepository.getBikes()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    /**
+     * Mutable state flow holding the list of available bikes based on start and end time.
+     */
     private val _availableBikes: MutableStateFlow<List<Bike>> = MutableStateFlow(emptyList())
+
+    /**
+     * A flow that emits a list of available bikes based on the start and end time.
+     */
     val availableBikes: StateFlow<List<Bike>> = _availableBikes
 
-    // Assuming you are calling the method to fetch available bikes with these time parameters
-    var startTime: Timestamp = Timestamp.now()  // Set this to the required value
-    var endTime: Timestamp = Timestamp.now()    // Set this to the required value
+    /**
+     * The start time for the bike rental.
+     */
+    var startTime: Timestamp = Timestamp.now()
 
+    /**
+     * The end time for the bike rental.
+     */
+    var endTime: Timestamp = Timestamp.now()
+
+    /**
+     * Fetches available bikes based on the start and end time.
+     *
+     * @param startTime The start time for the bike rental.
+     * @param endTime The end time for the bike rental.
+     */
     fun fetchAvailableBikes(startTime: Timestamp, endTime: Timestamp) {
         this.startTime = startTime
         this.endTime = endTime
@@ -83,11 +117,14 @@ class MapViewModel @Inject constructor(
         }
     }
 
-
-    // Mutable state to track selected ownerID
+    /**
+     * Mutable state flow to track the selected owner's ID.
+     */
     private val _ownerID = MutableStateFlow<String?>(null)
 
-    // Fetch user details when ownerID changes
+    /**
+     * A flow that emits the user details for the selected owner when the owner ID changes.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     val ownerDetails: StateFlow<User?> = _ownerID
         .filterNotNull()
@@ -96,15 +133,28 @@ class MapViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    // Update ownerId dynamically
+    /**
+     * Sets the owner ID to track the selected owner.
+     *
+     * @param ownerID The ID of the owner to track.
+     */
     fun setOwnerId(ownerID: String) {
         _ownerID.value = ownerID
     }
 
+    /**
+     * Navigates to the search screen.
+     */
     fun onSearchBarClick() {
         navigator.navigateTo(Destination.Home.Search.route)
     }
 
+    /**
+     * Updates the location of the bike.
+     *
+     * @param bikeId The ID of the bike to update.
+     * @param newLocation The new location to set for the bike.
+     */
     fun updateBikeLocation(bikeId: String, newLocation: LatLng) {
         viewModelScope.launch {
             try {
@@ -118,6 +168,9 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Navigates back to the map screen.
+     */
     fun goToMap() {
         viewModelScope.launch {
             try {
@@ -129,4 +182,14 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Navigates to the bike details screen.
+     *
+     * @param bikeId The ID of the bike to navigate to.
+     */
+    fun navigateToBikeDetails(bikeId: String) {
+        val route = Destination.Home.BikeDetails.route
+            .replace("{bikeId}", bikeId)
+        navigator.navigateTo(route)
+    }
 }

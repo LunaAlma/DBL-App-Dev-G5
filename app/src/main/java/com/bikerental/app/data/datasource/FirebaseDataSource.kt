@@ -26,12 +26,6 @@ import java.util.UUID
 /**
  * Firebase Data Source implementation handling all Firestore and Storage operations.
  *
- * Responsibilities:
- * - Manages CRUD operations for Users and Bikes in Firestore
- * - Handles bike image uploads to Firebase Storage
- * - Provides real-time data streams using Flow
- * - Abstracts all Firebase-specific implementations
- *
  * @property db Firestore database instance
  * @property auth Firebase Authentication instance
  * @property storage Firebase Storage instance
@@ -77,7 +71,9 @@ class FirebaseDataSource @Inject constructor(
         bikeName: String,
         bikePrice: Double,
         city: String,
-        bikeImageUrl: String
+        bikeImageUrl: String,
+        startTime: Timestamp,
+        endTime: Timestamp
         ) {
         db.collection("bikes").document(uuid).set(
             Bike(
@@ -88,8 +84,8 @@ class FirebaseDataSource @Inject constructor(
                 city = city,
                 imageUrl = bikeImageUrl,
                 location = GeoPoint(0.0, 0.0),
-                startTime = Timestamp.now(),
-                endTime = Timestamp.now(),
+                startTime = startTime,  // Use the provided startTime
+                endTime = endTime
             )
         ).await()
     }
@@ -128,13 +124,16 @@ class FirebaseDataSource @Inject constructor(
                     close(error)
                     return@addSnapshotListener
                 }
+
                 val user = snapshot?.toObject(User::class.java)
-                if(user != null) {
+                if (user != null) {
                     trySend(user)
                 } else {
-                    close(IllegalStateException("User document not found"))
+                    // Instead of closing the flow, send empty values
+                    Log.w("Firebase", "User document $uid not found")
                 }
             }
+
         awaitClose { subscription.remove() }
     }
 
@@ -170,6 +169,21 @@ class FirebaseDataSource @Inject constructor(
             document.toObject(Bike::class.java) ?: throw Exception("Bike not found")
         } catch (e: Exception) {
             throw Exception("Failed to fetch bike: ${e.message}")
+        }
+    }
+
+    suspend fun fetchBikesByUser(userId: String): List<Bike> {
+        return try {
+            // Query the "bikes" collection where the "owner" field matches the given userId.
+            val querySnapshot = db.collection("bikes")
+                .whereEqualTo("owner", userId)
+                .get()
+                .await()
+
+            // Map each document to a Bike object, filtering out any that cannot be converted.
+            querySnapshot.documents.mapNotNull { it.toObject(Bike::class.java) }
+        } catch (e: Exception) {
+            throw Exception("Failed to fetch bikes: ${e.message}")
         }
     }
 
@@ -286,18 +300,31 @@ class FirebaseDataSource @Inject constructor(
      * @return Flow<List<Bike>> emitting bikes owned by the specified user
      */
     fun fetchBikesByOwner(ownerId: String): Flow<List<Bike>> = callbackFlow {
+        Log.d("FirebaseDebug", "Querying bikes for ownerId: $ownerId")
+
         val subscription = db.collection("bikes")
-            .whereEqualTo("ownerId", ownerId)
+            .whereEqualTo("ownerId", ownerId) // Ensure this matches Firestore
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
+                    Log.e("FirebaseDebug", "Error: ${error.message}")
                     close(error)
                     return@addSnapshotListener
                 }
-                val bikes = snapshot?.toObjects(Bike::class.java) ?: emptyList()
+
+                if (snapshot == null || snapshot.isEmpty) {
+                    Log.d("FirebaseDebug", "No bikes found for ownerId: $ownerId")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+
+                val bikes = snapshot.toObjects(Bike::class.java)
+                Log.d("FirebaseDebug", "Fetched bikes: ${bikes.size}")
                 trySend(bikes)
             }
+
         awaitClose { subscription.remove() }
     }
+
 
     /**
      * Gets bikes available in a date range (not rented during the specified period).
@@ -332,7 +359,6 @@ class FirebaseDataSource @Inject constructor(
         }.addOnFailureListener { error ->
             close(error)
         }
-
         awaitClose { /* No subscription to cancel in this implementation */ }
     }
 
@@ -578,5 +604,24 @@ class FirebaseDataSource @Inject constructor(
 
     suspend fun updateUserName(uid: String, name: String) {
         db.collection("users").document(uid).update("name", name).await()
+    }
+    suspend fun createRental(bikeId: String, startTime: Timestamp, endTime: Timestamp) {
+        val user = auth.currentUser ?: throw Exception("User not authenticated")
+        val bike = fetchBikeById(bikeId)
+        val rentalId = UUID.randomUUID().toString()
+
+        val rental = Rental(
+            id = rentalId,
+            bikeId = bikeId,
+            renterId = user.uid,
+            ownerId = bike.ownerId,
+            status = "active",
+            startTime = startTime,
+            endTime = endTime
+        )
+
+        db.collection("rentals")
+            .add(rental)
+            .await()
     }
 }

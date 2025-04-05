@@ -79,6 +79,8 @@ import com.google.type.Date
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Locale
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 // Note that rememberMultiplePermissions is using an experimental API
 // Regularly check if it is working (this is easier code than alternative though)
@@ -371,9 +373,12 @@ fun Map(
                 if (it.numberOfRatings > 0) it.totalRating / it.numberOfRatings else 0
             } ?: 0
 
+            val viewModel: MapViewModel = viewModel()
+
             BottomCard(
-                markerData = marker.copy(rating = rating), // markerData = marker,
-                onDismiss = { selectedMarker = null }
+                markerData = marker.copy(rating = rating),
+                onDismiss = { selectedMarker = null },
+                viewModel = viewModel
             )
         }
     }
@@ -386,7 +391,8 @@ fun Map(
 @Composable
 fun BottomCard(
     markerData: MarkerData,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: MapViewModel
 ) {
     // Box that takes the entire screen
     Box(
@@ -405,13 +411,12 @@ fun BottomCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 200.dp, max = 300.dp)
-                // TODO: Clicking the card takes you to individual bike page
                 .clickable(
-                    onClick = { /*  TODO: ADD LOGIC HERE (LUKA pg) */ },
+                    onClick = { viewModel.navigateToBikeDetails(markerData.bikeId) },
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 )
-                .padding(bottom = 10.dp, start = 10.dp, end = 10.dp ), // prev. 16
+                .padding(bottom = 10.dp, start = 10.dp, end = 10.dp),
             shape = RoundedCornerShape(
                 topStart = 16.dp,
                 topEnd = 16.dp,

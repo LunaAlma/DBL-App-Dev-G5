@@ -29,6 +29,16 @@ import androidx.compose.material3.ListItem
 import androidx.compose.ui.layout.ContentScale
 import com.bikerental.app.data.model.User
 
+/**
+ * Displays the user's profile screen.
+ *
+ * This composable function is responsible for displaying the profile information of the user,
+ * including the profile image, name, email, and navigation options to manage the user's bikes
+ * and rental history.
+ *
+ * @param modifier Modifier to be applied to the outer container.
+ * @param viewModel The ProfileViewModel that provides the user data and navigation logic.
+ */
 @Composable
 fun Profile(
     modifier: Modifier = Modifier,
@@ -39,20 +49,33 @@ fun Profile(
         user = viewModel.user.collectAsState().value,
         navigateToMyBikes = { viewModel.navigateToMyBikes() },
         navigateToPastRentals = { viewModel.navigateToPastRentals() },
-        navigateToDetails = { viewModel.navigateToDetails() }
+        navigateToDetails = { viewModel.navigateToDetails() },
+        navigateToCurrentRentals = { viewModel.navigateToCurrentRentals() }
     )
 }
 
+/**
+ * Displays the main content of the profile screen, including the profile card and settings section.
+ *
+ * This composable function handles the layout and organization of the profile screen,
+ * including the user's profile information, and navigation options for bikes and rentals.
+ *
+ * @param modifier Modifier to be applied to the container.
+ * @param user The user object that contains the user's profile data.
+ * @param navigateToDetails Function that navigates to the user's profile details.
+ * @param navigateToMyBikes Function that navigates to the user's bikes screen.
+ * @param navigateToPastRentals Function that navigates to the past rentals screen.
+ * @param navigateToCurrentRentals Function that navigates to the current rentals screen.
+ */
 @Composable
 private fun ProfileView(
     modifier: Modifier,
     user: User?,
     navigateToDetails: () -> Unit,
     navigateToMyBikes: () -> Unit,
-    navigateToPastRentals: () -> Unit
+    navigateToPastRentals: () -> Unit,
+    navigateToCurrentRentals: () -> Unit
 ) {
-//    val userState by viewModel.user.collectAsState()
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -71,7 +94,8 @@ private fun ProfileView(
 
             SettingsSection(
                 navigateToMyBikes = navigateToMyBikes,
-                navigateToPastRentals = navigateToPastRentals
+                navigateToPastRentals = navigateToPastRentals,
+                navigateToCurrentRentals = navigateToCurrentRentals
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -79,6 +103,15 @@ private fun ProfileView(
     }
 }
 
+/**
+ * Displays the user's profile card, including their profile image, name, and email.
+ *
+ * This composable function presents the user's profile picture and basic information in a card format.
+ * The card is clickable and navigates to the profile details when clicked.
+ *
+ * @param navigateToDetails Function that navigates to the user's profile details.
+ * @param user The user object that contains the user's profile data.
+ */
 @Composable
 private fun ProfileCard(
     navigateToDetails: () -> Unit = {},
@@ -135,10 +168,22 @@ private fun ProfileCard(
     }
 }
 
+/**
+ * Displays the settings section of the profile screen, including navigation options for managing bikes
+ * and viewing rental history.
+ *
+ * This composable function displays a set of list items that allow the user to navigate to their bikes,
+ * past rentals, and current rentals.
+ *
+ * @param navigateToMyBikes Function that navigates to the user's bikes screen.
+ * @param navigateToPastRentals Function that navigates to the past rentals screen.
+ * @param navigateToCurrentRentals Function that navigates to the current rentals screen.
+ */
 @Composable
 private fun SettingsSection(
     navigateToMyBikes: () -> Unit = {},
-    navigateToPastRentals: () -> Unit = {}
+    navigateToPastRentals: () -> Unit = {},
+    navigateToCurrentRentals: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -154,12 +199,26 @@ private fun SettingsSection(
             ListItem(
                 headlineContent = { Text("Past Rentals") },
                 trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
-                modifier = Modifier.clickable { /* Handle click */ }
+                modifier = Modifier.clickable { navigateToPastRentals() }
+            )
+
+            // New ListItem for Current Rentals
+            ListItem(
+                headlineContent = { Text("Current Rentals") },
+                trailingContent = { Icon(Icons.Default.ChevronRight, contentDescription = null) },
+                modifier = Modifier.clickable { navigateToCurrentRentals() }
             )
         }
     }
 }
 
+/**
+ * Displays the action buttons, including logout and account deletion options.
+ *
+ * This composable function displays buttons that allow the user to log out or delete their account.
+ *
+ * @param onLogout Function that is called when the user clicks the logout button.
+ */
 @Composable
 private fun ActionButtons(onLogout: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
